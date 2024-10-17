@@ -1,6 +1,6 @@
 # This is a generated file. Not intended for manual editing.
 services:
-  foodie-connect-backend:
+  foodie-backend:
     build:
       context: "/home/solux/SourceCode/foodie-backend"
       dockerfile: "foodie-connect-backend/Dockerfile"
@@ -11,7 +11,7 @@ services:
     - "/app/bin/Debug/net8.0/foodie-connect-backend.dll"
     environment:
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "foodieconnectbackend:dev"
+    image: "foodie-connect-backend:dev"
     ports: []
     volumes:
     - "/home/solux/.nuget/packages:/home/app/.nuget/packages"

@@ -1,6 +1,5 @@
 services:
-  foodie-connect-backend:
-    image: ${DOCKER_REGISTRY-}foodieconnectbackend
+  foodie-backend:
     build:
       context: .
       dockerfile: foodie-connect-backend/Dockerfile
@@ -9,13 +8,7 @@ services:
   
   postgres:
     image: postgres:16.4
-    container_name: foodie-connect-postgres
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-        - "5432:5432"
+    container_name: foodie-postgres
     volumes:
         - foodie-data:/var/lib/postgresql/data 
      
