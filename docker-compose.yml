@@ -1,0 +1,6 @@
+services:
+  foodie-connect-backend:
+    image: ${DOCKER_REGISTRY-}foodieconnectbackend
+    build:
+      context: .
+      dockerfile: foodie-connect-backend/Dockerfile

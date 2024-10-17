@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35327.3
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "foodie-connect-backend", "foodie-connect-backend\foodie-connect-backend.csproj", "{DFE3AFC1-D75D-4DD0-8259-D73B34E41E3D}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{9401EB7F-370F-4DD6-A5EC-722A80BB3E6C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DFE3AFC1-D75D-4DD0-8259-D73B34E41E3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFE3AFC1-D75D-4DD0-8259-D73B34E41E3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFE3AFC1-D75D-4DD0-8259-D73B34E41E3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFE3AFC1-D75D-4DD0-8259-D73B34E41E3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9401EB7F-370F-4DD6-A5EC-722A80BB3E6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9401EB7F-370F-4DD6-A5EC-722A80BB3E6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9401EB7F-370F-4DD6-A5EC-722A80BB3E6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9401EB7F-370F-4DD6-A5EC-722A80BB3E6C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {77036D6A-79B1-4465-BA78-9B72DC5C0426}
+	EndGlobalSection
+EndGlobal
