@@ -5,7 +5,8 @@ services:
       context: .
       dockerfile: foodie-connect-backend/Dockerfile
     depends_on:
-        - postgres
+      - postgres
+  
   postgres:
     image: postgres:16.4
     container_name: foodie-connect-postgres
@@ -16,6 +17,8 @@ services:
     ports:
         - "5432:5432"
     volumes:
-        - ./pgdata-dev:/var/lib/postgresql/data 
+        - foodie-data:/var/lib/postgresql/data 
      
-    
+volumes:
+  foodie-data:
+  foodie-cache:

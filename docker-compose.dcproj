@@ -10,10 +10,13 @@
     <DockerServiceName>foodie-connect-backend</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="docker-compose.override.yml">
+    <None Include="docker-compose.development.yml">
       <DependentUpon>docker-compose.yml</DependentUpon>
     </None>
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".env" />
   </ItemGroup>
 </Project>
