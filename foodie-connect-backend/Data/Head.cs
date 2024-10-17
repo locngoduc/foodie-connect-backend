@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Data;
 
-public partial class User :IdentityUser
+public partial class Head :IdentityUser
 {
     [Required]
     public string DisplayName { get; set; }
@@ -17,5 +17,5 @@ public partial class User :IdentityUser
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public virtual ICollection<UsersUrole> UsersURoles { get; set; }
+    public virtual ICollection<HeadsHrole> HeadsHroles { get; set; }
 }

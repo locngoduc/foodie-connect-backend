@@ -154,6 +154,381 @@ namespace foodie_connect_backend.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("foodie_connect_backend.Data.Area", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Areas");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Dish", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int?>("Restaurantid")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Restaurantid");
+
+                    b.ToTable("Dishes");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.DishesCategory", b =>
+                {
+                    b.Property<int?>("Dishid")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Categoryid")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Dishid", "Categoryid");
+
+                    b.HasIndex("Categoryid");
+
+                    b.ToTable("DishesCategories");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Head", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("text");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Heads");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.HeadsHrole", b =>
+                {
+                    b.Property<int?>("Headid")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Hroleid")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("HeadId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Headid", "Hroleid");
+
+                    b.HasIndex("HeadId");
+
+                    b.HasIndex("Hroleid");
+
+                    b.ToTable("HeadsHRoles");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Hrole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HRoles");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Promotion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("Dishid")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("Expireddate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Restaurantid")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Target")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Dishid");
+
+                    b.HasIndex("Restaurantid");
+
+                    b.ToTable("Promotions");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Restaurant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Address")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Areaid")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Closetime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Opentime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Areaid");
+
+                    b.ToTable("Restaurants");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Review", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("Dishid")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Dishid");
+
+                    b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Service", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Restaurantid")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Restaurantid");
+
+                    b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Urole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("Createdat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Updatedat")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("URoles");
+                });
+
             modelBuilder.Entity("foodie_connect_backend.Data.User", b =>
                 {
                     b.Property<string>("Id")
@@ -164,6 +539,13 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
@@ -190,6 +572,10 @@ namespace foodie_connect_backend.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
@@ -201,6 +587,9 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -216,6 +605,29 @@ namespace foodie_connect_backend.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.UsersUrole", b =>
+                {
+                    b.Property<int?>("Userid")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Uroleid")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Userid", "Uroleid");
+
+                    b.HasIndex("Uroleid");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UsersURoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -267,6 +679,158 @@ namespace foodie_connect_backend.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Dish", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
+                        .WithMany("Dishes")
+                        .HasForeignKey("Restaurantid");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.DishesCategory", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Category", "Category")
+                        .WithMany("DishesCategories")
+                        .HasForeignKey("Categoryid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("foodie_connect_backend.Data.Dish", "Dish")
+                        .WithMany("DishesCategories")
+                        .HasForeignKey("Dishid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Dish");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.HeadsHrole", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Head", "Head")
+                        .WithMany("HeadsHroles")
+                        .HasForeignKey("HeadId");
+
+                    b.HasOne("foodie_connect_backend.Data.Hrole", "Hrole")
+                        .WithMany("HeadsHroles")
+                        .HasForeignKey("Hroleid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Head");
+
+                    b.Navigation("Hrole");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Promotion", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Dish", "Dish")
+                        .WithMany("Promotions")
+                        .HasForeignKey("Dishid");
+
+                    b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
+                        .WithMany("Promotions")
+                        .HasForeignKey("Restaurantid");
+
+                    b.Navigation("Dish");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Restaurant", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Area", "Area")
+                        .WithMany("Restaurants")
+                        .HasForeignKey("Areaid");
+
+                    b.Navigation("Area");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Review", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Dish", "Dish")
+                        .WithMany("Reviews")
+                        .HasForeignKey("Dishid");
+
+                    b.Navigation("Dish");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Service", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
+                        .WithMany("Services")
+                        .HasForeignKey("Restaurantid");
+
+                    b.Navigation("Restaurant");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.UsersUrole", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Urole", "Urole")
+                        .WithMany("UsersUroles")
+                        .HasForeignKey("Uroleid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("foodie_connect_backend.Data.User", "User")
+                        .WithMany("UsersURoles")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Urole");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Area", b =>
+                {
+                    b.Navigation("Restaurants");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Category", b =>
+                {
+                    b.Navigation("DishesCategories");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Dish", b =>
+                {
+                    b.Navigation("DishesCategories");
+
+                    b.Navigation("Promotions");
+
+                    b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Head", b =>
+                {
+                    b.Navigation("HeadsHroles");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Hrole", b =>
+                {
+                    b.Navigation("HeadsHroles");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Restaurant", b =>
+                {
+                    b.Navigation("Dishes");
+
+                    b.Navigation("Promotions");
+
+                    b.Navigation("Services");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.Urole", b =>
+                {
+                    b.Navigation("UsersUroles");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.User", b =>
+                {
+                    b.Navigation("UsersURoles");
                 });
 #pragma warning restore 612, 618
         }
