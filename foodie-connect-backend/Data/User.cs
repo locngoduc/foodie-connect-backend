@@ -16,6 +16,4 @@ public partial class User :IdentityUser
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-    public virtual ICollection<UsersUrole> UsersURoles { get; set; }
 }

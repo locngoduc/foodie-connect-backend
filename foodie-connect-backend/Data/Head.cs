@@ -16,6 +16,4 @@ public partial class Head :IdentityUser
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-    public virtual ICollection<HeadsHrole> HeadsHroles { get; set; }
 }
