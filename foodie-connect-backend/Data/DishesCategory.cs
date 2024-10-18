@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace foodie_connect_backend.Data;
 
-public partial class DishesCategory
+public class DishesCategory
 {
     public int Id { get; set; }
 
-    public int? Dishid { get; set; }
+    public int? DishId { get; set; }
 
-    public int? Categoryid { get; set; }
+    public int? CategoryId { get; set; }
 
     public virtual Category? Category { get; set; }
 

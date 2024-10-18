@@ -5,15 +5,17 @@ using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Data;
 
-public partial class Head :IdentityUser
+public class Head : IdentityUser
 {
-    [Required]
-    public string DisplayName { get; set; }
+    [Required] 
+    [MaxLength(50)]
+    public string DisplayName { get; set; } = null!;
 
-    [Required]
-    public string Phone { get; set; }
+    [Required] 
+    [MinLength(10)] [MaxLength(10)] 
+    public string Phone { get; set; } = null!;
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 }

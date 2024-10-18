@@ -1,25 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace foodie_connect_backend.Data;
 
-public partial class Promotion
+public class Promotion
 {
     public int Id { get; set; }
 
+    [Required]
+    [MaxLength(32)]
     public string Name { get; set; } = null!;
 
-    public string? Target { get; set; }
+    [Required] [MaxLength(64)] 
+    public string Target { get; set; } = null!;
 
-    public DateTime? Expireddate { get; set; }
+    public DateTime ExpireAt { get; set; }
 
-    public DateTime? Createdat { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    public DateTime? Updatedat { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-    public int? Restaurantid { get; set; }
+    public int? RestaurantId { get; set; }
 
-    public int? Dishid { get; set; }
+    public int? DishId { get; set; }
 
     public virtual Dish? Dish { get; set; }
 

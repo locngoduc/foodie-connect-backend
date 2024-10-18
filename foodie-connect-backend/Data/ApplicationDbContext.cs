@@ -20,7 +20,7 @@ namespace foodie_connect_backend.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<DishesCategory>()
-                .HasKey(dc => new { dc.Dishid, dc.Categoryid });
+                .HasKey(dc => new { dc.DishId, dc.CategoryId });
 
             base.OnModelCreating(modelBuilder);
         }

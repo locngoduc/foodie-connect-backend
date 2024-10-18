@@ -1,31 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Enums;
 
 namespace foodie_connect_backend.Data;
 
-public partial class Restaurant
+public class Restaurant
 {
     public int Id { get; set; }
 
+    [Required]
+    [MaxLength(64)]
     public string Name { get; set; } = null!;
 
-    public DateTime Opentime { get; set; }
+    public DateTime OpenTime { get; set; }
 
-    public DateTime Closetime { get; set; }
+    public DateTime CloseTime { get; set; }
 
-    public string? Address { get; set; }
+    [Required]
+    [MaxLength(256)]
+    public string Address { get; set; } = null!;
 
-    public string? Status { get; set; }
+    public RestaurantStatus Status { get; set; } = RestaurantStatus.Open;
 
-    public string? Link { get; set; }
+    public ICollection<SocialLink> SocialLinks { get; set; } = new List<SocialLink>();
 
+    [Required]
+    [MinLength(10)] [MaxLength(10)]
     public string Phone { get; set; } = null!;
 
-    public DateTime? Createdat { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    public DateTime? Updatedat { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-    public int? Areaid { get; set; }
+    public int? AreaId { get; set; }
 
     public virtual Area? Area { get; set; }
 

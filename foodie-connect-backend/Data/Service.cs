@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace foodie_connect_backend.Data;
 
-public partial class Service
+public sealed class Service
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    [MaxLength(64)]
+    public string Name { get; set; } = String.Empty;
 
-    public DateTime? Createdat { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
 
-    public DateTime? Updatedat { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-    public int? Restaurantid { get; set; }
+    public int? RestaurantId { get; set; }
 
-    public virtual Restaurant? Restaurant { get; set; }
+    public Restaurant? Restaurant { get; set; }
 }
