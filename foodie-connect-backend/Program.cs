@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
 builder.Services.AddIdentityCore<User>().AddEntityFrameworkStores<ApplicationDbContext>().AddApiEndpoints();
+builder.Services.AddIdentityCore<Head>().AddEntityFrameworkStores<ApplicationDbContext>().AddApiEndpoints();
 
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -31,6 +32,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapIdentityApi<User>();
 
 app.Run();
