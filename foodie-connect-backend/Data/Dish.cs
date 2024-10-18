@@ -11,6 +11,9 @@ public partial class Dish
     [Required]
     [MinLength(3)] [MaxLength(32)]
     public string Name { get; set; } = null!;
+    
+    [MaxLength(256)]
+    public string ImageUrl { get; set; } = String.Empty;
 
     public decimal Price { get; set; }
 

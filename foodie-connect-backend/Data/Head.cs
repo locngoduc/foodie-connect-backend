@@ -10,10 +10,9 @@ public class Head : IdentityUser
     [Required] 
     [MaxLength(50)]
     public string DisplayName { get; set; } = null!;
-
-    [Required] 
-    [MinLength(10)] [MaxLength(10)] 
-    public string Phone { get; set; } = null!;
+    
+    [MaxLength(256)]
+    public string AvatarUrl { get; set; } = String.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 

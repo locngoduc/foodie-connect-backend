@@ -14,6 +14,9 @@ public class Promotion
 
     [Required] [MaxLength(64)] 
     public string Target { get; set; } = null!;
+    
+    [MaxLength(256)]
+    public string BannerUrl { get; set; } = String.Empty;
 
     public DateTime ExpireAt { get; set; }
 

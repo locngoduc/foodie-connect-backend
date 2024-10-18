@@ -29,6 +29,9 @@ public class Restaurant
     [Required]
     [MinLength(10)] [MaxLength(10)]
     public string Phone { get; set; } = null!;
+    
+    [MaxLength(16)]
+    public ICollection<string> Images { get; set; } = new List<string>();
 
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 

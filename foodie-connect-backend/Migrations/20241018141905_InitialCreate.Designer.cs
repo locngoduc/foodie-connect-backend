@@ -12,7 +12,7 @@ using foodie_connect_backend.Data;
 namespace foodie_connect_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241018090409_InitialCreate")]
+    [Migration("20241018141905_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -216,6 +216,11 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -263,6 +268,11 @@ namespace foodie_connect_backend.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .HasColumnType("text");
 
@@ -295,11 +305,6 @@ namespace foodie_connect_backend.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");
 
@@ -330,6 +335,11 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BannerUrl")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -386,6 +396,11 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string[]>("Images")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("text[]");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -482,6 +497,11 @@ namespace foodie_connect_backend.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<string>("AvatarUrl")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -517,11 +537,6 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("text");

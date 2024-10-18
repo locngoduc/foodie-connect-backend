@@ -47,7 +47,7 @@ namespace foodie_connect_backend.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     DisplayName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Phone = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    AvatarUrl = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -91,7 +91,7 @@ namespace foodie_connect_backend.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     DisplayName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Phone = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    AvatarUrl = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserName = table.Column<string>(type: "text", nullable: true),
@@ -126,6 +126,7 @@ namespace foodie_connect_backend.Migrations
                     Address = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     Phone = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Images = table.Column<string[]>(type: "text[]", maxLength: 16, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     AreaId = table.Column<int>(type: "integer", nullable: true)
@@ -253,6 +254,7 @@ namespace foodie_connect_backend.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    ImageUrl = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Price = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -343,6 +345,7 @@ namespace foodie_connect_backend.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     Target = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    BannerUrl = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     ExpireAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),

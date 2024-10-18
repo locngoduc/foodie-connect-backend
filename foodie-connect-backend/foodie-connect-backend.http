@@ -1,6 +1,0 @@
-@foodie_connect_backend_HostAddress = http://localhost:5178
-
-GET {{foodie_connect_backend_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
