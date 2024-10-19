@@ -42,4 +42,23 @@ public class HeadsService(UserManager<User> userManager)
         
         return Result<User>.Success(head);
     }
+
+    public async Task<Result<bool>> ChangePassword(string userId, ChangePasswordDto changePasswordDto)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null || !await userManager.IsInRoleAsync(user, "Head"))
+            return Result<bool>.Failure(AppError.RecordNotFound("No head is associated with this id"));
+        var result = await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
+        if (!result.Succeeded)
+        {
+            switch (result.Errors.First().Code)
+            {
+                case "PasswordMismatch":
+                    return Result<bool>.Failure(AppError.InvalidCredential(result.Errors.First().Description));
+                default:
+                    return Result<bool>.Failure(AppError.ValidationError(result.Errors.First().Description));
+            }
+        }
+        return Result<bool>.Success(true);
+    }
 }

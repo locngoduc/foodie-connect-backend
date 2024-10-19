@@ -1,6 +1,9 @@
+using System.Security.Claims;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads.Dtos;
+using foodie_connect_backend.Sessions.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace foodie_connect_backend.Heads
@@ -72,6 +75,45 @@ namespace foodie_connect_backend.Heads
                 DisplayName = result.Value.DisplayName,
             };
             return Ok(responseDto);
+        }
+
+
+
+        /// <summary>
+        /// Change a HEAD user password
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="changePasswordDto"></param>
+        /// <returns>Password change result</returns>
+        /// <response code="200">Password changed successfully</response>
+        /// <response code="400">Invalid request body or new password does not meet requirements</response>
+        /// <response code="401">Unauthorized</response>
+        /// <response code="404">No HEAD user found</response>
+        [HttpPatch("{id}/password")]
+        [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<ActionResult<GenericResponse>> ChangePassword(string id, ChangePasswordDto changePasswordDto)
+        {
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null || userId != id) return Unauthorized(AppError.InvalidCredential("You are not authorized to change this user's password"));
+            
+            var result = await headsService.ChangePassword(id, changePasswordDto);
+            if (result.IsFailure)
+            {
+                switch (result.Error.Code)
+                {
+                    case "RecordNotFound":
+                        return NotFound(result.Error);
+                    case "InvalidCredential":
+                        return Unauthorized(result.Error);
+                    default:
+                        return BadRequest(result.Error);
+                }
+            }
+            return Ok(new GenericResponse { Message = "Password changed successfully" });
         }
     }
 }
