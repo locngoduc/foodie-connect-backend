@@ -23,10 +23,10 @@ namespace foodie_connect_backend.Sessions
         /// <response code="400">Request body is malformed</response>
         /// <response code="401">Invalid credentials</response>
         [HttpPost]
-        [ProducesResponseType(typeof(LoginResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<ActionResult<LoginResponse>> Login(LoginDto loginDto)
+        public async Task<ActionResult<GenericResponse>> Login(LoginDto loginDto)
         {
             Result<bool> result;
             
@@ -42,8 +42,8 @@ namespace foodie_connect_backend.Sessions
                     return BadRequest(new { Message = "Login type not supported" });
             }
             
-            if (result.IsFailure) return Unauthorized(new LoginResponse { Message = result.Error.Message });
-            return new LoginResponse { Message = "Successfully logged in" };
+            if (result.IsFailure) return Unauthorized(new GenericResponse { Message = result.Error.Message });
+            return new GenericResponse { Message = "Successfully logged in" };
         }
 
 
@@ -63,8 +63,25 @@ namespace foodie_connect_backend.Sessions
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var userId = identity!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var result = await sessionsService.GetUserSession(userId);
-            if (result.IsFailure) return Unauthorized(new LoginResponse { Message = result.Error.Message });
+            if (result.IsFailure) return Unauthorized(new GenericResponse { Message = result.Error.Message });
             return Ok(result.Value);
+        }
+
+
+
+        /// <summary>
+        /// Logout of current session
+        /// </summary>
+        /// <returns>Logout</returns>
+        /// <response code="200">Successfully logged out</response>
+        /// <response code="401">Not logged in</response>
+        [HttpDelete]
+        [Authorize]
+        public async Task<ActionResult<GenericResponse>> Logout()
+        {
+            var result = await sessionsService.Logout();
+            if (result.IsFailure) return Unauthorized(new GenericResponse { Message = result.Error.Message });
+            return Ok(new GenericResponse { Message = "Successfully logged out" });
         }
     }
 }
