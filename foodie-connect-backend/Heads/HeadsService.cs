@@ -15,6 +15,7 @@ public class HeadsService(UserManager<User> userManager)
             PhoneNumber = head.PhoneNumber,
             UserName = head.UserName,
             Email = head.Email,
+            AvatarUrl = "https://api.dicebear.com/9.x/initials/svg?seed=" + head.UserName
         };
         
         var result = await userManager.CreateAsync(newHead, head.Password);

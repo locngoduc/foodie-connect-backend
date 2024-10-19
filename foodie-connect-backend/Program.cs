@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Serialization;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads;
 using foodie_connect_backend.Sessions;
@@ -8,10 +9,16 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
-{
-    options.SuppressMapClientErrors = true;
-});;
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.SuppressMapClientErrors = true;
+    })
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });;
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
