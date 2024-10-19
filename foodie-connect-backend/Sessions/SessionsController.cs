@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace foodie_connect_backend.Sessions
 {
-    [Route("v1/sessions")]
+    [Route("v1/session")]
     [ApiController]
     [Produces("application/json")]
     public class SessionsController(SessionsService sessionsService) : ControllerBase
