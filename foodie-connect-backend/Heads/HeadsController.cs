@@ -22,7 +22,7 @@ namespace foodie_connect_backend.Heads
         [ProducesResponseType(typeof(HeadResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<Head>> CreateHead(CreateHeadDto head)
+        public async Task<ActionResult<User>> CreateHead(CreateHeadDto head)
         {
             var result = await headsService.CreateHead(head);
             
@@ -60,7 +60,7 @@ namespace foodie_connect_backend.Heads
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(HeadResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<Head>> GetHead(string id)
+        public async Task<ActionResult<User>> GetHead(string id)
         {
             var result = await headsService.GetHeadById(id);
             if (result.IsFailure) return NotFound(result.Error);

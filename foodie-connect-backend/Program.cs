@@ -1,6 +1,8 @@
 using System.Reflection;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads;
+using foodie_connect_backend.Sessions;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,19 +20,35 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Identity Server
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+builder.Services.AddAuthentication()
+    .AddCookie(IdentityConstants.ApplicationScheme, options =>
+    {
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = context =>
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            },
+            OnRedirectToAccessDenied = context =>
+            {
+                context.Response.StatusCode = 403;
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("UserOnly", policy => policy.RequireClaim("UserType", "User"));
+    options.AddPolicy("HeadOnly", policy => policy.RequireClaim("UserType", "Head"));
+});
 
 builder.Services.AddIdentityCore<User>(options =>
 {
     options.User.RequireUniqueEmail = true;
 })
-    .AddEntityFrameworkStores<ApplicationDbContext>().AddApiEndpoints();
-
-builder.Services.AddIdentityCore<Head>(options =>
-{
-    options.User.RequireUniqueEmail = true;
-})
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddApiEndpoints();
 
 // Database
@@ -39,10 +57,25 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Register services
 builder.Services.AddScoped<HeadsService>();
+builder.Services.AddScoped<SessionsService>();
 
 var app = builder.Build();
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+// Create roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { "Head", "User" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
+AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 
 if (app.Environment.IsDevelopment())
 {
@@ -51,6 +84,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

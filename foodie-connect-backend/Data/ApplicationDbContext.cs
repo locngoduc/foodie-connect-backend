@@ -7,7 +7,6 @@ namespace foodie_connect_backend.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options){}
 
-        public DbSet<Head> Heads { get; set; }
         public DbSet<Area> Areas { get; set; }
         public DbSet<Restaurant> Restaurants { get; set; }
         public DbSet<Dish> Dishes { get; set; }
