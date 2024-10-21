@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads;
 using foodie_connect_backend.Sessions;
+using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -63,8 +64,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register services
+builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
+    .AddMailtrapSender(
+        builder.Configuration["MAILTRAP_USERNAME"], 
+        builder.Configuration["MAILTRAP_PASSWORD"],
+        builder.Configuration["MAILTRAP_HOST"],
+        int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port) ? port : null);
 builder.Services.AddScoped<HeadsService>();
 builder.Services.AddScoped<SessionsService>();
+builder.Services.AddScoped<VerificationService>();
 
 var app = builder.Build();
 

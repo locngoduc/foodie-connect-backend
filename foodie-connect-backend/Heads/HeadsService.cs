@@ -1,3 +1,4 @@
+using FluentEmail.Core;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads.Dtos;
 using foodie_connect_backend.Shared.Classes;
@@ -5,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Heads;
 
-public class HeadsService(UserManager<User> userManager)
+public class HeadsService(UserManager<User> userManager, IFluentEmail fluentEmail)
 {
     public async Task<Result<User>> CreateHead(CreateHeadDto head)
     {
@@ -20,7 +21,16 @@ public class HeadsService(UserManager<User> userManager)
         
         var result = await userManager.CreateAsync(newHead, head.Password);
         await userManager.AddToRoleAsync(newHead, "Head");
-
+        
+        // Send verification email
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(newHead);
+        var email = await fluentEmail
+            .To(head.Email)
+            .SetFrom("verify@account.foodie.town", "The Foodie team")
+            .Subject("Verify your foodie town account")
+            .Body($"Your verification token: {token}")
+            .SendAsync();
+        
         if (!result.Succeeded)
         {
             if (result.Errors.FirstOrDefault()?.Code == "DuplicateUserName" ||
