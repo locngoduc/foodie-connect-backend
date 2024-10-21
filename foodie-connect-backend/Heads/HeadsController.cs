@@ -103,15 +103,12 @@ namespace foodie_connect_backend.Heads
             var result = await headsService.ChangePassword(id, changePasswordDto);
             if (result.IsFailure)
             {
-                switch (result.Error.Code)
+                return result.Error.Code switch
                 {
-                    case "RecordNotFound":
-                        return NotFound(result.Error);
-                    case "InvalidCredential":
-                        return Unauthorized(result.Error);
-                    default:
-                        return BadRequest(result.Error);
-                }
+                    "RecordNotFound" => NotFound(result.Error),
+                    "InvalidCredential" => Unauthorized(result.Error),
+                    _ => BadRequest(result.Error)
+                };
             }
             return Ok(new GenericResponse { Message = "Password changed successfully" });
         }
