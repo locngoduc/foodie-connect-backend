@@ -80,6 +80,44 @@ namespace foodie_connect_backend.Heads
 
 
         /// <summary>
+        /// Change the logged-in user avatar
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        /// <response code="200">Successfully uploaded avatar</response>
+        /// <response code="400">Invalid body. Allowed extensions are png, jpg, jpeg, and webp. Image must be less than 5MB</response>
+        /// <response code="401">Not logged in or not authorized to change another user avatar</response>
+        /// <response code="404">Invalid id provided</response>
+        [HttpPut("{id}/avatar")]
+        [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize]
+        public async Task<ActionResult<GenericResponse>> UploadAvatar(string id, IFormFile file)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || userId != id) 
+                return Unauthorized(AppError.InvalidCredential("You are not authorized to perform this operation"));
+            
+            var result = await headsService.UploadAvatar(id, file);
+            if (result.IsFailure)
+            {
+                return result.Error.Code switch
+                {
+                    "RecordNotFound" => NotFound(result.Error),
+                    "ValidationError" => BadRequest(result.Error),
+                    _ => StatusCode(500, result.Error),
+                };
+            }
+
+            return Ok(new GenericResponse() { Message = "Avatar updated successfully" });
+        }
+        
+        
+        
+        /// <summary>
         /// Change a HEAD user password
         /// </summary>
         /// <param name="id"></param>

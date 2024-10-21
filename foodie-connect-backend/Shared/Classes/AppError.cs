@@ -7,6 +7,7 @@ public sealed record AppError(string Code, string Message)
     public static readonly string ConflictErrorCode = "Conflict";
     public static readonly string InvalidCredentialErrorCode = "InvalidCredential";
     public static readonly string BadTokenCode = "BadToken";
+    public static readonly string InternalErrorCode = "InternalError";
     
     public static readonly AppError None = new(string.Empty, string.Empty);
     
@@ -33,5 +34,10 @@ public sealed record AppError(string Code, string Message)
     public static AppError BadToken(string message)
     {
         return new AppError(BadTokenCode, message);
+    }
+
+    public static AppError InternalError(string message)
+    {
+        return new AppError(InternalErrorCode, message);
     }
 }

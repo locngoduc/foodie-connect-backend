@@ -12,7 +12,7 @@ using foodie_connect_backend.Data;
 namespace foodie_connect_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241019040222_InitialCreate")]
+    [Migration("20241021142253_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -429,10 +429,9 @@ namespace foodie_connect_backend.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
-                    b.Property<string>("AvatarUrl")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                    b.Property<string>("AvatarId")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()

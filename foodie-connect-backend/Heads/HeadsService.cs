@@ -1,3 +1,5 @@
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using FluentEmail.Core;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads.Dtos;
@@ -7,8 +9,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Heads;
 
-public class HeadsService(UserManager<User> userManager, VerificationService verificationService)
+public class HeadsService(UserManager<User> userManager, VerificationService verificationService, Cloudinary cloudinary)
 {
+    private readonly List<string> _allowedAvatarExtensions = new List<string> { ".png", ".jpg", ".jpeg", ".webp" };
     public async Task<Result<User>> CreateHead(CreateHeadDto head)
     {
         var newHead = new User
@@ -17,7 +20,6 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
             PhoneNumber = head.PhoneNumber,
             UserName = head.UserName,
             Email = head.Email,
-            AvatarUrl = "https://api.dicebear.com/9.x/initials/svg?seed=" + head.UserName
         };
         
         var result = await userManager.CreateAsync(newHead, head.Password);
@@ -67,5 +69,42 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
             }
         }
         return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<bool>> UploadAvatar(string userId, IFormFile file)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null || !await userManager.IsInRoleAsync(user, "Head"))
+            return Result<bool>.Failure(AppError.RecordNotFound("No head is associated with this id"));
+
+        var extension = Path.GetExtension(file.FileName);
+        if (!_allowedAvatarExtensions.Contains(extension))
+            return Result<bool>.Failure(AppError.ValidationError($"Allowed file extensions are: {_allowedAvatarExtensions}"));
+        
+        var fileSize = file.Length;
+        if (fileSize < 1 || fileSize > 5 * 1024 * 1024) 
+            return Result<bool>.Failure(AppError.ValidationError("Maximum file size is 5MB"));
+
+        var uploadParams = new ImageUploadParams()
+        {
+            File = new FileDescription(file.FileName, file.OpenReadStream()),
+            Format = "webp",
+            PublicId = userId,
+            Folder = "foodie/user_avatars"
+        };
+        var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+        if (uploadResult.Error == null)
+        {
+            Console.WriteLine(uploadResult.PublicId);
+            user.AvatarId = uploadResult.PublicId;
+            var updateResult = await userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+                return Result<bool>.Failure(AppError.ValidationError(updateResult.Errors.First().Description));
+            return Result<bool>.Success(true);
+        }
+
+        Console.WriteLine(uploadResult.Error);
+        return Result<bool>.Failure(AppError.InternalError(uploadResult.Error.Message));
     }
 }

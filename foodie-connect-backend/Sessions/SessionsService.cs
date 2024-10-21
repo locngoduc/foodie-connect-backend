@@ -53,6 +53,7 @@ public class SessionsService(
             Id = user.Id,
             UserName = user.UserName!,
             DisplayName = user.DisplayName,
+            Avatar = user.AvatarId,
             Email = user.Email!,
             EmailConfirmed = user.EmailConfirmed,
             PhoneNumber = user.PhoneNumber!,
