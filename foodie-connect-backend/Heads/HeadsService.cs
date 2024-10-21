@@ -2,11 +2,12 @@ using FluentEmail.Core;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Heads;
 
-public class HeadsService(UserManager<User> userManager, IFluentEmail fluentEmail)
+public class HeadsService(UserManager<User> userManager, VerificationService verificationService)
 {
     public async Task<Result<User>> CreateHead(CreateHeadDto head)
     {
@@ -23,13 +24,9 @@ public class HeadsService(UserManager<User> userManager, IFluentEmail fluentEmai
         await userManager.AddToRoleAsync(newHead, "Head");
         
         // Send verification email
-        var token = await userManager.GenerateEmailConfirmationTokenAsync(newHead);
-        var email = await fluentEmail
-            .To(head.Email)
-            .SetFrom("verify@account.foodie.town", "The Foodie team")
-            .Subject("Verify your foodie town account")
-            .Body($"Your verification token: {token}")
-            .SendAsync();
+        // This introduces tight-coupling between Heads and Verification service
+        // TODO: Implement a pub/sub that invokes and consumes UserRegistered event
+        await verificationService.SendConfirmationEmail(newHead.Id);
         
         if (!result.Succeeded)
         {

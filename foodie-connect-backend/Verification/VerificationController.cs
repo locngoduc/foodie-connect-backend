@@ -12,6 +12,26 @@ namespace foodie_connect_backend.Verification
     public class VerificationController(VerificationService verificationService) : ControllerBase
     {
         /// <summary>
+        /// Re-send verification email to the logged-in user
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Successfully sent verification email</response>
+        /// <response code="400">User email is already verified</response>
+        /// <response code="401">Not logged in</response>
+        [HttpGet("email")]
+        [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [Authorize]
+        public async Task<ActionResult<GenericResponse>> ResendConfirmationEmail()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await verificationService.SendConfirmationEmail(userId!);
+            if (result.IsFailure) return BadRequest(result.Error);
+            return Ok(new GenericResponse { Message = "Verification email sent successfully" });
+        }
+        
+        /// <summary>
         /// Verify logged-in user email
         /// </summary>
         /// <param name="dto"></param>
