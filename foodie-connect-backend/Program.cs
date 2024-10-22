@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads;
+using foodie_connect_backend.Restaurants;
 using foodie_connect_backend.Sessions;
 using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -11,14 +12,9 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        options.SuppressMapClientErrors = true;
-    })
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });;
+    .ConfigureApiBehaviorOptions(options => { options.SuppressMapClientErrors = true; })
+    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+;
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -52,10 +48,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("HeadOnly", policy => policy.RequireClaim("UserType", "Head"));
 });
 
-builder.Services.AddIdentityCore<User>(options =>
-{
-    options.User.RequireUniqueEmail = true;
-})
+builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEmail = true; })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddApiEndpoints();
 
@@ -66,7 +59,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register services
 builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
     .AddMailtrapSender(
-        builder.Configuration["MAILTRAP_USERNAME"], 
+        builder.Configuration["MAILTRAP_USERNAME"],
         builder.Configuration["MAILTRAP_PASSWORD"],
         builder.Configuration["MAILTRAP_HOST"],
         int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port) ? port : null);
@@ -74,6 +67,7 @@ builder.Services.AddCloudinary();
 builder.Services.AddScoped<HeadsService>();
 builder.Services.AddScoped<SessionsService>();
 builder.Services.AddScoped<VerificationService>();
+builder.Services.AddScoped<RestaurantsService>();
 
 var app = builder.Build();
 
@@ -83,21 +77,17 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var roles = new[] { "Head", "User" };
     foreach (var role in roles)
-    {
         if (!await roleManager.RoleExistsAsync(role))
-        {
             await roleManager.CreateAsync(new IdentityRole(role));
-        }
-    }
 }
 
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 
 app.UseHttpsRedirection();
 

@@ -1,6 +1,5 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using FluentEmail.Core;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads.Dtos;
 using foodie_connect_backend.Shared.Classes;
@@ -9,9 +8,14 @@ using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Heads;
 
-public class HeadsService(UserManager<User> userManager, VerificationService verificationService, Cloudinary cloudinary)
+public class HeadsService(
+    UserManager<User> userManager,
+    VerificationService verificationService,
+    Cloudinary cloudinary,
+    ApplicationDbContext dbContext)
 {
-    private readonly List<string> _allowedAvatarExtensions = new List<string> { ".png", ".jpg", ".jpeg", ".webp" };
+    private readonly List<string> _allowedAvatarExtensions = new() { ".png", ".jpg", ".jpeg", ".webp" };
+
     public async Task<Result<User>> CreateHead(CreateHeadDto head)
     {
         var newHead = new User
@@ -19,36 +23,48 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
             DisplayName = head.DisplayName,
             PhoneNumber = head.PhoneNumber,
             UserName = head.UserName,
-            Email = head.Email,
+            Email = head.Email
         };
-        
+
         var result = await userManager.CreateAsync(newHead, head.Password);
-        await userManager.AddToRoleAsync(newHead, "Head");
-        
-        // Send verification email
-        // This introduces tight-coupling between Heads and Verification service
-        // TODO: Implement a pub/sub that invokes and consumes UserRegistered event
-        await verificationService.SendConfirmationEmail(newHead.Id);
-        
         if (!result.Succeeded)
         {
             if (result.Errors.FirstOrDefault()?.Code == "DuplicateUserName" ||
                 result.Errors.FirstOrDefault()?.Code == "DuplicateEmail")
-            {
                 return Result<User>.Failure(AppError.Conflict(result.Errors.First().Description));
-            }
             return Result<User>.Failure(AppError.ValidationError(result.Errors.First().Description));
         }
-        
-        return Result<User>.Success(newHead);
+
+        var createdUser = await userManager.FindByIdAsync(newHead.Id);
+        if (createdUser == null) throw new Exception("User was created but cannot be found");
+
+        // Add role
+        var roleResult = await userManager.AddToRoleAsync(createdUser, "Head");
+        if (!roleResult.Succeeded)
+            throw new Exception(
+                $"Failed to assign role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+
+        // Send verification email
+        // This introduces tight-coupling between Heads and Verification service
+        // TODO: Implement a pub/sub that invokes and consumes UserRegistered event
+        try
+        {
+            await verificationService.SendConfirmationEmail(createdUser.Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to send verification email: {ex.Message}");
+        }
+
+        return Result<User>.Success(createdUser);
     }
 
     public async Task<Result<User>> GetHeadById(string id)
     {
         var head = await userManager.FindByIdAsync(id);
-        if (head == null || !await userManager.IsInRoleAsync(head, "Head")) 
+        if (head == null || !await userManager.IsInRoleAsync(head, "Head"))
             return Result<User>.Failure(AppError.RecordNotFound("No head is associated with this id"));
-        
+
         return Result<User>.Success(head);
     }
 
@@ -57,9 +73,9 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
         var user = await userManager.FindByIdAsync(userId);
         if (user == null || !await userManager.IsInRoleAsync(user, "Head"))
             return Result<bool>.Failure(AppError.RecordNotFound("No head is associated with this id"));
-        var result = await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
+        var result =
+            await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
         if (!result.Succeeded)
-        {
             switch (result.Errors.First().Code)
             {
                 case "PasswordMismatch":
@@ -67,7 +83,7 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
                 default:
                     return Result<bool>.Failure(AppError.ValidationError(result.Errors.First().Description));
             }
-        }
+
         return Result<bool>.Success(true);
     }
 
@@ -79,13 +95,14 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
 
         var extension = Path.GetExtension(file.FileName);
         if (!_allowedAvatarExtensions.Contains(extension))
-            return Result<bool>.Failure(AppError.ValidationError($"Allowed file extensions are: {_allowedAvatarExtensions}"));
-        
+            return Result<bool>.Failure(
+                AppError.ValidationError($"Allowed file extensions are: {_allowedAvatarExtensions}"));
+
         var fileSize = file.Length;
-        if (fileSize < 1 || fileSize > 5 * 1024 * 1024) 
+        if (fileSize < 1 || fileSize > 5 * 1024 * 1024)
             return Result<bool>.Failure(AppError.ValidationError("Maximum file size is 5MB"));
 
-        var uploadParams = new ImageUploadParams()
+        var uploadParams = new ImageUploadParams
         {
             File = new FileDescription(file.FileName, file.OpenReadStream()),
             Format = "webp",

@@ -320,24 +320,30 @@ namespace foodie_connect_backend.Migrations
                     b.Property<int?>("AreaId")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("CloseTime")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("CloseTime")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("HeadId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string[]>("Images")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("text[]");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(64)
+                        .HasColumnType("text[]")
+                        .HasDefaultValue(new string[0]);
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<DateTime>("OpenTime")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<int>("OpenTime")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Phone")
                         .IsRequired()

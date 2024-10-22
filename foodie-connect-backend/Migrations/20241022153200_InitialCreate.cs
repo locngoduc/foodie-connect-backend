@@ -92,15 +92,16 @@ namespace foodie_connect_backend.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    OpenTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    CloseTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    OpenTime = table.Column<int>(type: "integer", nullable: false),
+                    CloseTime = table.Column<int>(type: "integer", nullable: false),
                     Address = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     Phone = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    Images = table.Column<string[]>(type: "text[]", maxLength: 16, nullable: false),
+                    Images = table.Column<string[]>(type: "text[]", maxLength: 64, nullable: false, defaultValue: new string[0]),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    AreaId = table.Column<int>(type: "integer", nullable: true)
+                    AreaId = table.Column<int>(type: "integer", nullable: true),
+                    HeadId = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false)
                 },
                 constraints: table =>
                 {
