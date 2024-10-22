@@ -148,5 +148,39 @@ namespace foodie_connect_backend.Users
             }
             return Ok(new GenericResponse { Message = "Password changed successfully" });
         }
+
+
+
+        /// <summary>
+        /// Upgrade a USER to a HEAD account. This action is not reversible. This will destroy the user's current session
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <response code="200">Successfully upgraded the user account. REQUIRES USER TO RE-LOGIN</response>
+        /// <response code="400">Something unexpected happened</response>
+        /// <response code="401">Not authorized to perform this action. Possible invalid id provided</response>
+        /// <response code="403">User is already a HEAD account</response>
+        [HttpPatch("{id}/type")]
+        [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [Authorize(Roles = "User")]
+        public async Task<ActionResult<GenericResponse>> UpgradeToHead(string id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || userId != id) return Unauthorized(AppError.InvalidCredential("You are not authorized to perform this operation"));
+            
+            var upgradeResult = await usersService.UpgradeToHead(userId);
+            if (upgradeResult.IsFailure)
+                return upgradeResult.Error.Code switch
+                {
+                    "RecordNotFound" => NotFound(upgradeResult.Error),
+                    "InvalidCredential" => BadRequest(upgradeResult.Error),
+                    _ => BadRequest(upgradeResult.Error)
+                };
+            
+            return Ok(new GenericResponse { Message = "Upgraded user to head successfully" });
+        }
     }
 }

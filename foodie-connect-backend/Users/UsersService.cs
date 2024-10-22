@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Users;
 
-public class UsersService(UserManager<User> userManager, VerificationService verificationService, Cloudinary cloudinary)
+public class UsersService(UserManager<User> userManager, VerificationService verificationService, Cloudinary cloudinary, SignInManager<User> signInManager)
 {
     private readonly List<string> _allowedAvatarExtensions = [".png", ".jpg", ".jpeg", ".webp"];
     public async Task<Result<User>> CreateUser(CreateUserDto user)
@@ -96,7 +96,6 @@ public class UsersService(UserManager<User> userManager, VerificationService ver
 
         if (uploadResult.Error == null)
         {
-            Console.WriteLine(uploadResult.PublicId);
             user.AvatarId = uploadResult.PublicId;
             var updateResult = await userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
@@ -104,7 +103,42 @@ public class UsersService(UserManager<User> userManager, VerificationService ver
             return Result<bool>.Success(true);
         }
 
-        Console.WriteLine(uploadResult.Error);
         return Result<bool>.Failure(AppError.InternalError(uploadResult.Error.Message));
+    }
+
+    public async Task<Result<bool>> UpgradeToHead(string userId)
+    {
+        var user = await userManager.FindByIdAsync(userId);
+        if (user == null || !await userManager.IsInRoleAsync(user, "User"))
+            return Result<bool>.Failure(AppError.RecordNotFound("No user is associated with this id"));
+    
+        try
+        {
+            var removeResult = await userManager.RemoveFromRoleAsync(user, "User");
+            if (!removeResult.Succeeded)
+            {
+                return Result<bool>.Failure(AppError.InternalError("Failed to remove User role"));
+            }
+
+            var addResult = await userManager.AddToRoleAsync(user, "Head");
+            if (!addResult.Succeeded)
+            {
+                // Rollback the remove operation if add fails
+                await userManager.AddToRoleAsync(user, "User");
+                return Result<bool>.Failure(AppError.InternalError("Failed to add Head role"));
+            }
+
+            await signInManager.SignOutAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            // Ensure user still has User role if any exception occurs
+            if (!await userManager.IsInRoleAsync(user, "User"))
+            {
+                await userManager.AddToRoleAsync(user, "User");
+            }
+            return Result<bool>.Failure(AppError.InvalidCredential($"Role upgrade failed: {ex.Message}"));
+        }
     }
 }
