@@ -1,34 +1,34 @@
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using foodie_connect_backend.Data;
-using foodie_connect_backend.Heads.Dtos;
+using foodie_connect_backend.Users.Dtos;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Dtos;
 using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Identity;
 
-namespace foodie_connect_backend.Heads;
+namespace foodie_connect_backend.Users;
 
-public class HeadsService(UserManager<User> userManager, VerificationService verificationService, Cloudinary cloudinary)
+public class UsersService(UserManager<User> userManager, VerificationService verificationService, Cloudinary cloudinary)
 {
     private readonly List<string> _allowedAvatarExtensions = [".png", ".jpg", ".jpeg", ".webp"];
-    public async Task<Result<User>> CreateHead(CreateHeadDto head)
+    public async Task<Result<User>> CreateUser(CreateUserDto user)
     {
-        var newHead = new User
+        var newUser = new User
         {
-            DisplayName = head.DisplayName,
-            PhoneNumber = head.PhoneNumber,
-            UserName = head.UserName,
-            Email = head.Email,
+            DisplayName = user.DisplayName,
+            PhoneNumber = user.PhoneNumber,
+            UserName = user.UserName,
+            Email = user.Email,
         };
         
-        var result = await userManager.CreateAsync(newHead, head.Password);
-        await userManager.AddToRoleAsync(newHead, "Head");
+        var result = await userManager.CreateAsync(newUser, user.Password);
+        await userManager.AddToRoleAsync(newUser, "User");
         
         // Send verification email
         // This introduces tight-coupling between Heads and Verification service
         // TODO: Implement a pub/sub that invokes and consumes UserRegistered event
-        await verificationService.SendConfirmationEmail(newHead.Id);
+        await verificationService.SendConfirmationEmail(newUser.Id);
         
         if (!result.Succeeded)
         {
@@ -40,14 +40,14 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
             return Result<User>.Failure(AppError.ValidationError(result.Errors.First().Description));
         }
         
-        return Result<User>.Success(newHead);
+        return Result<User>.Success(newUser);
     }
 
-    public async Task<Result<User>> GetHeadById(string id)
+    public async Task<Result<User>> GetUserById(string id)
     {
         var head = await userManager.FindByIdAsync(id);
-        if (head == null || !await userManager.IsInRoleAsync(head, "Head")) 
-            return Result<User>.Failure(AppError.RecordNotFound("No head is associated with this id"));
+        if (head == null || !await userManager.IsInRoleAsync(head, "User")) 
+            return Result<User>.Failure(AppError.RecordNotFound("No user is associated with this id"));
         
         return Result<User>.Success(head);
     }
@@ -55,8 +55,8 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
     public async Task<Result<bool>> ChangePassword(string userId, ChangePasswordDto changePasswordDto)
     {
         var user = await userManager.FindByIdAsync(userId);
-        if (user == null || !await userManager.IsInRoleAsync(user, "Head"))
-            return Result<bool>.Failure(AppError.RecordNotFound("No head is associated with this id"));
+        if (user == null || !await userManager.IsInRoleAsync(user, "User"))
+            return Result<bool>.Failure(AppError.RecordNotFound("No user is associated with this id"));
         var result = await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
         if (!result.Succeeded)
         {
@@ -74,8 +74,8 @@ public class HeadsService(UserManager<User> userManager, VerificationService ver
     public async Task<Result<bool>> UploadAvatar(string userId, IFormFile file)
     {
         var user = await userManager.FindByIdAsync(userId);
-        if (user == null || !await userManager.IsInRoleAsync(user, "Head"))
-            return Result<bool>.Failure(AppError.RecordNotFound("No head is associated with this id"));
+        if (user == null || !await userManager.IsInRoleAsync(user, "User"))
+            return Result<bool>.Failure(AppError.RecordNotFound("No user is associated with this id"));
 
         var extension = Path.GetExtension(file.FileName);
         if (!_allowedAvatarExtensions.Contains(extension))

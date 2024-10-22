@@ -1,10 +1,9 @@
 using System.Security.Claims;
 using foodie_connect_backend.Sessions.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Dtos;
 using foodie_connect_backend.Shared.Enums;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace foodie_connect_backend.Sessions

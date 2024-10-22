@@ -1,6 +1,6 @@
 using Microsoft.Build.Framework;
 
-namespace foodie_connect_backend.Heads.Dtos;
+namespace foodie_connect_backend.Shared.Dtos;
 
 public record ChangePasswordDto()
 {
