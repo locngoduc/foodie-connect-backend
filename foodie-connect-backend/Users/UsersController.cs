@@ -1,34 +1,33 @@
 using System.Security.Claims;
 using foodie_connect_backend.Data;
-using foodie_connect_backend.Heads.Dtos;
-using foodie_connect_backend.Sessions.Dtos;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Dtos;
+using foodie_connect_backend.Users.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace foodie_connect_backend.Heads
+namespace foodie_connect_backend.Users
 {
-    [Route("v1/heads")]
+    [Route("v1/users")]
     [ApiController]
     [Produces("application/json")]
-    public class HeadsController(HeadsService headsService) : ControllerBase
+    public class UsersController(UsersService usersService) : ControllerBase
     {
         /// <summary>
-        /// Create a HEAD account
+        /// Create a USER account
         /// </summary>
-        /// <param name="head"></param>
-        /// <returns>The newly created HEAD account</returns>
-        /// <response code="201">Returns the newly created HEAD account</response>
+        /// <param name="user"></param>
+        /// <returns>The newly created USER account</returns>
+        /// <response code="201">Returns the newly created USER account</response>
         /// <response code="400">Request body does not meet specified requirements</response>
         /// <response code="409">Username or Email is taken</response>
         [HttpPost]
-        [ProducesResponseType(typeof(HeadResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<User>> CreateHead(CreateHeadDto head)
+        public async Task<ActionResult<User>> CreateUser(CreateUserDto user)
         {
-            var result = await headsService.CreateHead(head);
+            var result = await usersService.CreateUser(user);
             
             if (result.IsFailure)
             {
@@ -39,39 +38,39 @@ namespace foodie_connect_backend.Heads
                 return BadRequest(result.Error);
             }
 
-            var responseDto = new HeadResponseDto
+            var responseDto = new UserResponseDto()
             {
                 Id = result.Value.Id,
                 UserName = result.Value.UserName!,
                 DisplayName = result.Value.DisplayName,
-                Avatar = result.Value.AvatarId
             };
             
-            return CreatedAtAction(nameof(GetHead), new { id = result.Value.Id }, responseDto);
+            return CreatedAtAction(nameof(GetUser), new { id = result.Value.Id }, responseDto);
         }
 
         
         
         /// <summary>
-        /// Query basic information about a HEAD user
+        /// Query basic information about a USER account
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>Information about the HEAD user without sensitive informations</returns>
-        /// <response code="200">Returns the HEAD user information</response>
-        /// <response code="404">HEAD user not found</response>
+        /// <returns>Information about the USER account without sensitive information</returns>
+        /// <response code="200">Returns the USER account information</response>
+        /// <response code="404">USER account not found</response>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(HeadResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<User>> GetHead(string id)
+        public async Task<ActionResult<User>> GetUser(string id)
         {
-            var result = await headsService.GetHeadById(id);
+            var result = await usersService.GetUserById(id);
             if (result.IsFailure) return NotFound(result.Error);
 
-            var responseDto = new HeadResponseDto
+            var responseDto = new UserResponseDto()
             {
                 Id = result.Value.Id,
                 UserName = result.Value.UserName!,
                 DisplayName = result.Value.DisplayName,
+                Avatar = result.Value.AvatarId,
             };
             return Ok(responseDto);
         }
@@ -100,7 +99,7 @@ namespace foodie_connect_backend.Heads
             if (userId == null || userId != id) 
                 return Unauthorized(AppError.InvalidCredential("You are not authorized to perform this operation"));
             
-            var result = await headsService.UploadAvatar(id, file);
+            var result = await usersService.UploadAvatar(id, file);
             if (result.IsFailure)
             {
                 return result.Error.Code switch
@@ -117,7 +116,7 @@ namespace foodie_connect_backend.Heads
         
         
         /// <summary>
-        /// Change a HEAD user password
+        /// Change a USER account password
         /// </summary>
         /// <param name="id"></param>
         /// <param name="changePasswordDto"></param>
@@ -125,7 +124,7 @@ namespace foodie_connect_backend.Heads
         /// <response code="200">Password changed successfully</response>
         /// <response code="400">Invalid request body or new password does not meet requirements</response>
         /// <response code="401">Unauthorized</response>
-        /// <response code="404">No HEAD user found</response>
+        /// <response code="404">No USER account found</response>
         [HttpPatch("{id}/password")]
         [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -137,7 +136,7 @@ namespace foodie_connect_backend.Heads
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (userId == null || userId != id) return Unauthorized(AppError.InvalidCredential("You are not authorized to change this user's password"));
             
-            var result = await headsService.ChangePassword(id, changePasswordDto);
+            var result = await usersService.ChangePassword(id, changePasswordDto);
             if (result.IsFailure)
             {
                 return result.Error.Code switch
@@ -148,6 +147,40 @@ namespace foodie_connect_backend.Heads
                 };
             }
             return Ok(new GenericResponse { Message = "Password changed successfully" });
+        }
+
+
+
+        /// <summary>
+        /// Upgrade a USER to a HEAD account. This action is not reversible. This will destroy the user's current session
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <response code="200">Successfully upgraded the user account. REQUIRES USER TO RE-LOGIN</response>
+        /// <response code="400">Something unexpected happened</response>
+        /// <response code="401">Not authorized to perform this action. Possible invalid id provided</response>
+        /// <response code="403">User is already a HEAD account</response>
+        [HttpPatch("{id}/type")]
+        [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [Authorize(Roles = "User")]
+        public async Task<ActionResult<GenericResponse>> UpgradeToHead(string id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null || userId != id) return Unauthorized(AppError.InvalidCredential("You are not authorized to perform this operation"));
+            
+            var upgradeResult = await usersService.UpgradeToHead(userId);
+            if (upgradeResult.IsFailure)
+                return upgradeResult.Error.Code switch
+                {
+                    "RecordNotFound" => NotFound(upgradeResult.Error),
+                    "InvalidCredential" => BadRequest(upgradeResult.Error),
+                    _ => BadRequest(upgradeResult.Error)
+                };
+            
+            return Ok(new GenericResponse { Message = "Upgraded user to head successfully" });
         }
     }
 }

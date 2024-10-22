@@ -1,6 +1,6 @@
-namespace foodie_connect_backend.Heads.Dtos;
+namespace foodie_connect_backend.Users.Dtos;
 
-public record HeadResponseDto()
+public record UserResponseDto()
 {
     public string Id { get; set; }
     public string? UserName { get; set; }

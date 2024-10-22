@@ -1,4 +1,4 @@
-namespace foodie_connect_backend.Sessions.Dtos;
+namespace foodie_connect_backend.Shared.Dtos;
 
 public record GenericResponse()
 {
