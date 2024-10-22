@@ -89,7 +89,7 @@ namespace foodie_connect_backend.Heads
         /// <response code="400">Invalid body. Allowed extensions are png, jpg, jpeg, and webp. Image must be less than 5MB</response>
         /// <response code="401">Not logged in or not authorized to change another user avatar</response>
         /// <response code="404">Invalid id provided</response>
-        [HttpPut("{id}/avatar")]
+        [HttpPatch("{id}/avatar")]
         [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
