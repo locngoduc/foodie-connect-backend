@@ -11,7 +11,7 @@ namespace foodie_connect_backend.Heads;
 
 public class HeadsService(UserManager<User> userManager, VerificationService verificationService, Cloudinary cloudinary)
 {
-    private readonly List<string> _allowedAvatarExtensions = new List<string> { ".png", ".jpg", ".jpeg", ".webp" };
+    private readonly List<string> _allowedAvatarExtensions = [".png", ".jpg", ".jpeg", ".webp"];
     public async Task<Result<User>> CreateHead(CreateHeadDto head)
     {
         var newHead = new User
