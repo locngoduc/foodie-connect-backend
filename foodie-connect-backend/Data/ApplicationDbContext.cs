@@ -59,7 +59,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
             entity.Property(e => e.Images)
                 .HasColumnType("text[]")
-                .HasDefaultValue(new string[] { });
+                .HasDefaultValue(new List<String>());
 
             entity.Property(e => e.HeadId)
                 .IsRequired();

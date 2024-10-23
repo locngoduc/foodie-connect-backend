@@ -25,7 +25,7 @@ public class Restaurant
     [MaxLength(10)]
     public string Phone { get; set; } = null!;
 
-    [MaxLength(64)] public ICollection<string> Images { get; set; } = new List<string>();
+    [MaxLength(64)] public IList<string> Images { get; set; } = new List<string>();
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
