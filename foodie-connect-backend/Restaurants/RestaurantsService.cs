@@ -3,6 +3,7 @@ using CloudinaryDotNet.Actions;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.SocialLinks.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace foodie_connect_backend.Restaurants;
@@ -63,15 +64,36 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
         }
     }
 
-    public async Task<Result<Restaurant>> GetRestaurantById(string id)
+    public async Task<Result<RestaurantResponseDto>> GetRestaurantById(string id)
     {
         var restaurant = await dbContext.Restaurants
             .Include(r => r.SocialLinks)
             .FirstOrDefaultAsync(r => r.Id == id);
 
+        if (restaurant == null)
+            return Result<RestaurantResponseDto>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
+
+        var restaurantResponseDto = new RestaurantResponseDto
+        {
+            Id = restaurant.Id,
+            Name = restaurant.Name,
+            Phone = restaurant.Phone,
+            OpenTime = restaurant.OpenTime,
+            CloseTime = restaurant.CloseTime,
+            Address = restaurant.Address,
+            Status = restaurant.Status,
+            Images = restaurant.Images,
+            SocialLinks = restaurant.SocialLinks.Select(s => new SocialLinkResponseDto
+            {
+                Id = s.Id,
+                Url = s.Url,
+                Platform = s.Platform
+            }).ToList()
+        };
+
         return restaurant == null
-            ? Result<Restaurant>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"))
-            : Result<Restaurant>.Success(restaurant);
+            ? Result<RestaurantResponseDto>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"))
+            : Result<RestaurantResponseDto>.Success(restaurantResponseDto);
     }
 
     private async Task<Result<bool>> ValidateAndGetRestaurant(string restaurantId, IFormFile file)

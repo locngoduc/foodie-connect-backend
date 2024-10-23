@@ -2,7 +2,7 @@
 using foodie_connect_backend.Shared.Enums;
 
 namespace foodie_connect_backend.SocialLinks.Dtos;
-public class SocialLinkResponseDto
+public record SocialLinkResponseDto
 {
     public string Id { get; set; } = string.Empty;
     public SocialMediaPlatform Platform { get; set; }

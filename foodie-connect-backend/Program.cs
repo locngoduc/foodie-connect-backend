@@ -4,6 +4,7 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads;
 using foodie_connect_backend.Restaurants;
 using foodie_connect_backend.Sessions;
+using foodie_connect_backend.SocialLinks;
 using foodie_connect_backend.Users;
 using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -70,6 +71,7 @@ builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<SessionsService>();
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<RestaurantsService>();
+builder.Services.AddScoped<SocialLinksService>();
 
 var app = builder.Build();
 

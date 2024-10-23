@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace foodie_connect_backend.SocialLinks;
 
 [ApiController]
-[Route("api/restaurants/{restaurantId}/social-links")]
+[Route("v1/restaurants/{restaurantId}/social-links")]
 public class SocialLinksController(SocialLinksService socialLinksService, RestaurantsService restaurantsService) : ControllerBase
 {
     [HttpGet]
@@ -26,6 +26,11 @@ public class SocialLinksController(SocialLinksService socialLinksService, Restau
     [Authorize(Roles = "Head")]
     public async Task<IActionResult> AddSocialLink(string restaurantId, CreateSocialLinkDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var identity = HttpContext.User.Identity as ClaimsIdentity;
         var userId = identity!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         var authorizationResult = await CheckRestaurantAuthorization(restaurantId, userId);
@@ -54,6 +59,11 @@ public class SocialLinksController(SocialLinksService socialLinksService, Restau
         string id,
         UpdateSocialLinkDto dto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var identity = HttpContext.User.Identity as ClaimsIdentity;
         var userId = identity!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         var authorizationResult = await CheckRestaurantAuthorization(restaurantId, userId);
