@@ -6,7 +6,7 @@ public record ChangePasswordDto()
 {
     [Required]
     public string OldPassword { get; init; }
-    
+
     [Required]
     public string NewPassword { get; init; }
 }

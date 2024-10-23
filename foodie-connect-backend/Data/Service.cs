@@ -6,16 +6,16 @@ namespace foodie_connect_backend.Data;
 
 public sealed class Service
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
     [MaxLength(64)]
     public string Name { get; set; } = String.Empty;
 
-    public DateTime CreatedDate { get; set; } = DateTime.Now;
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public int? RestaurantId { get; set; }
+    public string? RestaurantId { get; set; }
 
     public Restaurant? Restaurant { get; set; }
 }

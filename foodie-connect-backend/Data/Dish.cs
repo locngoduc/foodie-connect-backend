@@ -6,22 +6,23 @@ namespace foodie_connect_backend.Data;
 
 public partial class Dish
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
     [Required]
-    [MinLength(3)] [MaxLength(32)]
+    [MinLength(3)]
+    [MaxLength(32)]
     public string Name { get; set; } = null!;
-    
+
     [MaxLength(256)]
-    public string ImageUrl { get; set; } = String.Empty;
+    public string ImageId { get; set; } = null!;
 
     public decimal Price { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public int? RestaurantId { get; set; }
+    public string? RestaurantId { get; set; }
 
     public virtual ICollection<DishesCategory> DishesCategories { get; set; } = new List<DishesCategory>();
 

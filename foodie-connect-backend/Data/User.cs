@@ -7,10 +7,10 @@ namespace foodie_connect_backend.Data;
 
 public class User : IdentityUser
 {
-    [Required] 
+    [Required]
     [MaxLength(50)]
     public string DisplayName { get; set; } = null!;
-    
+
     [MaxLength(64)]
     public string? AvatarId { get; set; } = String.Empty;
 

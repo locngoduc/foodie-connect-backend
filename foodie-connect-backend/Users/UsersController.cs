@@ -28,7 +28,7 @@ namespace foodie_connect_backend.Users
         public async Task<ActionResult<User>> CreateUser(CreateUserDto user)
         {
             var result = await usersService.CreateUser(user);
-            
+
             if (result.IsFailure)
             {
                 if (result.Error.Code == AppError.ConflictErrorCode)
@@ -44,12 +44,12 @@ namespace foodie_connect_backend.Users
                 UserName = result.Value.UserName!,
                 DisplayName = result.Value.DisplayName,
             };
-            
+
             return CreatedAtAction(nameof(GetUser), new { id = result.Value.Id }, responseDto);
         }
 
-        
-        
+
+
         /// <summary>
         /// Query basic information about a USER account
         /// </summary>
@@ -96,9 +96,9 @@ namespace foodie_connect_backend.Users
         public async Task<ActionResult<GenericResponse>> UploadAvatar(string id, IFormFile file)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null || userId != id) 
+            if (userId == null || userId != id)
                 return Unauthorized(AppError.InvalidCredential("You are not authorized to perform this operation"));
-            
+
             var result = await usersService.UploadAvatar(id, file);
             if (result.IsFailure)
             {
@@ -112,9 +112,9 @@ namespace foodie_connect_backend.Users
 
             return Ok(new GenericResponse() { Message = "Avatar updated successfully" });
         }
-        
-        
-        
+
+
+
         /// <summary>
         /// Change a USER account password
         /// </summary>
@@ -135,7 +135,7 @@ namespace foodie_connect_backend.Users
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (userId == null || userId != id) return Unauthorized(AppError.InvalidCredential("You are not authorized to change this user's password"));
-            
+
             var result = await usersService.ChangePassword(id, changePasswordDto);
             if (result.IsFailure)
             {
@@ -170,7 +170,7 @@ namespace foodie_connect_backend.Users
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null || userId != id) return Unauthorized(AppError.InvalidCredential("You are not authorized to perform this operation"));
-            
+
             var upgradeResult = await usersService.UpgradeToHead(userId);
             if (upgradeResult.IsFailure)
                 return upgradeResult.Error.Code switch
@@ -179,7 +179,7 @@ namespace foodie_connect_backend.Users
                     "InvalidCredential" => BadRequest(upgradeResult.Error),
                     _ => BadRequest(upgradeResult.Error)
                 };
-            
+
             return Ok(new GenericResponse { Message = "Upgraded user to head successfully" });
         }
     }

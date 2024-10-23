@@ -6,27 +6,28 @@ namespace foodie_connect_backend.Data;
 
 public class Promotion
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
     [Required]
     [MaxLength(32)]
     public string Name { get; set; } = null!;
 
-    [Required] [MaxLength(64)] 
+    [Required]
+    [MaxLength(64)]
     public string Target { get; set; } = null!;
-    
+
     [MaxLength(256)]
     public string BannerUrl { get; set; } = String.Empty;
 
     public DateTime ExpireAt { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime UpdatedAt { get; set; } = DateTime.Now;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public int? RestaurantId { get; set; }
+    public string? RestaurantId { get; set; }
 
-    public int? DishId { get; set; }
+    public string? DishId { get; set; }
 
     public virtual Dish? Dish { get; set; }
 

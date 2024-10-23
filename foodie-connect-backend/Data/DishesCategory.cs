@@ -5,11 +5,11 @@ namespace foodie_connect_backend.Data;
 
 public class DishesCategory
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    public int? DishId { get; set; }
+    public string? DishId { get; set; }
 
-    public int? CategoryId { get; set; }
+    public string? CategoryId { get; set; }
 
     public virtual Category? Category { get; set; }
 

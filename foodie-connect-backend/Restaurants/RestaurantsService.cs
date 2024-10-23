@@ -65,19 +65,16 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
 
     public async Task<Result<Restaurant>> GetRestaurantById(string id)
     {
-        if (!int.TryParse(id, out var restaurantId))
-            return Result<Restaurant>.Failure(AppError.ValidationError("Invalid restaurant ID format"));
-
         var restaurant = await dbContext.Restaurants
             .Include(r => r.SocialLinks)
-            .FirstOrDefaultAsync(r => r.Id == restaurantId);
+            .FirstOrDefaultAsync(r => r.Id == id);
 
         return restaurant == null
             ? Result<Restaurant>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"))
             : Result<Restaurant>.Success(restaurant);
     }
 
-    private async Task<Result<bool>> ValidateAndGetRestaurant(int restaurantId, IFormFile file)
+    private async Task<Result<bool>> ValidateAndGetRestaurant(string restaurantId, IFormFile file)
     {
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
         if (restaurant == null)
@@ -95,7 +92,7 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
         return Result<bool>.Success(true);
     }
 
-    private async Task<Result<bool>> UploadImage(int restaurantId, IFormFile file, string publicId,
+    private async Task<Result<bool>> UploadImage(string restaurantId, IFormFile file, string publicId,
         string? folder = null)
     {
         var validationResult = await ValidateAndGetRestaurant(restaurantId, file);
@@ -130,17 +127,17 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
             : Result<bool>.Success(true);
     }
 
-    public Task<Result<bool>> UploadLogo(int restaurantId, IFormFile file)
+    public Task<Result<bool>> UploadLogo(string restaurantId, IFormFile file)
     {
         return UploadImage(restaurantId, file, "logo");
     }
 
-    public Task<Result<bool>> UploadBanner(int restaurantId, IFormFile file)
+    public Task<Result<bool>> UploadBanner(string restaurantId, IFormFile file)
     {
         return UploadImage(restaurantId, file, "banner");
     }
 
-    public async Task<Result<bool>> UploadImages(int restaurantId, ICollection<IFormFile> files)
+    public async Task<Result<bool>> UploadImages(string restaurantId, ICollection<IFormFile> files)
     {
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
         if (restaurant == null)

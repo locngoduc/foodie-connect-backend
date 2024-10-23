@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace foodie_connect_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class FinalCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,8 +16,7 @@ namespace foodie_connect_backend.Migrations
                 name: "Areas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -74,8 +73,7 @@ namespace foodie_connect_backend.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -89,8 +87,7 @@ namespace foodie_connect_backend.Migrations
                 name: "Restaurants",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     OpenTime = table.Column<int>(type: "integer", nullable: false),
                     CloseTime = table.Column<int>(type: "integer", nullable: false),
@@ -100,8 +97,8 @@ namespace foodie_connect_backend.Migrations
                     Images = table.Column<string[]>(type: "text[]", maxLength: 64, nullable: false, defaultValue: new string[0]),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    AreaId = table.Column<int>(type: "integer", nullable: true),
-                    HeadId = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false)
+                    AreaId = table.Column<string>(type: "text", nullable: true),
+                    HeadId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -110,7 +107,8 @@ namespace foodie_connect_backend.Migrations
                         name: "FK_Restaurants_Areas_AreaId",
                         column: x => x.AreaId,
                         principalTable: "Areas",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -223,14 +221,13 @@ namespace foodie_connect_backend.Migrations
                 name: "Dishes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    ImageUrl = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    ImageId = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RestaurantId = table.Column<int>(type: "integer", nullable: true)
+                    RestaurantId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -239,19 +236,19 @@ namespace foodie_connect_backend.Migrations
                         name: "FK_Dishes_Restaurants_RestaurantId",
                         column: x => x.RestaurantId,
                         principalTable: "Restaurants",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Services",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RestaurantId = table.Column<int>(type: "integer", nullable: true)
+                    RestaurantId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -264,20 +261,19 @@ namespace foodie_connect_backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SocialLink",
+                name: "SocialLinks",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RestaurantId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    RestaurantId = table.Column<string>(type: "text", nullable: true),
                     Platform = table.Column<int>(type: "integer", nullable: false),
                     Url = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SocialLink", x => x.Id);
+                    table.PrimaryKey("PK_SocialLinks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SocialLink_Restaurants_RestaurantId",
+                        name: "FK_SocialLinks_Restaurants_RestaurantId",
                         column: x => x.RestaurantId,
                         principalTable: "Restaurants",
                         principalColumn: "Id",
@@ -288,9 +284,9 @@ namespace foodie_connect_backend.Migrations
                 name: "DishesCategories",
                 columns: table => new
                 {
-                    DishId = table.Column<int>(type: "integer", nullable: false),
-                    CategoryId = table.Column<int>(type: "integer", nullable: false),
-                    Id = table.Column<int>(type: "integer", nullable: false)
+                    DishId = table.Column<string>(type: "text", nullable: false),
+                    CategoryId = table.Column<string>(type: "text", nullable: false),
+                    Id = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -313,16 +309,15 @@ namespace foodie_connect_backend.Migrations
                 name: "Promotions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     Target = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     BannerUrl = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     ExpireAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RestaurantId = table.Column<int>(type: "integer", nullable: true),
-                    DishId = table.Column<int>(type: "integer", nullable: true)
+                    RestaurantId = table.Column<string>(type: "text", nullable: true),
+                    DishId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -331,25 +326,26 @@ namespace foodie_connect_backend.Migrations
                         name: "FK_Promotions_Dishes_DishId",
                         column: x => x.DishId,
                         principalTable: "Dishes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Promotions_Restaurants_RestaurantId",
                         column: x => x.RestaurantId,
                         principalTable: "Restaurants",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Reviews",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     Content = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     Rating = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DishId = table.Column<int>(type: "integer", nullable: true)
+                    DishId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -358,8 +354,15 @@ namespace foodie_connect_backend.Migrations
                         name: "FK_Reviews_Dishes_DishId",
                         column: x => x.DishId,
                         principalTable: "Dishes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Areas_Name",
+                table: "Areas",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -399,6 +402,12 @@ namespace foodie_connect_backend.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Dishes_Name_RestaurantId",
+                table: "Dishes",
+                columns: new[] { "Name", "RestaurantId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Dishes_RestaurantId",
                 table: "Dishes",
                 column: "RestaurantId");
@@ -424,6 +433,12 @@ namespace foodie_connect_backend.Migrations
                 column: "AreaId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Restaurants_Name",
+                table: "Restaurants",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reviews_DishId",
                 table: "Reviews",
                 column: "DishId");
@@ -434,8 +449,8 @@ namespace foodie_connect_backend.Migrations
                 column: "RestaurantId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SocialLink_RestaurantId",
-                table: "SocialLink",
+                name: "IX_SocialLinks_RestaurantId",
+                table: "SocialLinks",
                 column: "RestaurantId");
         }
 
@@ -470,7 +485,7 @@ namespace foodie_connect_backend.Migrations
                 name: "Services");
 
             migrationBuilder.DropTable(
-                name: "SocialLink");
+                name: "SocialLinks");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

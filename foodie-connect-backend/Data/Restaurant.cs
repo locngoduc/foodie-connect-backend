@@ -6,15 +6,15 @@ namespace foodie_connect_backend.Data;
 
 public class Restaurant
 {
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    [Required] [MaxLength(64)] public string Name { get; set; } = null!;
+    [Required][MaxLength(64)] public string Name { get; set; } = null!;
 
     [Required] public int OpenTime { get; set; }
 
     [Required] public int CloseTime { get; set; }
 
-    [Required] [MaxLength(256)] public string Address { get; set; } = null!;
+    [Required][MaxLength(256)] public string Address { get; set; } = null!;
 
     public RestaurantStatus Status { get; set; } = RestaurantStatus.Open;
 
@@ -31,7 +31,7 @@ public class Restaurant
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public int? AreaId { get; set; }
+    public string? AreaId { get; set; }
 
     public virtual Area? Area { get; set; }
 
