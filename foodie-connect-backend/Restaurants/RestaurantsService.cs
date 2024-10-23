@@ -72,7 +72,7 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
 
         if (restaurant == null)
             return Result<RestaurantResponseDto>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
-
+        
         var restaurantResponseDto = new RestaurantResponseDto
         {
             Id = restaurant.Id,
@@ -83,6 +83,7 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
             Address = restaurant.Address,
             Status = restaurant.Status,
             Images = restaurant.Images,
+            HeadId = restaurant.HeadId,
             SocialLinks = restaurant.SocialLinks.Select(s => new SocialLinkResponseDto
             {
                 Id = s.Id,
@@ -147,6 +148,40 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
         return updateResult == 0
             ? Result<bool>.Failure(AppError.ValidationError("Failed to update restaurant's images in the database"))
             : Result<bool>.Success(true);
+    }
+
+    public async Task<Result<bool>> DeleteImage(string restaurantId, string imageId)
+    {
+        if (string.IsNullOrEmpty(restaurantId) || string.IsNullOrEmpty(imageId))
+            return Result<bool>.Failure(AppError.ValidationError("Restaurant ID and Image ID are required"));
+
+        var restaurant = await dbContext.Restaurants
+            .AsTracking()
+            .FirstOrDefaultAsync(r => r.Id == restaurantId);
+        
+        if (restaurant == null) 
+            return Result<bool>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
+
+        if (!restaurant.Images.Contains(imageId)) 
+            return Result<bool>.Failure(AppError.RecordNotFound("Image not found"));
+
+        try 
+        {
+            restaurant.Images.Remove(imageId);
+            await dbContext.SaveChangesAsync();
+            
+            var deleteParams = new DeletionParams(imageId);
+            var deleteResult = await cloudinary.DestroyAsync(deleteParams);
+        
+            if (deleteResult.Error != null) 
+                return Result<bool>.Failure(AppError.InternalError(deleteResult.Error.Message));
+        
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            return Result<bool>.Failure(AppError.InternalError($"Failed to delete image. Ex: {ex.Message}"));
+        }
     }
 
     public Task<Result<bool>> UploadLogo(string restaurantId, IFormFile file)
