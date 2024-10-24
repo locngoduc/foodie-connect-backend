@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(options => { options.SuppressMapClientErrors = true; })
-    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
 ;
 
 builder.Services.AddEndpointsApiExplorer();

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Enums;
 
@@ -33,12 +34,14 @@ public class Restaurant
 
     public string? AreaId { get; set; }
 
+    [JsonIgnore]
     public virtual Area? Area { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<Dish> Dishes { get; set; } = new List<Dish>();
-
+    [JsonIgnore]
     public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
-
+    [JsonIgnore]
     public virtual ICollection<Service> Services { get; set; } = new List<Service>();
 
     public string HeadId { get; set; } = null!;

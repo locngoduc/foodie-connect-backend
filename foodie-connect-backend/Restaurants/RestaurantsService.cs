@@ -3,12 +3,13 @@ using CloudinaryDotNet.Actions;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.SocialLinks;
 using foodie_connect_backend.SocialLinks.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace foodie_connect_backend.Restaurants;
 
-public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbContext)
+public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbContext, SocialLinksService socialLinksService)
 {
     private readonly List<string> _allowedAvatarExtensions = new() { ".png", ".jpg", ".jpeg", ".webp" };
 
@@ -31,26 +32,6 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
             await dbContext.Restaurants.AddAsync(newRestaurant);
             await dbContext.SaveChangesAsync();
 
-            var uploadLogoResult = await UploadLogo(newRestaurant.Id, restaurant.Logo);
-            if (uploadLogoResult.IsFailure)
-            {
-                await transaction.RollbackAsync();
-                return Result<Restaurant>.Failure(AppError.InternalError("Failed to upload restaurant's logo"));
-            }
-
-            var uploadBanner = await UploadBanner(newRestaurant.Id, restaurant.Logo);
-            if (uploadBanner.IsFailure)
-            {
-                await transaction.RollbackAsync();
-                return Result<Restaurant>.Failure(AppError.InternalError("Failed to upload restaurant's banner"));
-            }
-
-            if (restaurant.Images != null && restaurant.Images.Any())
-            {
-                var uploadImages = await UploadImages(newRestaurant.Id, restaurant.Images!);
-                if (uploadImages.IsFailure)
-                    return Result<Restaurant>.Failure(AppError.InternalError("Failed to upload restaurant's logo"));
-            }
 
             await transaction.CommitAsync();
 
@@ -64,37 +45,18 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
         }
     }
 
-    public async Task<Result<RestaurantResponseDto>> GetRestaurantById(string id)
+    public async Task<Result<Restaurant>> GetRestaurantById(string id)
     {
         var restaurant = await dbContext.Restaurants
             .Include(r => r.SocialLinks)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (restaurant == null)
-            return Result<RestaurantResponseDto>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
-        
-        var restaurantResponseDto = new RestaurantResponseDto
-        {
-            Id = restaurant.Id,
-            Name = restaurant.Name,
-            Phone = restaurant.Phone,
-            OpenTime = restaurant.OpenTime,
-            CloseTime = restaurant.CloseTime,
-            Address = restaurant.Address,
-            Status = restaurant.Status,
-            Images = restaurant.Images,
-            HeadId = restaurant.HeadId,
-            SocialLinks = restaurant.SocialLinks.Select(s => new SocialLinkResponseDto
-            {
-                Id = s.Id,
-                Url = s.Url,
-                Platform = s.Platform
-            }).ToList()
-        };
+            return Result<Restaurant>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
 
         return restaurant == null
-            ? Result<RestaurantResponseDto>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"))
-            : Result<RestaurantResponseDto>.Success(restaurantResponseDto);
+            ? Result<Restaurant>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"))
+            : Result<Restaurant>.Success(restaurant);
     }
 
     private async Task<Result<bool>> ValidateAndGetRestaurant(string restaurantId, IFormFile file)
@@ -140,14 +102,24 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
             Console.WriteLine(uploadResult.Error);
             return Result<bool>.Failure(AppError.InternalError(uploadResult.Error.Message));
         }
-
+        Console.WriteLine("Image uploaded to cloudinary");
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
+        if (restaurant!.Images.Contains(uploadResult.PublicId))
+        {
+            Console.WriteLine("Adding image to restaurant");
+            restaurant!.Images.Remove(uploadResult.PublicId);
+        }
         restaurant!.Images.Add(uploadResult.PublicId);
-
-        var updateResult = await dbContext.SaveChangesAsync();
-        return updateResult == 0
-            ? Result<bool>.Failure(AppError.ValidationError("Failed to update restaurant's images in the database"))
-            : Result<bool>.Success(true);
+        try
+        {
+            await dbContext.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving changes: {ex.Message}");
+            return Result<bool>.Failure(AppError.InternalError("Failed to update restaurant's images"));
+        }
     }
 
     public async Task<Result<bool>> DeleteImage(string restaurantId, string imageId)
@@ -158,24 +130,24 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
         var restaurant = await dbContext.Restaurants
             .AsTracking()
             .FirstOrDefaultAsync(r => r.Id == restaurantId);
-        
-        if (restaurant == null) 
+
+        if (restaurant == null)
             return Result<bool>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
 
-        if (!restaurant.Images.Contains(imageId)) 
+        if (!restaurant.Images.Contains(imageId))
             return Result<bool>.Failure(AppError.RecordNotFound("Image not found"));
 
-        try 
+        try
         {
             restaurant.Images.Remove(imageId);
             await dbContext.SaveChangesAsync();
-            
+
             var deleteParams = new DeletionParams(imageId);
             var deleteResult = await cloudinary.DestroyAsync(deleteParams);
-        
-            if (deleteResult.Error != null) 
+
+            if (deleteResult.Error != null)
                 return Result<bool>.Failure(AppError.InternalError(deleteResult.Error.Message));
-        
+
             return Result<bool>.Success(true);
         }
         catch (Exception ex)

@@ -17,10 +17,10 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    [Consumes("multipart/form-data")]
+    [Consumes("application/json")]
     [Produces("application/json")]
     [Authorize(Roles = "Head")]
-    public async Task<IActionResult> CreateRestaurant([FromForm] CreateRestaurantDto restaurantDto)
+    public async Task<IActionResult> CreateRestaurant([FromBody] CreateRestaurantDto restaurantDto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
         var head = await headsService.GetHeadById(userId);
@@ -42,7 +42,7 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<RestaurantResponseDto>> GetRestaurant([FromRoute] string id)
+    public async Task<ActionResult<Restaurant>> GetRestaurant([FromRoute] string id)
     {
         var result = await restaurantsService.GetRestaurantById(id);
         if (result.IsFailure) return NotFound(result.Error);
@@ -70,18 +70,18 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     public async Task<ActionResult<GenericResponse>> UpdateLogo(string id, IFormFile file)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        
+
         var restaurantQuery = await restaurantsService.GetRestaurantById(id);
         if (restaurantQuery.IsFailure) return NotFound(restaurantQuery.Error);
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
-        
+
         var result = await restaurantsService.UploadLogo(restaurantQuery.Value.Id, file);
         if (result.IsFailure) return BadRequest(result.Error);
         return Ok(new GenericResponse { Message = "Logo updated successfully" });
     }
-    
-    
-    
+
+
+
     /// <summary>
     /// Update the restaurant's banner
     /// </summary>
@@ -101,11 +101,11 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     public async Task<ActionResult<GenericResponse>> UpdateBanner(string id, IFormFile file)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        
+
         var restaurantQuery = await restaurantsService.GetRestaurantById(id);
         if (restaurantQuery.IsFailure) return NotFound(restaurantQuery.Error);
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
-        
+
         var result = await restaurantsService.UploadBanner(restaurantQuery.Value.Id, file);
         if (result.IsFailure) return BadRequest(result.Error);
         return Ok(new GenericResponse { Message = "Logo updated successfully" });
@@ -128,13 +128,13 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     public async Task<ActionResult<GenericResponse>> UploadImages(string id, IFormFile[] files)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        
+
         var restaurantQuery = await restaurantsService.GetRestaurantById(id);
         if (restaurantQuery.IsFailure) return NotFound(restaurantQuery.Error);
         Console.WriteLine($"Restaurant owner: {restaurantQuery.Value.HeadId}");
         Console.WriteLine($"Requester: {userId}");
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
-        
+
         var result = await restaurantsService.UploadImages(restaurantQuery.Value.Id, files);
         if (result.IsFailure) return BadRequest(result.Error);
         return Ok(new GenericResponse { Message = "Images uploaded successfully" });
@@ -162,11 +162,11 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     public async Task<ActionResult<GenericResponse>> DeleteImage(string id, string imageId)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        
+
         var restaurantQuery = await restaurantsService.GetRestaurantById(id);
         if (restaurantQuery.IsFailure) return NotFound(restaurantQuery.Error);
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
-        
+
         var result = await restaurantsService.DeleteImage(restaurantQuery.Value.Id, imageId);
         if (result.IsFailure) return result.Error.Code switch
         {
