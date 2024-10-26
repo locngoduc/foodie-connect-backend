@@ -2,21 +2,19 @@
 services:
   foodie-backend:
     build:
-      context: "C:\\Users\\locngo\\RiderProjects\\foodie-connect-backend"
-      dockerfile: "foodie-connect-backend/Dockerfile"
+      context: "/home/solux/SourceCode/foodie-backend"
+      dockerfile: "foodie-connect-backend.api/Dockerfile"
       target: "base"
     command: []
     entrypoint:
     - "dotnet"
-    - "/app/bin/Debug/net8.0/foodie-connect-backend.dll"
+    - "/app/bin/Debug/net8.0/foodie-connect-backend.api.dll"
     environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "foodie-connect-backend:dev"
+    image: "foodie-connect-backend.api:dev"
     ports: []
     volumes:
-    - "C:\\Users\\locngo\\AppData\\Roaming\\Microsoft\\UserSecrets:/home/app/.microsoft/usersecrets"
-    - "C:\\Users\\locngo\\.nuget\\packages:/home/app/.nuget/packages"
-    - "C:\\Users\\locngo\\RiderProjects\\foodie-connect-backend\\foodie-connect-backend:/app:rw"
-    - "C:\\Users\\locngo\\RiderProjects\\foodie-connect-backend:/src:rw"
+    - "/home/solux/.nuget/packages:/home/app/.nuget/packages"
+    - "/home/solux/SourceCode/foodie-backend/foodie-connect-backend.api:/app:rw"
+    - "/home/solux/SourceCode/foodie-backend:/src:rw"
     working_dir: "/app"

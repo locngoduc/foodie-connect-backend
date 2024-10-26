@@ -2,7 +2,7 @@ services:
   foodie-backend:
     build:
       context: .
-      dockerfile: foodie-connect-backend/Dockerfile
+      dockerfile: foodie-connect-backend.api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_HTTP_PORTS: 8080

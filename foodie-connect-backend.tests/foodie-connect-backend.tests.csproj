@@ -26,7 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\foodie-connect-backend\foodie-connect-backend.csproj" />
+      <ProjectReference Include="..\foodie-connect-backend.api\foodie-connect-backend.api.csproj" />
     </ItemGroup>
 
 </Project>

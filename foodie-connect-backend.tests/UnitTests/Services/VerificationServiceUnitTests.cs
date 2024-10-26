@@ -1,9 +1,11 @@
-using foodie_connect_backend.Verification;
-using Microsoft.AspNetCore.Identity;
-using Moq;
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Verification;
+using Microsoft.AspNetCore.Identity;
+using Moq;
+
+namespace food_connect_backend.tests.UnitTests.Services;
 
 public class VerificationServiceTests
 {

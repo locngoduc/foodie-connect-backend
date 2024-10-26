@@ -2,7 +2,7 @@ services:
   foodie-backend:
     build:
       context: .
-      dockerfile: foodie-connect-backend/Dockerfile
+      dockerfile: foodie-connect-backend.api/Dockerfile
     depends_on:
       - postgres
   
