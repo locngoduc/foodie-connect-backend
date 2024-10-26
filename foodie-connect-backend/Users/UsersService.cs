@@ -4,12 +4,17 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.Users.Dtos;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Dtos;
+using foodie_connect_backend.Uploader;
 using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Users;
 
-public class UsersService(UserManager<User> userManager, VerificationService verificationService, Cloudinary cloudinary, SignInManager<User> signInManager)
+public class UsersService(
+    UserManager<User> userManager, 
+    VerificationService verificationService, 
+    IUploaderService uploaderService, 
+    SignInManager<User> signInManager)
 {
     private readonly List<string> _allowedAvatarExtensions = [".png", ".jpg", ".jpeg", ".webp"];
     public async Task<Result<User>> CreateUser(CreateUserDto user)
@@ -77,33 +82,24 @@ public class UsersService(UserManager<User> userManager, VerificationService ver
         if (user == null || !await userManager.IsInRoleAsync(user, "User"))
             return Result<bool>.Failure(AppError.RecordNotFound("No user is associated with this id"));
 
-        var extension = Path.GetExtension(file.FileName);
-        if (!_allowedAvatarExtensions.Contains(extension))
-            return Result<bool>.Failure(AppError.ValidationError($"Allowed file extensions are: {_allowedAvatarExtensions}"));
-        
-        var fileSize = file.Length;
-        if (fileSize < 1 || fileSize > 5 * 1024 * 1024) 
-            return Result<bool>.Failure(AppError.ValidationError("Maximum file size is 5MB"));
-
-        var uploadParams = new ImageUploadParams()
+        var uploadParams = new ImageFileOptions()
         {
-            File = new FileDescription(file.FileName, file.OpenReadStream()),
             Format = "webp",
             PublicId = userId,
             Folder = "foodie/user_avatars"
         };
-        var uploadResult = await cloudinary.UploadAsync(uploadParams);
+        var uploadResult = await uploaderService.UploadImageAsync(file, uploadParams);
 
-        if (uploadResult.Error == null)
+        if (uploadResult.IsSuccess)
         {
-            user.AvatarId = uploadResult.PublicId;
+            user.AvatarId = uploadResult.Value;
             var updateResult = await userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
                 return Result<bool>.Failure(AppError.ValidationError(updateResult.Errors.First().Description));
             return Result<bool>.Success(true);
         }
 
-        return Result<bool>.Failure(AppError.InternalError(uploadResult.Error.Message));
+        return Result<bool>.Failure(uploadResult.Error);
     }
 
     public async Task<Result<bool>> UpgradeToHead(string userId)

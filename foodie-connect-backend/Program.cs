@@ -5,6 +5,7 @@ using foodie_connect_backend.Heads;
 using foodie_connect_backend.Restaurants;
 using foodie_connect_backend.Sessions;
 using foodie_connect_backend.SocialLinks;
+using foodie_connect_backend.Uploader;
 using foodie_connect_backend.Users;
 using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -65,7 +66,7 @@ builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email
         builder.Configuration["MAILTRAP_PASSWORD"],
         builder.Configuration["MAILTRAP_HOST"],
         int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port) ? port : null);
-builder.Services.AddCloudinary();
+builder.Services.AddScoped<IUploaderService, CloudinaryUploader>();
 builder.Services.AddScoped<HeadsService>();
 builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<SessionsService>();

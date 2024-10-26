@@ -5,14 +5,15 @@ using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.SocialLinks;
 using foodie_connect_backend.SocialLinks.Dtos;
+using foodie_connect_backend.Uploader;
 using Microsoft.EntityFrameworkCore;
 
 namespace foodie_connect_backend.Restaurants;
 
-public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbContext, SocialLinksService socialLinksService)
+public class RestaurantsService(
+    IUploaderService uploaderService, 
+    ApplicationDbContext dbContext)
 {
-    private readonly List<string> _allowedAvatarExtensions = new() { ".png", ".jpg", ".jpeg", ".webp" };
-
     public async Task<Result<Restaurant>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync();
@@ -53,63 +54,30 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
 
         if (restaurant == null)
             return Result<Restaurant>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
-
-        return restaurant == null
-            ? Result<Restaurant>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"))
-            : Result<Restaurant>.Success(restaurant);
-    }
-
-    private async Task<Result<bool>> ValidateAndGetRestaurant(string restaurantId, IFormFile file)
-    {
-        var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
-        if (restaurant == null)
-            return Result<bool>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
-
-        var extension = Path.GetExtension(file.FileName);
-        if (!_allowedAvatarExtensions.Contains(extension))
-            return Result<bool>.Failure(
-                AppError.ValidationError(
-                    $"Allowed file extensions are: {string.Join(", ", _allowedAvatarExtensions)}"));
-
-        if (file.Length < 1 || file.Length > 5 * 1024 * 1024)
-            return Result<bool>.Failure(AppError.ValidationError("Maximum file size is 5MB"));
-
-        return Result<bool>.Success(true);
+        return Result<Restaurant>.Success(restaurant);
     }
 
     private async Task<Result<bool>> UploadImage(string restaurantId, IFormFile file, string publicId,
         string? folder = null)
     {
-        var validationResult = await ValidateAndGetRestaurant(restaurantId, file);
-        if (validationResult.IsFailure)
-            return validationResult;
+        var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
+        if (restaurant is null)
+            return Result<bool>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
 
-        var uploadParams = new ImageUploadParams
+        var imageOptions = new ImageFileOptions
         {
-            File = new FileDescription(file.FileName, file.OpenReadStream()),
-            Format = "webp",
-            PublicId = publicId
+            PublicId = publicId,
+            Folder = !string.IsNullOrEmpty(folder) ? 
+                $"foodie/restaurants/{restaurantId}/{folder}" : 
+                $"foodie/restaurants/{restaurantId}/"
         };
 
-        if (!string.IsNullOrEmpty(folder))
-            uploadParams.Folder = $"foodie/restaurants/{restaurantId}/{folder}";
-        else
-            uploadParams.Folder = $"foodie/restaurants/{restaurantId}/";
-
-        var uploadResult = await cloudinary.UploadAsync(uploadParams);
-        if (uploadResult.Error != null)
-        {
-            Console.WriteLine(uploadResult.Error);
-            return Result<bool>.Failure(AppError.InternalError(uploadResult.Error.Message));
-        }
-        Console.WriteLine("Image uploaded to cloudinary");
-        var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
-        if (restaurant!.Images.Contains(uploadResult.PublicId))
-        {
-            Console.WriteLine("Adding image to restaurant");
-            restaurant!.Images.Remove(uploadResult.PublicId);
-        }
-        restaurant!.Images.Add(uploadResult.PublicId);
+        var uploadResult = await uploaderService.UploadImageAsync(file, imageOptions);
+        if (uploadResult.IsFailure)
+            return Result<bool>.Failure(uploadResult.Error);
+        
+        if (!restaurant.Images.Contains(uploadResult.Value)) restaurant.Images.Add(uploadResult.Value);
+        
         try
         {
             await dbContext.SaveChangesAsync();
@@ -142,12 +110,10 @@ public class RestaurantsService(Cloudinary cloudinary, ApplicationDbContext dbCo
             restaurant.Images.Remove(imageId);
             await dbContext.SaveChangesAsync();
 
-            var deleteParams = new DeletionParams(imageId);
-            var deleteResult = await cloudinary.DestroyAsync(deleteParams);
+            var deleteResult = await uploaderService.DeleteFileAsync(imageId);
 
-            if (deleteResult.Error != null)
-                return Result<bool>.Failure(AppError.InternalError(deleteResult.Error.Message));
-
+            if (deleteResult.IsFailure)
+                return Result<bool>.Failure(deleteResult.Error);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)
