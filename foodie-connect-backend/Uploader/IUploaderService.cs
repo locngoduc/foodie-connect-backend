@@ -7,6 +7,8 @@ public interface IUploaderService
     List<string> AllowedExtensions { get; init; }
     int MaxFileSize { get; init; }
     
+    public void ValidateFile(IFormFile file);
+    
     /// <summary>
     /// Uploads a single file to the storage service
     /// </summary>

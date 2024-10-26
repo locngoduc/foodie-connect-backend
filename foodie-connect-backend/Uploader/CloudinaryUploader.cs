@@ -1,4 +1,3 @@
-using System.Drawing.Imaging;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using FluentEmail.Core;
@@ -13,7 +12,7 @@ public class CloudinaryUploader: IUploaderService
     public List<string> AllowedExtensions { get; init; } = [".png", ".jpg", ".jpeg", ".webp"];
     public int MaxFileSize { get; init; } = 5 * 1024 * 1024; // 5MB
 
-    private void _validateFile(IFormFile file)
+    public void ValidateFile(IFormFile file)
     {
         var fileExtension = Path.GetExtension(file.FileName);
         if (!AllowedExtensions.Contains(fileExtension)) 
@@ -28,7 +27,7 @@ public class CloudinaryUploader: IUploaderService
     {
         try
         {
-            _validateFile(file);
+            ValidateFile(file);
         }
         catch (Exception e)
         {
@@ -62,7 +61,7 @@ public class CloudinaryUploader: IUploaderService
 
         foreach (var file in formFiles) try
             {
-                _validateFile(file);
+                ValidateFile(file);
             }
             catch (Exception e)
             {
