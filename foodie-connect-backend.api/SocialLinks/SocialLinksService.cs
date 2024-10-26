@@ -1,5 +1,3 @@
-
-
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.SocialLinks.Dtos;
@@ -78,35 +76,27 @@ public class SocialLinksService(ApplicationDbContext dbContext)
     {
         try
         {
-            var restaurant = await dbContext.Restaurants
-                .Include(r => r.SocialLinks)
-                .FirstOrDefaultAsync(r => r.Id == restaurantId);
-            if (restaurant == null)
-                return Result<SocialLinkResponseDto>.Failure(AppError.RecordNotFound("Restaurant not found"));
-
-            var socialLink = restaurant.SocialLinks.FirstOrDefault(sl => sl.Id == dto.Id);
+            var socialLink = await dbContext.SocialLinks.FirstOrDefaultAsync(sl => sl.Id == dto.Id && sl.RestaurantId == restaurantId);
             if (socialLink == null)
                 return Result<SocialLinkResponseDto>.Failure(AppError.RecordNotFound("Social link not found"));
 
-            if (restaurant.SocialLinks.Any(sl => sl.Platform == dto.Platform))
-                return Result<SocialLinkResponseDto>.Failure(AppError.Conflict($"Social link for {dto.Platform} already exists"));
-
             var updatedSocialLink = new SocialLink
             {
-                Id = socialLink.Id,
+                Id = dto.Id,
                 Platform = dto.Platform,
-                Url = dto.Url
+                Url = dto.Url,
+                RestaurantId = restaurantId
             };
-
-            restaurant.SocialLinks.Remove(socialLink);
-            restaurant.SocialLinks.Add(updatedSocialLink);
+            
+            dbContext.ChangeTracker.Clear();
+            var result = dbContext.SocialLinks.Update(updatedSocialLink);
             await dbContext.SaveChangesAsync();
 
             var socialLinksResponseDto = new SocialLinkResponseDto
             {
-                Id = socialLink.Id,
-                Platform = socialLink.Platform,
-                Url = socialLink.Url
+                Id = updatedSocialLink.Id,
+                Platform = updatedSocialLink.Platform,
+                Url = updatedSocialLink.Url,
             };
             return Result<SocialLinkResponseDto>.Success(socialLinksResponseDto);
         }
