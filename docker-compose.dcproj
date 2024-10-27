@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿
 <Project ToolsVersion="15.0" Sdk="Microsoft.Docker.Sdk">
   <PropertyGroup Label="Globals">
     <ProjectVersion>2.1</ProjectVersion>
@@ -8,6 +8,7 @@
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
     <DockerServiceName>foodie-connect-backend</DockerServiceName>
+    <UserSecretsId>95367fc2-b5bb-4623-a5bd-8a2e6f2b5c36</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.development.yml">

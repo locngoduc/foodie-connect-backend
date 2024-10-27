@@ -5,16 +5,30 @@ services:
       context: "/home/solux/SourceCode/foodie-backend"
       dockerfile: "foodie-connect-backend.api/Dockerfile"
       target: "base"
+      args:
+        BUILD_CONFIGURATION: "Debug"
     command: []
     entrypoint:
-    - "dotnet"
-    - "/app/bin/Debug/net8.0/foodie-connect-backend.api.dll"
+    - "/opt/rider-debugger/linux-x64/JetBrains.Debugger.Worker"
+    - "--runtimeconfig"
+    - "/opt/rider-debugger/JetBrains.Debugger.Worker.runtimeconfig.json"
+    - "--mode=server"
+    - "--frontend-port=57100"
+    - "--backend-port=57300"
+    - "--timeout=60"
     environment:
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
+      RIDER_DEBUGGER_LOG_DIR: "/var/opt/rider-debugger"
+      RESHARPER_LOG_CONF: "/etc/opt/rider-debugger/backend-log.xml"
     image: "foodie-connect-backend.api:dev"
-    ports: []
+    ports:
+    - "127.0.0.1:57000:57100"
+    - "127.0.0.1:57200:57300"
     volumes:
     - "/home/solux/.nuget/packages:/home/app/.nuget/packages"
     - "/home/solux/SourceCode/foodie-backend/foodie-connect-backend.api:/app:rw"
     - "/home/solux/SourceCode/foodie-backend:/src:rw"
+    - "/home/solux/.local/share/JetBrains/RiderRemoteDebugger/2024.2.6/Linux64:/opt/rider-debugger"
+    - "/home/solux/.local/share/JetBrains/Toolbox/apps/rider/bin:/etc/opt/rider-debugger/backend-log.xml"
+    - "/home/solux/.cache/JetBrains/Rider2024.2/log/DebuggerWorker/JetBrains.Debugger.Worker.2024_10_26_19_56_31:/var/opt/rider-debugger:rw"
     working_dir: "/app"
