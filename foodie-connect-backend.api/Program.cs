@@ -60,6 +60,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register services
+Console.WriteLine(builder.Configuration["MAILTRAP_USERNAME"]);
+Console.WriteLine(builder.Configuration["MAILTRAP_PASSWORD"]);
+Console.WriteLine(int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port2) ? port2 : null);
+Console.WriteLine(builder.Configuration["MAILTRAP_HOST"]);
 builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
     .AddMailtrapSender(
         builder.Configuration["MAILTRAP_USERNAME"],

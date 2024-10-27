@@ -1,5 +1,7 @@
 using System.Net.Http.Json;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Sessions.Dtos;
+using foodie_connect_backend.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,14 +12,19 @@ public class BaseIntegrationTest: IClassFixture<FoodieWebApplicationFactory<Prog
     private readonly HttpClient _client;
     private readonly FoodieWebApplicationFactory<Program> _factory;
     protected readonly ApplicationDbContext Context;
-    private readonly UserManager<User> _userManager;
+    protected readonly UserManager<User> UserManager;
     protected BaseIntegrationTest(FoodieWebApplicationFactory<Program> factory)
     {
         _factory = factory;
         _client = _factory.CreateClient();
         var scope = factory.Services.CreateScope();
         Context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        _userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        UserManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    }
+
+    protected HttpClient CreateUnauthenticatedClient()
+    {
+        return _factory.CreateClient();
     }
     
     protected async Task<FoodieClientWrapper> CreateAuthenticatedClientAsync(string userType = "User")
@@ -32,27 +39,25 @@ public class BaseIntegrationTest: IClassFixture<FoodieWebApplicationFactory<Prog
             EmailConfirmed = true
         };
 
-        var result = await _userManager.CreateAsync(user, "Password123!");
+        var result = await UserManager.CreateAsync(user, "Password123!");
         if (!result.Succeeded)
         {
             throw new Exception($"Could not create user: {string.Join(", ", result.Errors)}");
         }
 
-        await _userManager.AddToRoleAsync(user, userType);
+        await UserManager.AddToRoleAsync(user, userType);
 
-        var registrationResponse = await client.PostAsJsonAsync("/v1/session", new
+        var loginResponse = await client.PostAsJsonAsync("/v1/session", new LoginDto
         {
             UserName = user.UserName,
-            Password = "Password123!"
+            Password = "Password123!",
+            LoginType = userType == "User" ? LoginType.User : LoginType.Head
         });
 
-        if (!registrationResponse.IsSuccessStatusCode)
+        if (!loginResponse.IsSuccessStatusCode)
         {
-            throw new Exception($"Could not authenticate user. Status code: {registrationResponse.StatusCode}");
+            throw new Exception($"Could not authenticate user. Status code: {loginResponse.StatusCode}");
         }
-
-        var cookies = registrationResponse.Headers.GetValues("Set-Cookie");
-        client.DefaultRequestHeaders.Add("Cookie", cookies);
 
         return new FoodieClientWrapper(client, user);
     }
