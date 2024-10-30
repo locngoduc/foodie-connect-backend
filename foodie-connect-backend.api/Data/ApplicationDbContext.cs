@@ -1,6 +1,6 @@
+using foodie_connect_backend.Shared.Classes;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using foodie_connect_backend.Shared.Classes;
 
 namespace foodie_connect_backend.Data;
 
@@ -59,7 +59,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
             entity.Property(e => e.Images)
                 .HasColumnType("text[]")
-                .HasDefaultValue(new List<String>());
+                .HasDefaultValue(new List<string>());
 
             entity.Property(e => e.HeadId)
                 .IsRequired();
@@ -93,6 +93,9 @@ public class ApplicationDbContext : IdentityDbContext<User>
             entity.Property(e => e.ImageId)
                 .IsRequired()
                 .HasMaxLength(256);
+
+            entity.Property(e => e.Description)
+                .IsRequired();
 
             entity.Property(e => e.Price)
                 .HasColumnType("decimal(18,2)");
@@ -155,6 +158,9 @@ public class ApplicationDbContext : IdentityDbContext<User>
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Id).ValueGeneratedNever();
 
+            entity.Property(e => e.Type)
+                .IsRequired();
+
             entity.Property(e => e.Content)
                 .IsRequired()
                 .HasMaxLength(128);
@@ -166,6 +172,11 @@ public class ApplicationDbContext : IdentityDbContext<User>
             entity.HasOne(r => r.Dish)
                 .WithMany(d => d.Reviews)
                 .HasForeignKey(r => r.DishId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(r => r.Restaurant)
+                .WithMany(res => res.Reviews)
+                .HasForeignKey(r => r.RestaurantId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

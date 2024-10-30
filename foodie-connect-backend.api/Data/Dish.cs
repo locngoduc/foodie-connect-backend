@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace foodie_connect_backend.Data;
 
-public partial class Dish
+public class Dish
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
@@ -13,8 +11,9 @@ public partial class Dish
     [MaxLength(32)]
     public string Name { get; set; } = null!;
 
-    [MaxLength(256)]
     public string ImageId { get; set; } = null!;
+
+    public string Description { get; set; } = null!;
 
     public decimal Price { get; set; }
 
@@ -22,7 +21,9 @@ public partial class Dish
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public string? RestaurantId { get; set; }
+    public string RestaurantId { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
 
     public virtual ICollection<DishesCategory> DishesCategories { get; set; } = new List<DishesCategory>();
 

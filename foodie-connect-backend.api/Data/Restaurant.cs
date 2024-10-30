@@ -9,13 +9,13 @@ public class Restaurant
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    [Required][MaxLength(64)] public string Name { get; set; } = null!;
+    [Required] [MaxLength(64)] public string Name { get; set; } = null!;
 
     [Required] public int OpenTime { get; set; }
 
     [Required] public int CloseTime { get; set; }
 
-    [Required][MaxLength(256)] public string Address { get; set; } = null!;
+    [Required] [MaxLength(256)] public string Address { get; set; } = null!;
 
     public RestaurantStatus Status { get; set; } = RestaurantStatus.Open;
 
@@ -34,15 +34,17 @@ public class Restaurant
 
     public string? AreaId { get; set; }
 
-    [JsonIgnore]
-    public virtual Area? Area { get; set; }
+    public bool IsDeleted { get; set; } = false;
 
-    [JsonIgnore]
-    public virtual ICollection<Dish> Dishes { get; set; } = new List<Dish>();
-    [JsonIgnore]
-    public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
-    [JsonIgnore]
-    public virtual ICollection<Service> Services { get; set; } = new List<Service>();
+    [JsonIgnore] public virtual Area? Area { get; set; }
+
+    [JsonIgnore] public virtual ICollection<Dish> Dishes { get; set; } = new List<Dish>();
+
+    [JsonIgnore] public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+    [JsonIgnore] public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
+
+    [JsonIgnore] public virtual ICollection<Service> Services { get; set; } = new List<Service>();
 
     public string HeadId { get; set; } = null!;
 }

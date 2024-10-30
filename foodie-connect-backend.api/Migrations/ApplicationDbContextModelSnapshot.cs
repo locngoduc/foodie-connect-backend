@@ -208,10 +208,17 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ImageId")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -222,6 +229,7 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("RestaurantId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -329,6 +337,9 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("text[]")
                         .HasDefaultValue(new string[0]);
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -374,7 +385,16 @@ namespace foodie_connect_backend.Migrations
                     b.Property<string>("DishId")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("Rating")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RestaurantId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -383,6 +403,8 @@ namespace foodie_connect_backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DishId");
+
+                    b.HasIndex("RestaurantId");
 
                     b.ToTable("Reviews");
                 });
@@ -394,6 +416,9 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -570,7 +595,8 @@ namespace foodie_connect_backend.Migrations
                     b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
                         .WithMany("Dishes")
                         .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Restaurant");
                 });
@@ -628,7 +654,14 @@ namespace foodie_connect_backend.Migrations
                         .HasForeignKey("DishId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
+                        .WithMany("Reviews")
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.Navigation("Dish");
+
+                    b.Navigation("Restaurant");
                 });
 
             modelBuilder.Entity("foodie_connect_backend.Data.Service", b =>
@@ -674,6 +707,8 @@ namespace foodie_connect_backend.Migrations
                     b.Navigation("Dishes");
 
                     b.Navigation("Promotions");
+
+                    b.Navigation("Reviews");
 
                     b.Navigation("Services");
 

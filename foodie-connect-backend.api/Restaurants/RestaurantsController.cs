@@ -49,10 +49,8 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
         return Ok(result.Value);
     }
 
-
-
     /// <summary>
-    /// Update the restaurant's logo
+    ///     Update the restaurant's logo
     /// </summary>
     /// <param name="id"></param>
     /// <param name="file"></param>
@@ -81,9 +79,8 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     }
 
 
-
     /// <summary>
-    /// Update the restaurant's banner
+    ///     Update the restaurant's banner
     /// </summary>
     /// <param name="id"></param>
     /// <param name="file"></param>
@@ -112,9 +109,8 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     }
 
 
-
     /// <summary>
-    /// Adds additional images to the restaurant's gallery
+    ///     Adds additional images to the restaurant's gallery
     /// </summary>
     /// <param name="id"></param>
     /// <param name="files"></param>
@@ -142,7 +138,7 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
 
 
     /// <summary>
-    /// Delete an image from the restaurant's gallery
+    ///     Delete an image from the restaurant's gallery
     /// </summary>
     /// <param name="id"></param>
     /// <param name="imageId"></param>
@@ -168,11 +164,12 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
 
         var result = await restaurantsService.DeleteImage(restaurantQuery.Value.Id, imageId);
-        if (result.IsFailure) return result.Error.Code switch
-        {
-            "RecordNotFound" => NotFound(result.Error),
-            _ => BadRequest(result.Error)
-        };
+        if (result.IsFailure)
+            return result.Error.Code switch
+            {
+                "RecordNotFound" => NotFound(result.Error),
+                _ => BadRequest(result.Error)
+            };
         return Ok(new GenericResponse { Message = "Image deleted successfully" });
     }
 }

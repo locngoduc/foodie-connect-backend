@@ -1,17 +1,13 @@
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
-using foodie_connect_backend.SocialLinks;
-using foodie_connect_backend.SocialLinks.Dtos;
 using foodie_connect_backend.Uploader;
 using Microsoft.EntityFrameworkCore;
 
 namespace foodie_connect_backend.Restaurants;
 
 public class RestaurantsService(
-    IUploaderService uploaderService, 
+    IUploaderService uploaderService,
     ApplicationDbContext dbContext)
 {
     public async Task<Result<Restaurant>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
@@ -46,6 +42,32 @@ public class RestaurantsService(
         }
     }
 
+    public async Task<Result<Restaurant>> UpdateRestaurant(string restaurantId, CreateRestaurantDto restaurant)
+    {
+        try
+        {
+            var result = await GetRestaurantById(restaurantId);
+            if (!result.IsSuccess) return Result<Restaurant>.Failure(AppError.RecordNotFound("Restaurant not found"));
+
+            var currRestaurant = result.Value;
+            currRestaurant.Name = restaurant.Name;
+            currRestaurant.Phone = restaurant.Phone;
+            currRestaurant.OpenTime = restaurant.OpenTime;
+            currRestaurant.CloseTime = restaurant.CloseTime;
+            currRestaurant.Address = restaurant.Address;
+            currRestaurant.Status = restaurant.Status;
+
+            await dbContext.Restaurants.AddAsync(currRestaurant);
+            await dbContext.SaveChangesAsync();
+            return Result<Restaurant>.Success(currRestaurant);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating restaurant: {ex.Message}");
+            return Result<Restaurant>.Failure(AppError.InternalError("Failed to update restaurant"));
+        }
+    }
+
     public async Task<Result<Restaurant>> GetRestaurantById(string id)
     {
         var restaurant = await dbContext.Restaurants
@@ -67,17 +89,17 @@ public class RestaurantsService(
         var imageOptions = new ImageFileOptions
         {
             PublicId = publicId,
-            Folder = !string.IsNullOrEmpty(folder) ? 
-                $"foodie/restaurants/{restaurantId}/{folder}" : 
-                $"foodie/restaurants/{restaurantId}/"
+            Folder = !string.IsNullOrEmpty(folder)
+                ? $"foodie/restaurants/{restaurantId}/{folder}"
+                : $"foodie/restaurants/{restaurantId}/"
         };
 
         var uploadResult = await uploaderService.UploadImageAsync(file, imageOptions);
         if (uploadResult.IsFailure)
             return Result<bool>.Failure(uploadResult.Error);
-        
+
         if (!restaurant.Images.Contains(uploadResult.Value)) restaurant.Images.Add(uploadResult.Value);
-        
+
         try
         {
             await dbContext.SaveChangesAsync();
