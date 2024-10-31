@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json.Serialization;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Heads;
 using foodie_connect_backend.Restaurants;
 using foodie_connect_backend.Sessions;
@@ -58,6 +59,13 @@ builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEm
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+
+Console.WriteLine("Im here");
+Console.WriteLine("Im here");
+Console.WriteLine("Im here");
+Console.WriteLine("Im here");
+Console.WriteLine("Im here");
+Console.WriteLine("Im here");
 // Register services
 builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
     .AddMailtrapSender(
@@ -65,6 +73,8 @@ builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email
         builder.Configuration["MAILTRAP_PASSWORD"],
         builder.Configuration["MAILTRAP_HOST"],
         int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port) ? port : null);
+builder.Services.AddScoped<IGeoCoderService, ReverseGeoCoder>(sp =>
+    new ReverseGeoCoder(builder.Configuration["GOOGLE_MAPS_API_KEY"]!));
 builder.Services.AddScoped<IUploaderService, CloudinaryUploader>();
 builder.Services.AddScoped<HeadsService>();
 builder.Services.AddScoped<UsersService>();

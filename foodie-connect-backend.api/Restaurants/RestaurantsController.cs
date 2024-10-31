@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Heads;
 using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
@@ -11,7 +12,10 @@ namespace foodie_connect_backend.Restaurants;
 
 [Route("v1/restaurants")]
 [ApiController]
-public class RestaurantsController(RestaurantsService restaurantsService, HeadsService headsService) : ControllerBase
+public class RestaurantsController(
+    RestaurantsService restaurantsService,
+    HeadsService headsService,
+    IGeoCoderService geoCoderService) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -45,9 +49,11 @@ public class RestaurantsController(RestaurantsService restaurantsService, HeadsS
     public async Task<ActionResult<Restaurant>> GetRestaurant([FromRoute] string id)
     {
         var result = await restaurantsService.GetRestaurantById(id);
+        var test = await geoCoderService.GetAddressAsync("123");
         if (result.IsFailure) return NotFound(result.Error);
         return Ok(result.Value);
     }
+
 
     /// <summary>
     ///     Update the restaurant's logo
