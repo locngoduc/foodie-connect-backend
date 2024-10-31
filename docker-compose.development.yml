@@ -5,23 +5,16 @@ services:
       dockerfile: foodie-connect-backend.api/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_HTTP_PORTS: 8080
-      ASPNETCORE_HTTPS_PORTS: 8081
+      ASPNETCORE_URLS: http://+:8080
       MAILTRAP_USERNAME: ${MAILTRAP_USERNAME}
       MAILTRAP_PASSWORD: ${MAILTRAP_PASSWORD}
       MAILTRAP_HOST: ${MAILTRAP_HOST}
       MAILTRAP_PORT: ${MAILTRAP_PORT}
       CLOUDINARY_URL: ${CLOUDINARY_URL}
-      ASPNETCORE_Kestrel__Certificates__Default__Password: ${CERTIFICATE_PASSWORD}
-      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       FRONTEND_URL: ${FRONTEND_URL}
     ports:
       - "8080:8080"
-      - "8081:8081"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${HOME}/.aspnet/https:/https:ro
         
   postgres:
     image: postgres:16.4
