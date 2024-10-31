@@ -27,4 +27,4 @@ RUN dotnet publish "./foodie-connect-backend.api.csproj" -c $BUILD_CONFIGURATION
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "foodie-connect-backend.dll"]
+ENTRYPOINT ["dotnet", "foodie-connect-backend.api.dll"]
