@@ -16,7 +16,6 @@ public class UsersService(
     IUploaderService uploaderService, 
     SignInManager<User> signInManager)
 {
-    private readonly List<string> _allowedAvatarExtensions = [".png", ".jpg", ".jpeg", ".webp"];
     public async Task<Result<User>> CreateUser(CreateUserDto user)
     {
         var newUser = new User

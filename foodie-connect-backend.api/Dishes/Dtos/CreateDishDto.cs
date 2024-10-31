@@ -4,11 +4,11 @@ namespace foodie_connect_backend.Dishes.Dtos;
 
 public record CreateDishDto
 {
-    [Required] public string Name { get; set; }
+    [Required] public string Name { get; set; } = null!;
 
     [MinLength(1)] public string Description { get; set; } = null!;
 
     public decimal Price { get; set; }
 
-    [Required] public string RestaurantId { get; set; }
+    [Required] public string RestaurantId { get; set; } = null!;
 }

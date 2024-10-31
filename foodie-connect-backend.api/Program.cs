@@ -45,12 +45,6 @@ builder.Services.AddAuthentication()
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("UserOnly", policy => policy.RequireClaim("UserType", "User"));
-    options.AddPolicy("HeadOnly", policy => policy.RequireClaim("UserType", "Head"));
-});
-
 builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEmail = true; })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddApiEndpoints();
