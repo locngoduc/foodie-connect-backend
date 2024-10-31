@@ -54,10 +54,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register services
-Console.WriteLine(builder.Configuration["MAILTRAP_USERNAME"]);
-Console.WriteLine(builder.Configuration["MAILTRAP_PASSWORD"]);
-Console.WriteLine(int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port2) ? port2 : null);
-Console.WriteLine(builder.Configuration["MAILTRAP_HOST"]);
 builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
     .AddMailtrapSender(
         builder.Configuration["MAILTRAP_USERNAME"],
@@ -71,6 +67,19 @@ builder.Services.AddScoped<SessionsService>();
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<RestaurantsService>();
 builder.Services.AddScoped<SocialLinksService>();
+
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", corsBuilder =>
+    {
+        Console.WriteLine(builder.Configuration["FRONTEND_URL"]);
+        corsBuilder.WithOrigins(builder.Configuration["FRONTEND_URL"]!)
+            .AllowCredentials()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -93,6 +102,8 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+app.UseCors("CorsPolicy");
 
 app.UseAuthentication();
 
