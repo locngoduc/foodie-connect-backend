@@ -21,6 +21,9 @@ public record CreateHeadDto()
     [EmailAddress]
     public string Email { get; init; } = null!;
     
+    /// <summary>
+    /// Password should contain at least one uppercase letter, one number and one special character
+    /// </summary>
     [Required]
     [MaxLength(64)]
     public string Password { get; init; } = null!;
