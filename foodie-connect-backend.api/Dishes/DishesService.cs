@@ -45,7 +45,7 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         {
             var result = await GetDishById(dishId);
             if (!result.IsSuccess)
-                return Result<Dish>.Failure(AppError.RecordNotFound("No dish is associated with this id"));
+                return result;
 
             var currDish = result.Value;
             currDish.Name = dish.Name;
@@ -59,6 +59,57 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         {
             Console.WriteLine($"Error updating dish: {ex.Message}");
             return Result<Dish>.Failure(AppError.InternalError("Failed to update dish"));
+        }
+    }
+
+    public async Task<Result<bool>> DeleteDish(string dishId)
+    {
+        try
+        {
+            var result = await GetDishById(dishId);
+            if (!result.IsSuccess)
+                return Result<bool>.Failure(AppError.RecordNotFound("No dish is associated with this id"));
+
+            var dish = result.Value;
+            dish.IsDeleted = true;
+            await dbContext.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return Result<bool>.Failure(AppError.InternalError("Failed to delete dish"));
+        }
+    }
+
+    public async Task<Result<bool>> UploadImage(string dishId, IFormFile file)
+    {
+        try
+        {
+            var result = await GetDishById(dishId);
+            if (!result.IsSuccess)
+                return Result<bool>.Failure(AppError.RecordNotFound("No dish is associated with this id"));
+
+            var dish = result.Value;
+
+            var imageOptions = new ImageFileOptions
+            {
+                PublicId = "image",
+                Folder = $"foodie/dishes/{dishId}/"
+            };
+
+            var uploadResult = await uploaderService.UploadImageAsync(file, imageOptions);
+            if (uploadResult.IsFailure)
+                return Result<bool>.Failure(uploadResult.Error);
+
+            dish.ImageId = uploadResult.Value;
+
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return Result<bool>.Failure(AppError.InternalError("Failed to upload image"));
         }
     }
 }
