@@ -47,7 +47,8 @@ builder.Services.AddAuthentication()
 
 builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEmail = true; })
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>().AddApiEndpoints();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddApiEndpoints();
 
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -73,7 +74,6 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", corsBuilder =>
     {
-        Console.WriteLine(builder.Configuration["FRONTEND_URL"]);
         corsBuilder.WithOrigins(builder.Configuration["FRONTEND_URL"]!)
             .AllowCredentials()
             .AllowAnyHeader()
