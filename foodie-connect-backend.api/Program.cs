@@ -60,13 +60,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
-Console.WriteLine("Im here");
-Console.WriteLine("Im here");
-Console.WriteLine("Im here");
-Console.WriteLine("Im here");
-Console.WriteLine("Im here");
-Console.WriteLine("Im here");
-// Register services
 builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
     .AddMailtrapSender(
         builder.Configuration["MAILTRAP_USERNAME"],
@@ -74,7 +67,7 @@ builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email
         builder.Configuration["MAILTRAP_HOST"],
         int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port) ? port : null);
 builder.Services.AddScoped<IGeoCoderService, ReverseGeoCoder>(sp =>
-    new ReverseGeoCoder(builder.Configuration["GOOGLE_MAPS_API_KEY"]!));
+    new ReverseGeoCoder(builder.Configuration["GOOGLE_APIKEY"]!));
 builder.Services.AddScoped<IUploaderService, CloudinaryUploader>();
 builder.Services.AddScoped<HeadsService>();
 builder.Services.AddScoped<UsersService>();

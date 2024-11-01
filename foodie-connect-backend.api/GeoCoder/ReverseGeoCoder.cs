@@ -29,7 +29,13 @@ public class ReverseGeoCoder : IGeoCoderService
 
             if (response.Status == Status.Ok && response.Results.Any())
             {
-                Console.WriteLine(response.Results.First().ToString());
+                foreach (var component in response.Results.First().AddressComponents)
+                {
+                    Console.WriteLine($"- Type: {string.Join(", ", component.Types)}");
+                    Console.WriteLine($"  Long Name: {component.LongName}");
+                    Console.WriteLine($"  Short Name: {component.ShortName}");
+                }
+
                 return response.Results.First();
             }
 

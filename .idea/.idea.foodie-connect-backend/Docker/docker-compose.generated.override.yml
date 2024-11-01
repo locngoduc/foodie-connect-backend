@@ -2,7 +2,7 @@
 services:
   foodie-backend:
     build:
-      context: "/home/solux/SourceCode/foodie-backend"
+      context: "/home/vaderngo/Projects/foodie-connect-backend"
       dockerfile: "foodie-connect-backend.api/Dockerfile"
       target: "base"
     command: []
@@ -14,7 +14,7 @@ services:
     image: "foodie-connect-backend.api:dev"
     ports: []
     volumes:
-    - "/home/solux/.nuget/packages:/home/app/.nuget/packages"
-    - "/home/solux/SourceCode/foodie-backend/foodie-connect-backend.api:/app:rw"
-    - "/home/solux/SourceCode/foodie-backend:/src:rw"
+    - "/home/vaderngo/Projects/foodie-connect-backend/foodie-connect-backend.api:/app:rw"
+    - "/home/vaderngo/Projects/foodie-connect-backend:/src:rw"
+    - "/home/vaderngo/.nuget/packages:/home/app/.nuget/packages"
     working_dir: "/app"
