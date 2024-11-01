@@ -11,11 +11,12 @@ services:
       MAILTRAP_HOST: ${MAILTRAP_HOST}
       MAILTRAP_PORT: ${MAILTRAP_PORT}
       CLOUDINARY_URL: ${CLOUDINARY_URL}
+      GOOGLE_APIKEY: ${GOOGLE_APIKEY}
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       FRONTEND_URL: ${FRONTEND_URL}
     ports:
       - "8080:8080"
-        
+
   postgres:
     image: postgres:16.4
     environment:
