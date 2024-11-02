@@ -1,18 +1,17 @@
-namespace foodie_connect_backend.Shared.Classes;
+namespace foodie_connect_backend.Shared.Classes.Errors;
 
-public class AppError(string _code, string _message)
+public sealed class AppError(string code, string message)
 {
-    public static readonly string RecordNotFoundCode = "RecordNotFound";
-    public static readonly string ValidationErrorCode = "ValidationError";
-    public static readonly string ConflictErrorCode = "Conflict";
-    public static readonly string InvalidCredentialErrorCode = "InvalidCredential";
-    public static readonly string BadTokenCode = "BadToken";
-    public static readonly string InternalErrorCode = "InternalError";
-    public static readonly string PermissionDeniedErrorCode = "PermissionDenied";
-    
+    public const string RecordNotFoundCode = "RecordNotFound";
+    public const string ValidationErrorCode = "ValidationError";
+    public const string ConflictErrorCode = "Conflict";
+    public const string InvalidCredentialErrorCode = "InvalidCredential";
+    public const string BadTokenCode = "BadToken";
+    public const string InternalErrorCode = "InternalError";
+
     public static readonly AppError None = new(string.Empty, string.Empty);
-    public string Code { get; private set; } = _code;
-    public string Message { get; private set; } = _message;
+    public string Code { get; private set; } = code;
+    public string Message { get; private set; } = message;
 
     public static AppError RecordNotFound(string message)
     {

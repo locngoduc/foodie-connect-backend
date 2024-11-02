@@ -1,5 +1,6 @@
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.SocialLinks.Dtos;
 using Microsoft.EntityFrameworkCore;
 

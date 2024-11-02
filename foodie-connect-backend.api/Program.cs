@@ -1,10 +1,12 @@
 using System.Reflection;
+using System.Text;
 using System.Text.Json.Serialization;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Heads;
 using foodie_connect_backend.Restaurants;
 using foodie_connect_backend.Sessions;
+using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.SocialLinks;
 using foodie_connect_backend.Uploader;
 using foodie_connect_backend.Users;
@@ -12,6 +14,7 @@ using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,16 +38,23 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddAuthentication()
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.Name = "access_token";
+        options.ExpireTimeSpan = TimeSpan.FromDays(14);
         options.Events = new CookieAuthenticationEvents
         {
             OnRedirectToLogin = context =>
             {
                 context.Response.StatusCode = 401;
+                context.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(AuthError.NotAuthenticated().ToJson()));
                 return Task.CompletedTask;
             },
             OnRedirectToAccessDenied = context =>
             {
                 context.Response.StatusCode = 403;
+                context.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(AuthError.NotAuthorized().ToJson()));
                 return Task.CompletedTask;
             }
         };

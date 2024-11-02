@@ -1,6 +1,6 @@
-namespace foodie_connect_backend.Shared.Classes;
+namespace foodie_connect_backend.Shared.Classes.Errors;
 
-public sealed class PromotionError(string Code, string Message) : AppError(Code, Message)
+public abstract class PromotionError
 {
     public static AppError PromotionNotFound(string promotionId)
     {

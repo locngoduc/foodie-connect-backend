@@ -1,6 +1,7 @@
 using FluentEmail.Core;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Verification;

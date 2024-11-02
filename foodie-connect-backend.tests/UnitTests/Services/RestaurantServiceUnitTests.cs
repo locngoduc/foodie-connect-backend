@@ -7,6 +7,7 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.Restaurants;
 using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Enums;
 using foodie_connect_backend.SocialLinks;
 using foodie_connect_backend.Uploader;

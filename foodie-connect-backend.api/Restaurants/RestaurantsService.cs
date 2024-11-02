@@ -2,6 +2,7 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Uploader;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite;
