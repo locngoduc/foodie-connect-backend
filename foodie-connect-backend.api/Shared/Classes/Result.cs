@@ -1,3 +1,5 @@
+using foodie_connect_backend.Shared.Classes.Errors;
+
 namespace foodie_connect_backend.Shared.Classes;
 
 public class Result<T>

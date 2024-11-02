@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Dtos;
 using foodie_connect_backend.Users.Dtos;
 using Microsoft.AspNetCore.Authorization;

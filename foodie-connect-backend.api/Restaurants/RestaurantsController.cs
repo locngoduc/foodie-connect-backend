@@ -4,6 +4,7 @@ using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Heads;
 using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

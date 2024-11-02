@@ -2,6 +2,7 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using FluentEmail.Core;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 
 namespace foodie_connect_backend.Uploader;
 

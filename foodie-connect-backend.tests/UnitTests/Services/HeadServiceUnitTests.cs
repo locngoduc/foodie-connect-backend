@@ -4,6 +4,7 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.Heads;
 using foodie_connect_backend.Heads.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Dtos;
 using foodie_connect_backend.Uploader;
 using foodie_connect_backend.Verification;
