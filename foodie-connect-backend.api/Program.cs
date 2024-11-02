@@ -42,6 +42,7 @@ builder.Services.AddAuthentication()
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.None;
         options.Cookie.Name = "access_token";
+        options.Cookie.Expiration = TimeSpan.FromDays(14);
         options.Events = new CookieAuthenticationEvents
         {
             OnRedirectToLogin = context =>
