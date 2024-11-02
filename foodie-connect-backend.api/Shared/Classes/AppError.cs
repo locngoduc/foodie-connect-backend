@@ -8,7 +8,8 @@ public class AppError(string _code, string _message)
     public static readonly string InvalidCredentialErrorCode = "InvalidCredential";
     public static readonly string BadTokenCode = "BadToken";
     public static readonly string InternalErrorCode = "InternalError";
-
+    public static readonly string PermissionDeniedErrorCode = "PermissionDenied";
+    
     public static readonly AppError None = new(string.Empty, string.Empty);
     public string Code { get; private set; } = _code;
     public string Message { get; private set; } = _message;

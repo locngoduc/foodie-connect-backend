@@ -1,14 +1,19 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Uploader;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 
 namespace foodie_connect_backend.Restaurants;
 
 public class RestaurantsService(
     IUploaderService uploaderService,
-    ApplicationDbContext dbContext)
+    ApplicationDbContext dbContext,
+    IGeoCoderService geoCoderService
+    )
 {
     public async Task<Result<Restaurant>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
     {
@@ -21,7 +26,6 @@ public class RestaurantsService(
                 Phone = restaurant.Phone,
                 OpenTime = restaurant.OpenTime,
                 CloseTime = restaurant.CloseTime,
-                Address = restaurant.Address,
                 Status = restaurant.Status,
                 HeadId = head.Id
             };
@@ -54,7 +58,6 @@ public class RestaurantsService(
             currRestaurant.Phone = restaurant.Phone;
             currRestaurant.OpenTime = restaurant.OpenTime;
             currRestaurant.CloseTime = restaurant.CloseTime;
-            currRestaurant.Address = restaurant.Address;
             currRestaurant.Status = restaurant.Status;
 
             await dbContext.Restaurants.AddAsync(currRestaurant);
@@ -174,4 +177,5 @@ public class RestaurantsService(
 
         return Result<bool>.Success(true);
     }
+
 }

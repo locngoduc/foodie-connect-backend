@@ -75,7 +75,6 @@ public class RestaurantsServiceTests
             Id = "rest1",
             Name = "Test Restaurant",
             HeadId = "user1",
-            Address = "123 Test St",
             Phone = "1234567890",
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
@@ -113,7 +112,6 @@ public class RestaurantsServiceTests
             Name = "Test Restaurant",
             Images = new List<string>(),
             Phone = "1234567890",
-            Address = "123 Test St",
             HeadId = "user1"
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
@@ -150,7 +148,6 @@ public class RestaurantsServiceTests
             Id = restaurantId,
             Name = "Test Restaurant",
             Images = new List<string> { imageId },
-            Address = "123 Test St",
             Phone = "1234567890",
             HeadId = "user1"
         };
@@ -183,7 +180,6 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
-            Address = "123 Test St",
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -228,7 +224,6 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
-            Address = "123 Test St",
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -262,7 +257,6 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
-            Address = "123 Test St",
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -296,7 +290,6 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
-            Address = "123 Test St",
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -330,7 +323,6 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
-            Address = "123 Test St",
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();

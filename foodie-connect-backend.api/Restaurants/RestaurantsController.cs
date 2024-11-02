@@ -14,8 +14,8 @@ namespace foodie_connect_backend.Restaurants;
 [ApiController]
 public class RestaurantsController(
     RestaurantsService restaurantsService,
-    HeadsService headsService,
-    IGeoCoderService geoCoderService) : ControllerBase
+    HeadsService headsService
+    ) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
@@ -49,7 +49,6 @@ public class RestaurantsController(
     public async Task<ActionResult<Restaurant>> GetRestaurant([FromRoute] string id)
     {
         var result = await restaurantsService.GetRestaurantById(id);
-        var test = await geoCoderService.GetAddressAsync("123");
         if (result.IsFailure) return NotFound(result.Error);
         return Ok(result.Value);
     }
@@ -178,4 +177,6 @@ public class RestaurantsController(
             };
         return Ok(new GenericResponse { Message = "Image deleted successfully" });
     }
+
+
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using foodie_connect_backend.Data;
 
@@ -21,6 +22,7 @@ namespace foodie_connect_backend.Migrations
                 .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -160,21 +162,99 @@ namespace foodie_connect_backend.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("AdministrativeAreaLevel1")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("text");
+
+                    b.Property<string>("AdministrativeAreaLevel2")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("AdministrativeAreaLevel3")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Airport")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2024, 11, 2, 18, 7, 36, 430, DateTimeKind.Utc).AddTicks(5387));
+
+                    b.Property<string>("FormattedAddress")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Intersection")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Locality")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NaturalFeature")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Neighborhood")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Park")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlusCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PointOfInterest")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PoliticalEntity")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Premise")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Route")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("StreetAddress")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("Sublocality")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Subpremise")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValue(new DateTime(2024, 11, 2, 18, 7, 36, 430, DateTimeKind.Utc).AddTicks(5734));
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Areas");
                 });
@@ -279,8 +359,11 @@ namespace foodie_connect_backend.Migrations
                     b.Property<string>("DishId")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("ExpireAt")
+                    b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -312,11 +395,6 @@ namespace foodie_connect_backend.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
                     b.Property<string>("AreaId")
                         .HasColumnType("text");
 
@@ -340,6 +418,10 @@ namespace foodie_connect_backend.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<Point>("Location")
+                        .IsRequired()
+                        .HasColumnType("geography (point)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -362,6 +444,10 @@ namespace foodie_connect_backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AreaId");
+
+                    b.HasIndex("Location");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Location"), "GIST");
 
                     b.HasIndex("Name")
                         .IsUnique();

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -7,19 +8,41 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace foodie_connect_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalCreate : Migration
+    public partial class UpdateAreaModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:PostgresExtension:postgis", ",,");
+
             migrationBuilder.CreateTable(
                 name: "Areas",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    FormattedAddress = table.Column<string>(type: "text", nullable: false),
+                    StreetAddress = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Route = table.Column<string>(type: "text", nullable: false),
+                    Intersection = table.Column<string>(type: "text", nullable: false),
+                    PoliticalEntity = table.Column<string>(type: "text", nullable: false),
+                    Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    AdministrativeAreaLevel1 = table.Column<string>(type: "text", nullable: false),
+                    AdministrativeAreaLevel2 = table.Column<string>(type: "text", nullable: false),
+                    AdministrativeAreaLevel3 = table.Column<string>(type: "text", nullable: false),
+                    Locality = table.Column<string>(type: "text", nullable: false),
+                    Sublocality = table.Column<string>(type: "text", nullable: false),
+                    Neighborhood = table.Column<string>(type: "text", nullable: false),
+                    Premise = table.Column<string>(type: "text", nullable: false),
+                    Subpremise = table.Column<string>(type: "text", nullable: false),
+                    PostalCode = table.Column<string>(type: "text", nullable: false),
+                    PlusCode = table.Column<string>(type: "text", nullable: false),
+                    NaturalFeature = table.Column<string>(type: "text", nullable: false),
+                    Airport = table.Column<string>(type: "text", nullable: false),
+                    Park = table.Column<string>(type: "text", nullable: false),
+                    PointOfInterest = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 2, 18, 7, 36, 430, DateTimeKind.Utc).AddTicks(5387)),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 2, 18, 7, 36, 430, DateTimeKind.Utc).AddTicks(5734))
                 },
                 constraints: table =>
                 {
@@ -91,13 +114,14 @@ namespace foodie_connect_backend.Migrations
                     Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     OpenTime = table.Column<int>(type: "integer", nullable: false),
                     CloseTime = table.Column<int>(type: "integer", nullable: false),
-                    Address = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     Phone = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
                     Images = table.Column<string[]>(type: "text[]", maxLength: 64, nullable: false, defaultValue: new string[0]),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     AreaId = table.Column<string>(type: "text", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    Location = table.Column<Point>(type: "geography (point)", nullable: false),
                     HeadId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -224,10 +248,12 @@ namespace foodie_connect_backend.Migrations
                     Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     ImageId = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
                     Price = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RestaurantId = table.Column<string>(type: "text", nullable: true)
+                    RestaurantId = table.Column<string>(type: "text", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -246,6 +272,7 @@ namespace foodie_connect_backend.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     RestaurantId = table.Column<string>(type: "text", nullable: true)
@@ -313,9 +340,10 @@ namespace foodie_connect_backend.Migrations
                     Name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     Target = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     BannerUrl = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    ExpireAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiredAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
                     RestaurantId = table.Column<string>(type: "text", nullable: true),
                     DishId = table.Column<string>(type: "text", nullable: true)
                 },
@@ -345,7 +373,10 @@ namespace foodie_connect_backend.Migrations
                     Rating = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DishId = table.Column<string>(type: "text", nullable: true)
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    DishId = table.Column<string>(type: "text", nullable: true),
+                    RestaurantId = table.Column<string>(type: "text", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -356,13 +387,13 @@ namespace foodie_connect_backend.Migrations
                         principalTable: "Dishes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Restaurants_RestaurantId",
+                        column: x => x.RestaurantId,
+                        principalTable: "Restaurants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Areas_Name",
-                table: "Areas",
-                column: "Name",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -433,6 +464,12 @@ namespace foodie_connect_backend.Migrations
                 column: "AreaId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Restaurants_Location",
+                table: "Restaurants",
+                column: "Location")
+                .Annotation("Npgsql:IndexMethod", "GIST");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Restaurants_Name",
                 table: "Restaurants",
                 column: "Name",
@@ -442,6 +479,11 @@ namespace foodie_connect_backend.Migrations
                 name: "IX_Reviews_DishId",
                 table: "Reviews",
                 column: "DishId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_RestaurantId",
+                table: "Reviews",
+                column: "RestaurantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Services_RestaurantId",

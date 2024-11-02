@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Enums;
+using NetTopologySuite.Geometries;
 
 namespace foodie_connect_backend.Data;
 
@@ -14,8 +16,6 @@ public class Restaurant
     [Required] public int OpenTime { get; set; }
 
     [Required] public int CloseTime { get; set; }
-
-    [Required] [MaxLength(256)] public string Address { get; set; } = null!;
 
     public RestaurantStatus Status { get; set; } = RestaurantStatus.Open;
 
@@ -36,6 +36,10 @@ public class Restaurant
 
     public bool IsDeleted { get; set; } = false;
 
+    [Required]
+    [Column(TypeName="geography (point)")]
+    public Point Location { get; set; }
+    
     [JsonIgnore] public virtual Area? Area { get; set; }
 
     [JsonIgnore] public virtual ICollection<Dish> Dishes { get; set; } = new List<Dish>();

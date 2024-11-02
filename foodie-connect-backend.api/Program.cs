@@ -57,7 +57,10 @@ builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEm
 
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        x => x.UseNetTopologySuite()
+    ));
 
 
 builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
@@ -66,6 +69,7 @@ builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email
         builder.Configuration["MAILTRAP_PASSWORD"],
         builder.Configuration["MAILTRAP_HOST"],
         int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port) ? port : null);
+
 builder.Services.AddScoped<IGeoCoderService, ReverseGeoCoder>(sp =>
     new ReverseGeoCoder(builder.Configuration["GOOGLE_APIKEY"]!));
 builder.Services.AddScoped<IUploaderService, CloudinaryUploader>();

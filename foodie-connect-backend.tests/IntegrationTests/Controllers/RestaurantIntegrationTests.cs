@@ -39,7 +39,6 @@ public class RestaurantsIntegrationTests(FoodieWebApplicationFactory<Program> fa
         
         Assert.NotNull(restaurant);
         Assert.Equal(createDto.Name, restaurant.Name);
-        Assert.Equal(createDto.Address, restaurant.Address);
         Assert.Equal(restaurantOwner.User.Id, restaurant.HeadId);
         
         // Verify Location header
@@ -80,7 +79,6 @@ public class RestaurantsIntegrationTests(FoodieWebApplicationFactory<Program> fa
         Assert.NotNull(restaurant);
         Assert.Equal(createdRestaurant.Id, restaurant.Id);
         Assert.Equal(createDto.Name, restaurant.Name);
-        Assert.Equal(createDto.Address, restaurant.Address);
         Assert.Equal(restaurantOwner.User.Id, createdRestaurant.HeadId);
     }
     

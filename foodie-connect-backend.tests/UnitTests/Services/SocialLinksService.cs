@@ -42,7 +42,6 @@ public class SocialLinksServiceTests
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
-            Address = "123 Main Street",
             SocialLinks = new List<SocialLink>
             {
                 new() { Id = "1", Platform = SocialMediaPlatform.Facebook, Url = "fb.com/test", RestaurantId = restaurantId },
@@ -90,7 +89,6 @@ public class SocialLinksServiceTests
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
-            Address = "123 Main Street",
             SocialLinks = new List<SocialLink>()
         };
     
@@ -131,7 +129,6 @@ public class SocialLinksServiceTests
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
-            Address = "123 Main Street",
             SocialLinks = new List<SocialLink>
             {
                 new() { Id = "1", Platform = SocialMediaPlatform.Twitter, Url = "twitter.com/existing", RestaurantId = restaurantId }
@@ -168,7 +165,6 @@ public class SocialLinksServiceTests
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
-            Address = "123 Main Street",
             SocialLinks = new List<SocialLink>
             {
                 new() { Id = socialLinkId, Platform = SocialMediaPlatform.Twitter, Url = "twitter.com/old", RestaurantId = restaurantId }
@@ -213,7 +209,6 @@ public class SocialLinksServiceTests
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
-            Address = "123 Main Street",
             SocialLinks = new List<SocialLink>
             {
                 new() { Id = socialLinkId, Platform = SocialMediaPlatform.Twitter, Url = "twitter.com/test", RestaurantId = restaurantId }
@@ -265,7 +260,6 @@ public class SocialLinksServiceTests
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
-            Address = "123 Main Street",
             SocialLinks = new List<SocialLink>()
         };
     
