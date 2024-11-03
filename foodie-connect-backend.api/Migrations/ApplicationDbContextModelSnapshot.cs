@@ -163,96 +163,77 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("AdministrativeAreaLevel1")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("AdministrativeAreaLevel2")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("AdministrativeAreaLevel3")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Airport")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Country")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2024, 11, 2, 18, 7, 36, 430, DateTimeKind.Utc).AddTicks(5387));
+                        .HasDefaultValue(new DateTime(2024, 11, 3, 2, 18, 7, 492, DateTimeKind.Utc).AddTicks(7416));
 
                     b.Property<string>("FormattedAddress")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Intersection")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Locality")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("NaturalFeature")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Neighborhood")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Park")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PlusCode")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PointOfInterest")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PoliticalEntity")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("PostalCode")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Premise")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Route")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("StreetAddress")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)");
 
                     b.Property<string>("Sublocality")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Subpremise")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2024, 11, 2, 18, 7, 36, 430, DateTimeKind.Utc).AddTicks(5734));
+                        .HasDefaultValue(new DateTime(2024, 11, 3, 2, 18, 7, 492, DateTimeKind.Utc).AddTicks(7923));
 
                     b.HasKey("Id");
 
@@ -420,7 +401,7 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<Point>("Location")
                         .IsRequired()
-                        .HasColumnType("geography (point)");
+                        .HasColumnType("geography");
 
                     b.Property<string>("Name")
                         .IsRequired()

@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace foodie_connect_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateAreaModel : Migration
+    public partial class UpdateToSpatialDatabase : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,27 +22,27 @@ namespace foodie_connect_backend.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     FormattedAddress = table.Column<string>(type: "text", nullable: false),
-                    StreetAddress = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
-                    Route = table.Column<string>(type: "text", nullable: false),
-                    Intersection = table.Column<string>(type: "text", nullable: false),
-                    PoliticalEntity = table.Column<string>(type: "text", nullable: false),
-                    Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    AdministrativeAreaLevel1 = table.Column<string>(type: "text", nullable: false),
-                    AdministrativeAreaLevel2 = table.Column<string>(type: "text", nullable: false),
-                    AdministrativeAreaLevel3 = table.Column<string>(type: "text", nullable: false),
-                    Locality = table.Column<string>(type: "text", nullable: false),
-                    Sublocality = table.Column<string>(type: "text", nullable: false),
-                    Neighborhood = table.Column<string>(type: "text", nullable: false),
-                    Premise = table.Column<string>(type: "text", nullable: false),
-                    Subpremise = table.Column<string>(type: "text", nullable: false),
-                    PostalCode = table.Column<string>(type: "text", nullable: false),
-                    PlusCode = table.Column<string>(type: "text", nullable: false),
-                    NaturalFeature = table.Column<string>(type: "text", nullable: false),
-                    Airport = table.Column<string>(type: "text", nullable: false),
-                    Park = table.Column<string>(type: "text", nullable: false),
-                    PointOfInterest = table.Column<string>(type: "text", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 2, 18, 7, 36, 430, DateTimeKind.Utc).AddTicks(5387)),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 2, 18, 7, 36, 430, DateTimeKind.Utc).AddTicks(5734))
+                    StreetAddress = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    Route = table.Column<string>(type: "text", nullable: true),
+                    Intersection = table.Column<string>(type: "text", nullable: true),
+                    PoliticalEntity = table.Column<string>(type: "text", nullable: true),
+                    Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    AdministrativeAreaLevel1 = table.Column<string>(type: "text", nullable: true),
+                    AdministrativeAreaLevel2 = table.Column<string>(type: "text", nullable: true),
+                    AdministrativeAreaLevel3 = table.Column<string>(type: "text", nullable: true),
+                    Locality = table.Column<string>(type: "text", nullable: true),
+                    Sublocality = table.Column<string>(type: "text", nullable: true),
+                    Neighborhood = table.Column<string>(type: "text", nullable: true),
+                    Premise = table.Column<string>(type: "text", nullable: true),
+                    Subpremise = table.Column<string>(type: "text", nullable: true),
+                    PostalCode = table.Column<string>(type: "text", nullable: true),
+                    PlusCode = table.Column<string>(type: "text", nullable: true),
+                    NaturalFeature = table.Column<string>(type: "text", nullable: true),
+                    Airport = table.Column<string>(type: "text", nullable: true),
+                    Park = table.Column<string>(type: "text", nullable: true),
+                    PointOfInterest = table.Column<string>(type: "text", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 3, 2, 18, 7, 492, DateTimeKind.Utc).AddTicks(7416)),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 3, 2, 18, 7, 492, DateTimeKind.Utc).AddTicks(7923))
                 },
                 constraints: table =>
                 {
@@ -121,7 +121,7 @@ namespace foodie_connect_backend.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     AreaId = table.Column<string>(type: "text", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    Location = table.Column<Point>(type: "geography (point)", nullable: false),
+                    Location = table.Column<Point>(type: "geography", nullable: false),
                     HeadId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
