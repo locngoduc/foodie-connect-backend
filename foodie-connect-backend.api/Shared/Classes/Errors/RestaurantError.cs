@@ -1,14 +1,8 @@
 using foodie_connect_backend.Shared.Classes.Errors;
 
-namespace foodie_connect_backend.Shared.Classes;
+namespace foodie_connect_backend.Shared.Classes.Errors;
 
-public sealed class RestaurantError(string Code, string Message) : AppError(Code, Message)
+public abstract class RestaurantError
 {
-    public static AppError PermissionDenied(string permissionId)
-    {
-        return new AppError(
-            PermissionDeniedErrorCode,
-            "You do not have permission to access this restaurant."
-        );
-    }
+    
 }

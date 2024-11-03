@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace foodie_connect_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateToSpatialDatabase : Migration
+    public partial class UpdateToSpatialDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -41,8 +41,8 @@ namespace foodie_connect_backend.Migrations
                     Airport = table.Column<string>(type: "text", nullable: true),
                     Park = table.Column<string>(type: "text", nullable: true),
                     PointOfInterest = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 3, 2, 18, 7, 492, DateTimeKind.Utc).AddTicks(7416)),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 3, 2, 18, 7, 492, DateTimeKind.Utc).AddTicks(7923))
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 3, 4, 48, 34, 958, DateTimeKind.Utc).AddTicks(7059)),
+                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValue: new DateTime(2024, 11, 3, 4, 48, 34, 958, DateTimeKind.Utc).AddTicks(7448))
                 },
                 constraints: table =>
                 {
@@ -121,7 +121,7 @@ namespace foodie_connect_backend.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     AreaId = table.Column<string>(type: "text", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    Location = table.Column<Point>(type: "geography", nullable: false),
+                    Location = table.Column<Point>(type: "geography (Point,4326)", nullable: false),
                     HeadId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -462,12 +462,6 @@ namespace foodie_connect_backend.Migrations
                 name: "IX_Restaurants_AreaId",
                 table: "Restaurants",
                 column: "AreaId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Restaurants_Location",
-                table: "Restaurants",
-                column: "Location")
-                .Annotation("Npgsql:IndexMethod", "GIST");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Restaurants_Name",

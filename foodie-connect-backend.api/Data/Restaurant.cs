@@ -37,7 +37,7 @@ public class Restaurant
     public bool IsDeleted { get; set; } = false;
 
     [Required]
-    [Column(TypeName="geography (point)")]
+    [JsonIgnore]
     public Point Location { get; set; }
     
     [JsonIgnore] public virtual Area? Area { get; set; }

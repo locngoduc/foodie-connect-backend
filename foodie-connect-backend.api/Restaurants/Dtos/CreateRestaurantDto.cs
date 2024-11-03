@@ -11,6 +11,8 @@ public record CreateRestaurantDto
 
     public int CloseTime { get; set; } = 22;
 
+    public string LatitudeLongitude { get; set; } = null!;
+    
     public RestaurantStatus Status { get; set; } = RestaurantStatus.Open;
 
     [Required]

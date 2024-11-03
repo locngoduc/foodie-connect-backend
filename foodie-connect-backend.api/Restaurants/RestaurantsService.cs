@@ -1,3 +1,4 @@
+using foodie_connect_backend.Areas;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Restaurants.Dtos;
@@ -16,45 +17,91 @@ public class RestaurantsService(
     IGeoCoderService geoCoderService
     )
 {
-    public async Task<Result<Restaurant>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
+    private RestaurantResponseDto ToResponseDto(Restaurant restaurant)
     {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync();
-        try
+        return new RestaurantResponseDto
         {
-            var newRestaurant = new Restaurant
-            {
-                Name = restaurant.Name,
-                Phone = restaurant.Phone,
-                OpenTime = restaurant.OpenTime,
-                CloseTime = restaurant.CloseTime,
-                Status = restaurant.Status,
-                HeadId = head.Id
-            };
-
-            await dbContext.Restaurants.AddAsync(newRestaurant);
-            await dbContext.SaveChangesAsync();
-
-
-            await transaction.CommitAsync();
-
-            return Result<Restaurant>.Success(newRestaurant);
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            Console.WriteLine($"Error creating restaurant: {ex.Message}");
-            return Result<Restaurant>.Failure(AppError.InternalError("Failed to create restaurant"));
-        }
+            Id = restaurant.Id,
+            Name = restaurant.Name,
+            OpenTime = restaurant.OpenTime,
+            CloseTime = restaurant.CloseTime,
+            Status = restaurant.Status,
+            SocialLinks = restaurant.SocialLinks,
+            Phone = restaurant.Phone,
+            Images = restaurant.Images,
+            CreatedAt = restaurant.CreatedAt,
+            FormattedAddress = restaurant.Area?.FormattedAddress,
+            Latitude = restaurant.Location?.Y ?? 0,    
+            Longitude = restaurant.Location?.X ?? 0,   
+            HeadId = restaurant.HeadId
+        };
     }
+    
+  public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
+{
+    await using var transaction = await dbContext.Database.BeginTransactionAsync();
+    try
+    {
+        var coordinates = restaurant.LatitudeLongitude.Split(',');
+
+        if (coordinates.Length != 2 ||
+            !double.TryParse(coordinates[0], System.Globalization.NumberStyles.Float, 
+                System.Globalization.CultureInfo.InvariantCulture, out double latitude) ||
+            !double.TryParse(coordinates[1], System.Globalization.NumberStyles.Float, 
+                System.Globalization.CultureInfo.InvariantCulture, out double longitude))
+        {
+            return Result<RestaurantResponseDto>.Failure(AppError.Conflict("Invalid coordinate format"));
+        }
+
+        var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
+
+        Console.WriteLine($"Creating restaurant {restaurant.Name}...");
+        Console.WriteLine(locationPoint);
+
+        var newRestaurant = new Restaurant
+        {
+            Name = restaurant.Name,
+            Phone = restaurant.Phone,
+            OpenTime = restaurant.OpenTime,
+            CloseTime = restaurant.CloseTime,
+            Status = restaurant.Status,
+            HeadId = head.Id,
+            Location = locationPoint // Assigning the location
+        };
+        
+        var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
+        if (resultArea.IsFailure)
+            return Result<RestaurantResponseDto>.Failure(AppError.InternalError("Error occurred while creating a new area."));
+
+        await dbContext.Areas.AddAsync(resultArea.Value);
+
+        newRestaurant.AreaId = resultArea.Value.Id;
+
+        await dbContext.Restaurants.AddAsync(newRestaurant);
+        await dbContext.SaveChangesAsync();
+
+        await transaction.CommitAsync();
+    
+        var response = ToResponseDto(newRestaurant);
+        return Result<RestaurantResponseDto>.Success(response);
+    }
+    catch (Exception ex)
+    {
+        await transaction.RollbackAsync();
+        Console.WriteLine($"Error creating restaurant: {ex.Message}");
+        return Result<RestaurantResponseDto>.Failure(AppError.InternalError("Failed to create restaurant"));
+    }
+}
+
 
     public async Task<Result<Restaurant>> UpdateRestaurant(string restaurantId, CreateRestaurantDto restaurant)
     {
         try
         {
-            var result = await GetRestaurantById(restaurantId);
-            if (!result.IsSuccess) return Result<Restaurant>.Failure(AppError.RecordNotFound("Restaurant not found"));
+            var result = await dbContext.Restaurants.FindAsync(restaurantId);   
+            if (result == null) return Result<Restaurant>.Failure(AppError.RecordNotFound("Restaurant not found"));
 
-            var currRestaurant = result.Value;
+            var currRestaurant = result;
             currRestaurant.Name = restaurant.Name;
             currRestaurant.Phone = restaurant.Phone;
             currRestaurant.OpenTime = restaurant.OpenTime;
@@ -72,15 +119,18 @@ public class RestaurantsService(
         }
     }
 
-    public async Task<Result<Restaurant>> GetRestaurantById(string id)
+    public async Task<Result<RestaurantResponseDto>> GetRestaurantById(string id)
     {
         var restaurant = await dbContext.Restaurants
             .Include(r => r.SocialLinks)
+            .Include(r=>r.Area)
             .FirstOrDefaultAsync(r => r.Id == id);
 
+        
         if (restaurant == null)
-            return Result<Restaurant>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
-        return Result<Restaurant>.Success(restaurant);
+            return Result<RestaurantResponseDto>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
+        var response = ToResponseDto(restaurant);
+        return Result<RestaurantResponseDto>.Success(response);
     }
 
     private async Task<Result<bool>> UploadImage(string restaurantId, IFormFile file, string publicId,

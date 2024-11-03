@@ -181,7 +181,7 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2024, 11, 3, 2, 18, 7, 492, DateTimeKind.Utc).AddTicks(7416));
+                        .HasDefaultValue(new DateTime(2024, 11, 3, 4, 48, 34, 958, DateTimeKind.Utc).AddTicks(7059));
 
                     b.Property<string>("FormattedAddress")
                         .IsRequired()
@@ -233,7 +233,7 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2024, 11, 3, 2, 18, 7, 492, DateTimeKind.Utc).AddTicks(7923));
+                        .HasDefaultValue(new DateTime(2024, 11, 3, 4, 48, 34, 958, DateTimeKind.Utc).AddTicks(7448));
 
                     b.HasKey("Id");
 
@@ -401,7 +401,7 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<Point>("Location")
                         .IsRequired()
-                        .HasColumnType("geography");
+                        .HasColumnType("geography (Point,4326)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -425,10 +425,6 @@ namespace foodie_connect_backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AreaId");
-
-                    b.HasIndex("Location");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Location"), "GIST");
 
                     b.HasIndex("Name")
                         .IsUnique();

@@ -47,7 +47,7 @@ public class RestaurantsController(
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<Restaurant>> GetRestaurant([FromRoute] string id)
+    public async Task<ActionResult<RestaurantResponseDto>> GetRestaurant([FromRoute] string id)
     {
         var result = await restaurantsService.GetRestaurantById(id);
         if (result.IsFailure) return NotFound(result.Error);

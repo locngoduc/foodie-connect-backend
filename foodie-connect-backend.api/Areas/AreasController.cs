@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using foodie_connect_backend.Area.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace foodie_connect_backend.Areas;
@@ -25,8 +26,8 @@ public class AreasController(
                     return Conflict(result.Error);
                 }
 
-                if (result.Error.Code == AppError.PermissionDeniedErrorCode)
-                    return Forbid();
+                // if (result.Error.Code == AppError.PermissionDeniedErrorCode)
+                //     return Forbid();
                 return BadRequest(result.Error);
             }
         }

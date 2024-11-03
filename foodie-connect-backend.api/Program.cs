@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using foodie_connect_backend.Areas;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Heads;
@@ -19,13 +20,16 @@ using NuGet.Protocol;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options => { options.SuppressMapClientErrors = true; })
+    .ConfigureApiBehaviorOptions(options => 
+    { 
+        options.SuppressMapClientErrors = true; 
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals;
     });
-;
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -39,8 +43,8 @@ builder.Services.AddAuthentication()
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.None; // change to none for testing 
+        options.Cookie.SameSite = SameSiteMode.Lax; // change to Lax for testing
         options.Cookie.Name = "access_token";
         options.ExpireTimeSpan = TimeSpan.FromDays(14);
         options.Events = new CookieAuthenticationEvents
@@ -88,6 +92,7 @@ builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<SessionsService>();
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<RestaurantsService>();
+builder.Services.AddScoped<AreasService>();
 builder.Services.AddScoped<SocialLinksService>();
 
 // Configure CORS

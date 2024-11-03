@@ -3,6 +3,7 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.GeoCoder;
 using foodie_connect_backend.Restaurants;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using NetTopologySuite;
 using NetTopologySuite.Geometries;
 
@@ -17,11 +18,11 @@ public class AreasService(
     {
         try
         {
-            var restaurant = await restaurantsService.GetRestaurantById(createAreaDto.RestaurantId);
-            if(!restaurant.IsSuccess)
+            var restaurant = await dbContext.Restaurants.FindAsync(createAreaDto.RestaurantId);
+            if(restaurant == null)
                 return Result<Data.Area>.Failure(AppError.RecordNotFound("No restaurant is associated with this restaurantId."));
-            if(restaurant.Value.HeadId != userId)
-                return Result<Data.Area>.Failure(RestaurantError.PermissionDenied(userId));
+            if(restaurant.HeadId != userId)
+                return Result<Data.Area>.Failure(AppError.InternalError("User does not belong to this restaurant."));
             
             var coordinates = createAreaDto.LatitudeLongitude.Split(',');
             if (coordinates.Length != 2 || 
@@ -36,9 +37,8 @@ public class AreasService(
                 return Result<Data.Area>.Failure(AppError.InternalError("Error occured while creating a new area."));
             await dbContext.Areas.AddAsync(resultArea.Value);
             
-            restaurant.Value.AreaId = resultArea.Value.Id;
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
-            restaurant.Value.Location = geometryFactory.CreatePoint(new Coordinate(longitude, latitude));
+            restaurant.Location = geometryFactory.CreatePoint(new Coordinate(longitude, latitude));
             
             await dbContext.SaveChangesAsync(); 
             return Result<Data.Area>.Success(resultArea.Value);

@@ -34,34 +34,50 @@ public class ApplicationDbContext : IdentityDbContext<User>
             entity.Property(e => e.FormattedAddress)
                 .IsRequired();
 
+            // Optional fields with MaxLength
             entity.Property(e => e.StreetAddress)
-                .IsRequired()
-                .HasMaxLength(255);
+                .HasMaxLength(255)
+                .IsRequired(false);
 
             entity.Property(e => e.Country)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            entity.Property(e => e.AdministrativeAreaLevel1)
-                .IsRequired();
+                .HasMaxLength(100)
+                .IsRequired(false);
 
             // Optional fields
-            entity.Property(e => e.Route);
-            entity.Property(e => e.Intersection);
-            entity.Property(e => e.PoliticalEntity);
-            entity.Property(e => e.AdministrativeAreaLevel2);
-            entity.Property(e => e.AdministrativeAreaLevel3);
-            entity.Property(e => e.Locality);
-            entity.Property(e => e.Sublocality);
-            entity.Property(e => e.Neighborhood);
-            entity.Property(e => e.Premise);
-            entity.Property(e => e.Subpremise);
-            entity.Property(e => e.PostalCode);
-            entity.Property(e => e.PlusCode);
-            entity.Property(e => e.NaturalFeature);
-            entity.Property(e => e.Airport);
-            entity.Property(e => e.Park);
-            entity.Property(e => e.PointOfInterest);
+            entity.Property(e => e.Route)
+                .IsRequired(false);
+            entity.Property(e => e.Intersection)
+                .IsRequired(false);
+            entity.Property(e => e.PoliticalEntity)
+                .IsRequired(false);
+            entity.Property(e => e.AdministrativeAreaLevel1)
+                .IsRequired(false);
+            entity.Property(e => e.AdministrativeAreaLevel2)
+                .IsRequired(false);
+            entity.Property(e => e.AdministrativeAreaLevel3)
+                .IsRequired(false);
+            entity.Property(e => e.Locality)
+                .IsRequired(false);
+            entity.Property(e => e.Sublocality)
+                .IsRequired(false);
+            entity.Property(e => e.Neighborhood)
+                .IsRequired(false);
+            entity.Property(e => e.Premise)
+                .IsRequired(false);
+            entity.Property(e => e.Subpremise)
+                .IsRequired(false);
+            entity.Property(e => e.PostalCode)
+                .IsRequired(false);
+            entity.Property(e => e.PlusCode)
+                .IsRequired(false);
+            entity.Property(e => e.NaturalFeature)
+                .IsRequired(false);
+            entity.Property(e => e.Airport)
+                .IsRequired(false);
+            entity.Property(e => e.Park)
+                .IsRequired(false);
+            entity.Property(e => e.PointOfInterest)
+                .IsRequired(false);
 
             // Timestamps
             entity.Property(e => e.CreatedAt)
@@ -71,7 +87,6 @@ public class ApplicationDbContext : IdentityDbContext<User>
             entity.Property(e => e.UpdatedAt)
                 .IsRequired()
                 .HasDefaultValue(DateTime.UtcNow);
-
         });
         
         // Restaurant Configuration
@@ -92,10 +107,8 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
             entity.Property(e => e.Location)
                 .IsRequired()
-                .HasColumnType("geography (point)");
-            
-            entity.HasIndex(e => e.Location)
-                .HasMethod("GIST");
+                .HasColumnType("geography (Point,4326)");
+ 
             
             entity.Property(e => e.Images)
                 .HasColumnType("text[]")
