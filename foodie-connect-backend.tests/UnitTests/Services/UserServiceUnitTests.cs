@@ -102,8 +102,7 @@ public class UsersServiceUnitTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Conflict", result.Error.Code);
-        Assert.Equal("Username already exists", result.Error.Message);
+        Assert.Equal(UserError.DuplicateUsernameCode, result.Error.Code);
     }
 
     [Fact]
@@ -142,7 +141,7 @@ public class UsersServiceUnitTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("RecordNotFound", result.Error.Code);
+        Assert.Equal(UserError.UserNotFoundCode, result.Error.Code);
     }
 
     [Fact]
@@ -198,7 +197,7 @@ public class UsersServiceUnitTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("InvalidCredential", result.Error.Code);
+        Assert.Equal(UserError.PasswordMismatchCode, result.Error.Code);
     }
 
     [Fact]
@@ -314,8 +313,7 @@ public class UsersServiceUnitTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("InternalError", result.Error.Code);
-        Assert.Equal("Failed to remove User role", result.Error.Message);
+        Assert.Equal(AppError.InternalErrorCode, result.Error.Code);
     }
 
     [Fact]
@@ -341,8 +339,7 @@ public class UsersServiceUnitTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("InternalError", result.Error.Code);
-        Assert.Equal("Failed to add Head role", result.Error.Message);
+        Assert.Equal(AppError.InternalErrorCode, result.Error.Code);
         
         _mockUserManager.Verify(x => x.AddToRoleAsync(user, "User"), Times.Once);
     }

@@ -16,7 +16,7 @@ public class FoodieWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
     where TProgram : class
 {
     private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:16.4")
+        .WithImage("postgis/postgis:17-3.5")
         .WithDatabase("foodie_test")
         .WithUsername("test_user")
         .WithPassword("test_password")
@@ -52,7 +52,7 @@ public class FoodieWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
 
             services.AddDbContext<ApplicationDbContext>((_, options) =>
             {
-                options.UseNpgsql(_dbContainer.GetConnectionString());
+                options.UseNpgsql(_dbContainer.GetConnectionString(), x => x.UseNetTopologySuite());
             });
             
             // Create database

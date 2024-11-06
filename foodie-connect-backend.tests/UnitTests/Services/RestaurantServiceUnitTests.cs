@@ -131,7 +131,7 @@ public class RestaurantsServiceTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("No restaurant is associated with this id", result.Error.Message);
+        Assert.Equal(RestaurantError.RestaurantNotExistCode, result.Error.Code);
     }
 
     [Fact]

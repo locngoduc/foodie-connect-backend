@@ -2,8 +2,10 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Socials;
 using foodie_connect_backend.Modules.Socials.Dtos;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 
 namespace food_connect_backend.tests.UnitTests.Services;
 
@@ -46,7 +48,8 @@ public class SocialsServiceTests
             {
                 new() { Id = "1", PlatformType = SocialPlatformType.Facebook, Url = "fb.com/test", RestaurantId = restaurantId },
                 new() { Id = "2", PlatformType = SocialPlatformType.Twitter, Url = "instagram.com/test", RestaurantId = restaurantId }
-            }
+            },
+            Location = new Point(0,0)
         };
 
         _dbContext.Restaurants.Add(restaurant);
@@ -74,7 +77,7 @@ public class SocialsServiceTests
     
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Restaurant not found", result.Error!.Message);
+        Assert.Equal(SocialError.RestaurantNotFoundCode, result.Error.Code);
     }
     
     [Fact]
@@ -89,7 +92,8 @@ public class SocialsServiceTests
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
-            SocialLinks = new List<SocialLink>()
+            SocialLinks = new List<SocialLink>(),
+            Location = new Point(0,0)
         };
     
         _dbContext.Restaurants.Add(restaurant);
@@ -132,7 +136,8 @@ public class SocialsServiceTests
             SocialLinks = new List<SocialLink>
             {
                 new() { Id = "1", PlatformType = SocialPlatformType.Twitter, Url = "twitter.com/existing", RestaurantId = restaurantId }
-            }
+            },
+            Location = new Point(0,0)
         };
     
         _dbContext.Restaurants.Add(restaurant);
@@ -149,7 +154,7 @@ public class SocialsServiceTests
     
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Social link for Twitter already exists", result.Error!.Message);
+        Assert.Equal(SocialError.SocialAlreadyExistCode, result.Error.Code);
     }
     
     [Fact]
@@ -168,7 +173,8 @@ public class SocialsServiceTests
             SocialLinks = new List<SocialLink>
             {
                 new() { Id = socialLinkId, PlatformType = SocialPlatformType.Twitter, Url = "twitter.com/old", RestaurantId = restaurantId }
-            }
+            },
+            Location = new Point(0,0)
         };
     
         _dbContext.Restaurants.Add(restaurant);
@@ -212,7 +218,8 @@ public class SocialsServiceTests
             SocialLinks = new List<SocialLink>
             {
                 new() { Id = socialLinkId, PlatformType = SocialPlatformType.Twitter, Url = "twitter.com/test", RestaurantId = restaurantId }
-            }
+            },
+            Location = new Point(0,0)
         };
     
         _dbContext.Restaurants.Add(restaurant);
@@ -244,7 +251,7 @@ public class SocialsServiceTests
     
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Restaurant not found", result.Error!.Message);
+        Assert.Equal(SocialError.RestaurantNotFoundCode, result.Error.Code);
     }
     
     [Fact]
@@ -260,7 +267,8 @@ public class SocialsServiceTests
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
-            SocialLinks = new List<SocialLink>()
+            SocialLinks = new List<SocialLink>(),
+            Location = new Point(0,0)
         };
     
         _dbContext.Restaurants.Add(restaurant);
@@ -271,6 +279,6 @@ public class SocialsServiceTests
     
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Social link not found", result.Error!.Message);
+        Assert.Equal(SocialError.SocialDoesNotExistCode, result.Error.Code);
     }
 }

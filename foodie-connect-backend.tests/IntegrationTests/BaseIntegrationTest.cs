@@ -3,6 +3,7 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Sessions.Dtos;
 using foodie_connect_backend.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace food_connect_backend.tests.IntegrationTests;
@@ -13,6 +14,8 @@ public class BaseIntegrationTest: IClassFixture<FoodieWebApplicationFactory<Prog
     private readonly FoodieWebApplicationFactory<Program> _factory;
     protected readonly ApplicationDbContext Context;
     protected readonly UserManager<User> UserManager;
+    private readonly IConfiguration _configuration;
+    
     protected BaseIntegrationTest(FoodieWebApplicationFactory<Program> factory)
     {
         _factory = factory;
@@ -20,6 +23,7 @@ public class BaseIntegrationTest: IClassFixture<FoodieWebApplicationFactory<Prog
         var scope = factory.Services.CreateScope();
         Context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         UserManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        _configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
     }
 
     protected HttpClient CreateUnauthenticatedClient()
@@ -30,6 +34,8 @@ public class BaseIntegrationTest: IClassFixture<FoodieWebApplicationFactory<Prog
     protected async Task<FoodieClientWrapper> CreateAuthenticatedClientAsync(string userType = "User")
     {
         var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Add("origin", _configuration["FRONTEND_URL"]);
+        
         var user = new User
         {
             UserName = $"test_{Guid.NewGuid()}@example.com",

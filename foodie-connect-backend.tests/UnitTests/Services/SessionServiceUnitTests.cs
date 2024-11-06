@@ -1,5 +1,6 @@
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Sessions;
+using foodie_connect_backend.Shared.Classes.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;
@@ -96,7 +97,7 @@ public class SessionsServiceTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid username or password", result.Error!.Message);
+        Assert.Equal(AuthError.InvalidCredentialsCode, result.Error.Code);
     }
 
     [Fact]
@@ -165,7 +166,7 @@ public class SessionsServiceTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid username or password", result.Error!.Message);
+        Assert.Equal(AuthError.InvalidCredentialsCode, result.Error.Code);
     }
 
     [Fact]
@@ -234,6 +235,6 @@ public class SessionsServiceTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Invalid username or password", result.Error!.Message);
+        Assert.Equal(AuthError.InvalidCredentialsCode, result.Error.Code);
     }
 }

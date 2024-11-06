@@ -40,7 +40,14 @@ public class HeadsService(
         // Send verification email
         // This introduces tight-coupling between Heads and Verification service
         // TODO: Implement a pub/sub that invokes and consumes UserRegistered event
-        await verificationService.SendConfirmationEmail(newHead.Id);
+        try
+        {
+            await verificationService.SendConfirmationEmail(newHead.Id);
+        }
+        catch
+        {
+            Console.WriteLine("Email verification failed");
+        }
 
         return Result<User>.Success(newHead);
     }

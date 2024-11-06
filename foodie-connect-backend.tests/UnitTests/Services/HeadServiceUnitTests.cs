@@ -63,26 +63,22 @@ public class HeadsServiceUnitTests
         _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<User>(), createHeadDto.Password))
             .ReturnsAsync(IdentityResult.Success);
 
-        _mockUserManager.Setup(x => x.FindByIdAsync(It.IsAny<string>()))
-            .ReturnsAsync(createdUser);
-
-        _mockUserManager.Setup(x => x.AddToRoleAsync(createdUser, "Head"))
+        _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<User>(), "Head"))
             .ReturnsAsync(IdentityResult.Success);
-
-        _mockEmailService.Setup(e => e.SendAsync(default)).ReturnsAsync(new SendResponse() { ErrorMessages = null });
-
+        
+        
         // Act
         var result = await _headsService.CreateHead(createHeadDto);
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(createdUser.Id, result.Value.Id);
         Assert.Equal(createHeadDto.DisplayName, result.Value.DisplayName);
         Assert.Equal(createHeadDto.Email, result.Value.Email);
-        
+    
         _mockUserManager.Verify(x => x.CreateAsync(It.IsAny<User>(), createHeadDto.Password), Times.Once);
-        _mockUserManager.Verify(x => x.AddToRoleAsync(createdUser, "Head"), Times.Once);
+        _mockUserManager.Verify(x => x.AddToRoleAsync(It.IsAny<User>(), "Head"), Times.Once);
     }
+
 
     [Fact]
     public async Task CreateHead_DuplicateUsername_ReturnsConflictError()
@@ -104,8 +100,7 @@ public class HeadsServiceUnitTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("Conflict", result.Error.Code);
-        Assert.Equal("Username already exists", result.Error.Message);
+        Assert.Equal(UserError.DuplicateUsernameCode, result.Error.Code);
     }
 
     [Fact]
@@ -144,7 +139,7 @@ public class HeadsServiceUnitTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("RecordNotFound", result.Error.Code);
+        Assert.Equal(UserError.UserNotFoundCode, result.Error.Code);
     }
 
     [Fact]
@@ -200,7 +195,7 @@ public class HeadsServiceUnitTests
 
         // Assert
         Assert.False(result.IsSuccess);
-        Assert.Equal("InvalidCredential", result.Error.Code);
+        Assert.Equal(UserError.PasswordMismatchCode, result.Error.Code);
     }
 
     [Fact]

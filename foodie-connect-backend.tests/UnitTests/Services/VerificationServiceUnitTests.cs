@@ -2,6 +2,7 @@ using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Verification;
+using foodie_connect_backend.Shared.Classes.Errors;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 
@@ -33,7 +34,7 @@ public class VerificationServiceTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("User not found", result.Error.Message);
+        Assert.Equal(VerificationError.UserNotFoundCode, result.Error.Code);
     }
 
     [Fact]
@@ -49,7 +50,7 @@ public class VerificationServiceTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Email is already confirmed", result.Error.Message);
+        Assert.Equal(VerificationError.EmailAlreadyConfirmedCode, result.Error.Code);
     }
 
     [Fact]
@@ -94,7 +95,7 @@ public class VerificationServiceTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("No user found", result.Error.Message);
+        Assert.Equal(VerificationError.UserNotFoundCode, result.Error.Code);
     }
 
     [Fact]
@@ -112,7 +113,7 @@ public class VerificationServiceTests
 
         // Assert
         Assert.True(result.IsFailure);
-        Assert.Equal("Token is not valid", result.Error.Message);
+        Assert.Equal(VerificationError.EmailVerificationTokenInvalidCode, result.Error.Code);
     }
 
     [Fact]
