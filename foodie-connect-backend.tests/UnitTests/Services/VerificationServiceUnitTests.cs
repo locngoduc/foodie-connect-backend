@@ -1,7 +1,7 @@
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using foodie_connect_backend.Data;
-using foodie_connect_backend.Verification;
+using foodie_connect_backend.Modules.Verification;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 

@@ -253,7 +253,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
             entity.Property(e => e.Url)
                 .IsRequired();
 
-            entity.Property(e => e.Platform)
+            entity.Property(e => e.PlatformType)
                 .IsRequired();
         });
     }

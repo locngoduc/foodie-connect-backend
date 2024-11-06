@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 using foodie_connect_backend.Data;
-using foodie_connect_backend.Sessions.Dtos;
+using foodie_connect_backend.Modules.Sessions.Dtos;
 using foodie_connect_backend.Shared.Dtos;
 using foodie_connect_backend.Shared.Enums;
 using Newtonsoft.Json;

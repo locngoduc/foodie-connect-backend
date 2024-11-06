@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using foodie_connect_backend.Data;
-using foodie_connect_backend.Restaurants.Dtos;
+using foodie_connect_backend.Modules.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Dtos;
 using Newtonsoft.Json;
 

@@ -1,13 +1,13 @@
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Modules.Uploader;
+using foodie_connect_backend.Modules.Users;
+using foodie_connect_backend.Modules.Users.Dtos;
+using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Dtos;
-using foodie_connect_backend.Uploader;
-using foodie_connect_backend.Users;
-using foodie_connect_backend.Users.Dtos;
-using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;

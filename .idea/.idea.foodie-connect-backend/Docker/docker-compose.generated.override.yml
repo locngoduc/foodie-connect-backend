@@ -2,7 +2,7 @@
 services:
   foodie-backend:
     build:
-      context: "C:\\Users\\locngo\\RiderProjects\\foodie-connect-backend"
+      context: "/home/sopuro/SourceCode/foodie-connect-backend"
       dockerfile: "foodie-connect-backend.api/Dockerfile"
       target: "base"
     command: []
@@ -14,8 +14,7 @@ services:
     image: "foodie-connect-backend.api:dev"
     ports: []
     volumes:
-    - "C:\\Users\\locngo\\AppData\\Roaming\\Microsoft\\UserSecrets:/home/app/.microsoft/usersecrets"
-    - "C:\\Users\\locngo\\.nuget\\packages:/home/app/.nuget/packages"
-    - "C:\\Users\\locngo\\RiderProjects\\foodie-connect-backend\\foodie-connect-backend.api:/app:rw"
-    - "C:\\Users\\locngo\\RiderProjects\\foodie-connect-backend:/src:rw"
+    - "/home/sopuro/.nuget/packages:/home/app/.nuget/packages"
+    - "/home/sopuro/SourceCode/foodie-connect-backend/foodie-connect-backend.api:/app:rw"
+    - "/home/sopuro/SourceCode/foodie-connect-backend:/src:rw"
     working_dir: "/app"

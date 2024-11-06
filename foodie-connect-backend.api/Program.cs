@@ -1,17 +1,16 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
-using foodie_connect_backend.Areas;
 using foodie_connect_backend.Data;
-using foodie_connect_backend.GeoCoder;
-using foodie_connect_backend.Heads;
-using foodie_connect_backend.Restaurants;
-using foodie_connect_backend.Sessions;
+using foodie_connect_backend.Modules.GeoCoder;
+using foodie_connect_backend.Modules.Heads;
+using foodie_connect_backend.Modules.Restaurants;
+using foodie_connect_backend.Modules.Sessions;
+using foodie_connect_backend.Modules.Socials;
+using foodie_connect_backend.Modules.Uploader;
+using foodie_connect_backend.Modules.Users;
+using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes.Errors;
-using foodie_connect_backend.SocialLinks;
-using foodie_connect_backend.Uploader;
-using foodie_connect_backend.Users;
-using foodie_connect_backend.Verification;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -43,8 +42,8 @@ builder.Services.AddAuthentication()
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.None; // change to none for testing 
-        options.Cookie.SameSite = SameSiteMode.Lax; // change to Lax for testing
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.None;
         options.Cookie.Name = "access_token";
         options.ExpireTimeSpan = TimeSpan.FromDays(14);
         options.Events = new CookieAuthenticationEvents
@@ -84,7 +83,7 @@ builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email
         builder.Configuration["MAILTRAP_HOST"],
         int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port) ? port : null);
 
-builder.Services.AddScoped<IGeoCoderService, ReverseGeoCoder>(sp =>
+builder.Services.AddScoped<IGeoCoderService, ReverseGeoCoder>(_ =>
     new ReverseGeoCoder(builder.Configuration["GOOGLE_APIKEY"]!));
 builder.Services.AddScoped<IUploaderService, CloudinaryUploader>();
 builder.Services.AddScoped<HeadsService>();
@@ -92,8 +91,7 @@ builder.Services.AddScoped<UsersService>();
 builder.Services.AddScoped<SessionsService>();
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<RestaurantsService>();
-builder.Services.AddScoped<AreasService>();
-builder.Services.AddScoped<SocialLinksService>();
+builder.Services.AddScoped<SocialsService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

@@ -1,25 +1,25 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Modules.Socials;
+using foodie_connect_backend.Modules.Socials.Dtos;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Enums;
-using foodie_connect_backend.SocialLinks;
-using foodie_connect_backend.SocialLinks.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace food_connect_backend.tests.UnitTests.Services;
 
-public class SocialLinksServiceTests
+public class SocialsServiceTests
 {
     private readonly DbContextOptions<ApplicationDbContext> _options;
     private readonly ApplicationDbContext _dbContext;
-    private readonly SocialLinksService _socialLinksService;
+    private readonly SocialsService _socialsService;
 
-    public SocialLinksServiceTests()
+    public SocialsServiceTests()
     {
         _options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
         _dbContext = new ApplicationDbContext(_options);
-        _socialLinksService = new SocialLinksService(_dbContext);
+        _socialsService = new SocialsService(_dbContext);
     }
 
     private async Task ClearDatabase()
@@ -44,8 +44,8 @@ public class SocialLinksServiceTests
             HeadId = "head-user",
             SocialLinks = new List<SocialLink>
             {
-                new() { Id = "1", Platform = SocialMediaPlatform.Facebook, Url = "fb.com/test", RestaurantId = restaurantId },
-                new() { Id = "2", Platform = SocialMediaPlatform.Twitter, Url = "instagram.com/test", RestaurantId = restaurantId }
+                new() { Id = "1", PlatformType = SocialPlatformType.Facebook, Url = "fb.com/test", RestaurantId = restaurantId },
+                new() { Id = "2", PlatformType = SocialPlatformType.Twitter, Url = "instagram.com/test", RestaurantId = restaurantId }
             }
         };
 
@@ -53,13 +53,13 @@ public class SocialLinksServiceTests
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var result = await _socialLinksService.GetRestaurantSocialLinksAsync(restaurantId);
+        var result = await _socialsService.GetRestaurantSocialLinksAsync(restaurantId);
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(2, result.Value.Count);
-        Assert.Equal(SocialMediaPlatform.Facebook, result.Value[0].Platform);
-        Assert.Equal(SocialMediaPlatform.Twitter, result.Value[1].Platform);
+        Assert.Equal(SocialPlatformType.Facebook, result.Value[0].PlatformType);
+        Assert.Equal(SocialPlatformType.Twitter, result.Value[1].PlatformType);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class SocialLinksServiceTests
         var restaurantId = "invalid";
     
         // Act
-        var result = await _socialLinksService.GetRestaurantSocialLinksAsync(restaurantId);
+        var result = await _socialsService.GetRestaurantSocialLinksAsync(restaurantId);
     
         // Assert
         Assert.False(result.IsSuccess);
@@ -96,25 +96,25 @@ public class SocialLinksServiceTests
         await _dbContext.SaveChangesAsync();
         _dbContext.ChangeTracker.Clear();
     
-        var createDto = new CreateSocialLinkDto
+        var createDto = new CreateSocialDto
         {
-            Platform = SocialMediaPlatform.Twitter,
+            PlatformType = SocialPlatformType.Twitter,
             Url = "twitter.com/test"
         };
     
         // Act
-        var result = await _socialLinksService.AddSocialLinkAsync(restaurantId, createDto);
+        var result = await _socialsService.AddSocialLinkAsync(restaurantId, createDto);
     
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(SocialMediaPlatform.Twitter, result.Value.Platform);
+        Assert.Equal(SocialPlatformType.Twitter, result.Value.PlatformType);
         Assert.Equal("twitter.com/test", result.Value.Url);
         
         var savedRestaurant = await _dbContext.Restaurants
             .Include(r => r.SocialLinks)
             .FirstAsync(r => r.Id == restaurantId);
         Assert.Single(savedRestaurant.SocialLinks);
-        Assert.Equal(SocialMediaPlatform.Twitter, savedRestaurant.SocialLinks.First().Platform);
+        Assert.Equal(SocialPlatformType.Twitter, savedRestaurant.SocialLinks.First().PlatformType);
     }
     
     [Fact]
@@ -131,21 +131,21 @@ public class SocialLinksServiceTests
             HeadId = "head-user",
             SocialLinks = new List<SocialLink>
             {
-                new() { Id = "1", Platform = SocialMediaPlatform.Twitter, Url = "twitter.com/existing", RestaurantId = restaurantId }
+                new() { Id = "1", PlatformType = SocialPlatformType.Twitter, Url = "twitter.com/existing", RestaurantId = restaurantId }
             }
         };
     
         _dbContext.Restaurants.Add(restaurant);
         await _dbContext.SaveChangesAsync();
     
-        var createDto = new CreateSocialLinkDto
+        var createDto = new CreateSocialDto
         {
-            Platform = SocialMediaPlatform.Twitter,
+            PlatformType = SocialPlatformType.Twitter,
             Url = "twitter.com/test"
         };
     
         // Act
-        var result = await _socialLinksService.AddSocialLinkAsync(restaurantId, createDto);
+        var result = await _socialsService.AddSocialLinkAsync(restaurantId, createDto);
     
         // Assert
         Assert.False(result.IsSuccess);
@@ -167,33 +167,33 @@ public class SocialLinksServiceTests
             HeadId = "head-user",
             SocialLinks = new List<SocialLink>
             {
-                new() { Id = socialLinkId, Platform = SocialMediaPlatform.Twitter, Url = "twitter.com/old", RestaurantId = restaurantId }
+                new() { Id = socialLinkId, PlatformType = SocialPlatformType.Twitter, Url = "twitter.com/old", RestaurantId = restaurantId }
             }
         };
     
         _dbContext.Restaurants.Add(restaurant);
         await _dbContext.SaveChangesAsync();
         
-        var updateDto = new UpdateSocialLinkDto
+        var updateDto = new UpdateSocialDto
         {
             Id = socialLinkId,
-            Platform = SocialMediaPlatform.Facebook,
+            PlatformType = SocialPlatformType.Facebook,
             Url = "facebook.com/new"
         };
     
         // Act
-        var result = await _socialLinksService.UpdateSocialLinkAsync(restaurantId, updateDto);
+        var result = await _socialsService.UpdateSocialLinkAsync(restaurantId, updateDto);
     
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal(SocialMediaPlatform.Facebook, result.Value.Platform);
+        Assert.Equal(SocialPlatformType.Facebook, result.Value.PlatformType);
         Assert.Equal("facebook.com/new", result.Value.Url);
     
         var updatedRestaurant = await _dbContext.Restaurants
             .Include(r => r.SocialLinks)
             .FirstAsync(r => r.Id == restaurantId);
         Assert.Single(updatedRestaurant.SocialLinks);
-        Assert.Equal(SocialMediaPlatform.Facebook, updatedRestaurant.SocialLinks.First().Platform);
+        Assert.Equal(SocialPlatformType.Facebook, updatedRestaurant.SocialLinks.First().PlatformType);
     }
     
     [Fact]
@@ -211,7 +211,7 @@ public class SocialLinksServiceTests
             HeadId = "head-user",
             SocialLinks = new List<SocialLink>
             {
-                new() { Id = socialLinkId, Platform = SocialMediaPlatform.Twitter, Url = "twitter.com/test", RestaurantId = restaurantId }
+                new() { Id = socialLinkId, PlatformType = SocialPlatformType.Twitter, Url = "twitter.com/test", RestaurantId = restaurantId }
             }
         };
     
@@ -219,7 +219,7 @@ public class SocialLinksServiceTests
         await _dbContext.SaveChangesAsync();
     
         // Act
-        var result = await _socialLinksService.DeleteSocialLinkAsync(restaurantId, socialLinkId);
+        var result = await _socialsService.DeleteSocialLinkAsync(restaurantId, socialLinkId);
     
         // Assert
         Assert.True(result.IsSuccess);
@@ -240,7 +240,7 @@ public class SocialLinksServiceTests
         var socialLinkId = "link123";
     
         // Act
-        var result = await _socialLinksService.DeleteSocialLinkAsync(restaurantId, socialLinkId);
+        var result = await _socialsService.DeleteSocialLinkAsync(restaurantId, socialLinkId);
     
         // Assert
         Assert.False(result.IsSuccess);
@@ -267,7 +267,7 @@ public class SocialLinksServiceTests
         await _dbContext.SaveChangesAsync();
     
         // Act
-        var result = await _socialLinksService.DeleteSocialLinkAsync(restaurantId, socialLinkId);
+        var result = await _socialsService.DeleteSocialLinkAsync(restaurantId, socialLinkId);
     
         // Assert
         Assert.False(result.IsSuccess);

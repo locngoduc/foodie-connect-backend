@@ -1,5 +1,5 @@
 using foodie_connect_backend.Data;
-using foodie_connect_backend.Sessions;
+using foodie_connect_backend.Modules.Sessions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Moq;

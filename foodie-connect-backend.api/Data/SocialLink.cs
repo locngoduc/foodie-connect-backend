@@ -12,6 +12,6 @@ public record SocialLink
     [JsonIgnore]
     public Restaurant Restaurant { get; set; } = null!;
 
-    public SocialMediaPlatform Platform { get; init; }
+    public SocialPlatformType PlatformType { get; init; }
     public string Url { get; init; } = String.Empty;
 }
