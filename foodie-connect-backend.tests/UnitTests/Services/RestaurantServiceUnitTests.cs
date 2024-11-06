@@ -4,6 +4,7 @@ using System.Text;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Modules.GeoCoder;
 using foodie_connect_backend.Modules.Restaurants;
 using foodie_connect_backend.Modules.Restaurants.Dtos;
 using foodie_connect_backend.Modules.Uploader;
@@ -14,12 +15,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
+using NetTopologySuite.Geometries;
+using Point = NetTopologySuite.Geometries.Point;
 
 namespace food_connect_backend.tests.UnitTests.Services;
 
 public class RestaurantsServiceTests
 {
     private readonly Mock<IUploaderService> _mockUploaderService;
+    private readonly Mock<IGeoCoderService> _mockGeoCoderService;
     private readonly ApplicationDbContext _dbContext;
     private readonly RestaurantsService _service;
 
@@ -33,10 +37,12 @@ public class RestaurantsServiceTests
         _dbContext = new ApplicationDbContext(options);
 
         _mockUploaderService = new Mock<IUploaderService>();
+        _mockGeoCoderService = new Mock<IGeoCoderService>();
 
         _service = new RestaurantsService(
             _mockUploaderService.Object,
-            _dbContext
+            _dbContext,
+            _mockGeoCoderService.Object
         );
     }
 
@@ -50,11 +56,37 @@ public class RestaurantsServiceTests
             Phone = "+1234567890",
             OpenTime = 8,
             CloseTime = 22,
-            Address = "123 Test St",
+            LatitudeLongitude = "0,0",
             Status = RestaurantStatus.Open
         };
 
         var head = new User { Id = "user1" };
+
+        _mockGeoCoderService.Setup(g => g.GetAddressAsync(It.IsAny<double>(), It.IsAny<double>()))
+            .ReturnsAsync(Result<Area>.Success(new Area
+            {
+                FormattedAddress = "123 Gourmet St, Foodie City, FL 12345, USA",
+                StreetAddress = "123 Gourmet St",
+                Route = "Gourmet St",
+                Intersection = "Foodie Ave & Gourmet St",
+                PoliticalEntity = "Foodie County",
+                Country = "USA",
+                AdministrativeAreaLevel1 = "Florida",
+                AdministrativeAreaLevel2 = "Miami-Dade County",
+                AdministrativeAreaLevel3 = "Downtown Miami",
+                Locality = "Miami",
+                Sublocality = "Downtown",
+                Neighborhood = "Culinary District",
+                PostalCode = "12345",
+                PlusCode = "AB34+56",
+                NaturalFeature = "Miami River",
+                Airport = "Miami International Airport",
+                Park = "Foodie Park",
+                PointOfInterest = "Foodie Plaza",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Restaurants = new List<Restaurant>() 
+            }));
 
         // Act
         var result = await _service.CreateRestaurant(createDto, head);
@@ -76,6 +108,7 @@ public class RestaurantsServiceTests
             Name = "Test Restaurant",
             HeadId = "user1",
             Phone = "1234567890",
+            Location = new Point(new Coordinate(0,0))
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -112,7 +145,8 @@ public class RestaurantsServiceTests
             Name = "Test Restaurant",
             Images = new List<string>(),
             Phone = "1234567890",
-            HeadId = "user1"
+            HeadId = "user1",
+            Location = new Point(new Coordinate(0,0))
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -149,7 +183,8 @@ public class RestaurantsServiceTests
             Name = "Test Restaurant",
             Images = new List<string> { imageId },
             Phone = "1234567890",
-            HeadId = "user1"
+            HeadId = "user1",
+            Location = new Point(new Coordinate(0,0))
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -180,6 +215,7 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
+            Location = new Point(new Coordinate(0,0))
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -224,6 +260,7 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
+            Location = new Point(new Coordinate(0,0))
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -257,6 +294,7 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
+            Location = new Point(new Coordinate(0,0))
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -290,6 +328,7 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
+            Location = new Point(new Coordinate(0,0))
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
@@ -323,6 +362,7 @@ public class RestaurantsServiceTests
             Images = new List<string>(),
             HeadId = "user1",
             Phone = "1234567890",
+            Location = new Point(new Coordinate(0,0))
         };
         await _dbContext.Restaurants.AddAsync(restaurant);
         await _dbContext.SaveChangesAsync();
