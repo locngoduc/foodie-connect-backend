@@ -248,7 +248,7 @@ public class HeadsServiceUnitTests
         var userId = "test-id";
         var user = new User { Id = userId };
         var mockFile = new Mock<IFormFile>();
-        var uploadError = AppError.ValidationError("Upload failed");
+        var uploadError = UploadError.TypeNotAllowed(".mp4", [".jpg", ".png", ".gif"]);
 
         _mockUserManager.Setup(x => x.FindByIdAsync(userId))
             .ReturnsAsync(user);

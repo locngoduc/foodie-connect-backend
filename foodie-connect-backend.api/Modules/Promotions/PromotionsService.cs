@@ -29,7 +29,7 @@ public class PromotionsService(ApplicationDbContext dbContext, IUploaderService 
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return Result<Promotion>.Failure(AppError.InternalError("Failed to create new promotion"));
+            return Result<Promotion>.Failure(AppError.InternalError());
         }
     }
 
@@ -59,7 +59,7 @@ public class PromotionsService(ApplicationDbContext dbContext, IUploaderService 
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return Result<Promotion>.Failure(AppError.InternalError("Failed to update promotion"));
+            return Result<Promotion>.Failure(AppError.InternalError());
         }
     }
 
@@ -77,7 +77,7 @@ public class PromotionsService(ApplicationDbContext dbContext, IUploaderService 
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            return Result<bool>.Failure(AppError.InternalError("Failed to delete promotion"));
+            return Result<bool>.Failure(AppError.InternalError());
         }
     }
 }

@@ -36,7 +36,7 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         var dish = await dbContext.Dishes.FindAsync(id);
 
         if (dish == null)
-            return Result<Dish>.Failure(AppError.RecordNotFound("No dish is associated with this id"));
+            return Result<Dish>.Failure(DishError.DishNotFound(id));
         return Result<Dish>.Success(dish);
     }
 
@@ -59,7 +59,7 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         catch (Exception ex)
         {
             Console.WriteLine($"Error updating dish: {ex.Message}");
-            return Result<Dish>.Failure(AppError.InternalError("Failed to update dish"));
+            return Result<Dish>.Failure(DishError.DishNotFound(dishId));
         }
     }
 
@@ -69,7 +69,7 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         {
             var result = await GetDishById(dishId);
             if (!result.IsSuccess)
-                return Result<bool>.Failure(AppError.RecordNotFound("No dish is associated with this id"));
+                return Result<bool>.Failure(DishError.DishNotFound(dishId));
 
             var dish = result.Value;
             dish.IsDeleted = true;
@@ -89,7 +89,7 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         {
             var result = await GetDishById(dishId);
             if (!result.IsSuccess)
-                return Result<bool>.Failure(AppError.RecordNotFound("No dish is associated with this id"));
+                return Result<bool>.Failure(DishError.DishNotFound(dishId));
 
             var dish = result.Value;
 

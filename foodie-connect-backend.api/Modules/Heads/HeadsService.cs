@@ -25,43 +25,31 @@ public class HeadsService(
         };
 
         var result = await userManager.CreateAsync(newHead, head.Password);
+        await userManager.AddToRoleAsync(newHead, "Head");
+        
         if (!result.Succeeded)
         {
-            if (result.Errors.FirstOrDefault()?.Code == "DuplicateUserName" ||
-                result.Errors.FirstOrDefault()?.Code == "DuplicateEmail")
-                return Result<User>.Failure(AppError.Conflict(result.Errors.First().Description));
-            return Result<User>.Failure(AppError.ValidationError(result.Errors.First().Description));
+            return result.Errors.FirstOrDefault()?.Code switch
+            {
+                "DuplicateUserName" => Result<User>.Failure(UserError.DuplicateUsername(head.UserName)),
+                "DuplicateEmail" => Result<User>.Failure(UserError.DuplicateEmail(head.Email)),
+                _ => Result<User>.Failure(AppError.UnexpectedError(result.Errors.First().Description))
+            };
         }
-
-        var createdUser = await userManager.FindByIdAsync(newHead.Id);
-        if (createdUser == null) throw new Exception("User was created but cannot be found");
-
-        // Add role
-        var roleResult = await userManager.AddToRoleAsync(createdUser, "Head");
-        if (!roleResult.Succeeded)
-            throw new Exception(
-                $"Failed to assign role: {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
 
         // Send verification email
         // This introduces tight-coupling between Heads and Verification service
         // TODO: Implement a pub/sub that invokes and consumes UserRegistered event
-        try
-        {
-            await verificationService.SendConfirmationEmail(createdUser.Id);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to send verification email: {ex.Message}");
-        }
+        await verificationService.SendConfirmationEmail(newHead.Id);
 
-        return Result<User>.Success(createdUser);
+        return Result<User>.Success(newHead);
     }
 
     public async Task<Result<User>> GetHeadById(string id)
     {
         var head = await userManager.FindByIdAsync(id);
         if (head == null || !await userManager.IsInRoleAsync(head, "Head"))
-            return Result<User>.Failure(AppError.RecordNotFound("No head is associated with this id"));
+            return Result<User>.Failure(UserError.UserNotFound(id));
 
         return Result<User>.Success(head);
     }
@@ -70,18 +58,18 @@ public class HeadsService(
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null || !await userManager.IsInRoleAsync(user, "Head"))
-            return Result<bool>.Failure(AppError.RecordNotFound("No head is associated with this id"));
-        var result =
-            await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
+            return Result<bool>.Failure(UserError.UserNotFound(userId));
+        
+        var result = await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
         if (!result.Succeeded)
-            switch (result.Errors.First().Code)
+        {
+            return result.Errors.First().Code switch
             {
-                case "PasswordMismatch":
-                    return Result<bool>.Failure(AppError.InvalidCredential(result.Errors.First().Description));
-                default:
-                    return Result<bool>.Failure(AppError.ValidationError(result.Errors.First().Description));
-            }
-
+                "PasswordMismatch" => Result<bool>.Failure(UserError.PasswordMismatch()),
+                _ => Result<bool>.Failure(AppError.UnexpectedError(result.Errors.First().Description))
+            };
+        }
+        
         return Result<bool>.Success(true);
     }
 
@@ -89,7 +77,7 @@ public class HeadsService(
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null || !await userManager.IsInRoleAsync(user, "Head"))
-            return Result<bool>.Failure(AppError.RecordNotFound("No head is associated with this id"));
+            return Result<bool>.Failure(UserError.UserNotFound(userId));
 
         var uploadParams = new ImageFileOptions()
         {
@@ -104,7 +92,8 @@ public class HeadsService(
             user.AvatarId = uploadResult.Value;
             var updateResult = await userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
-                return Result<bool>.Failure(AppError.ValidationError(updateResult.Errors.First().Description));
+                return Result<bool>.Failure(AppError.InternalError());
+            
             return Result<bool>.Success(true);
         }
 

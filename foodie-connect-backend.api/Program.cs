@@ -42,8 +42,8 @@ builder.Services.AddAuthentication()
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.None;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+        options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.Name = "access_token";
         options.ExpireTimeSpan = TimeSpan.FromDays(14);
         options.Events = new CookieAuthenticationEvents

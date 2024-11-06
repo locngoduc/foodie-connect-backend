@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using foodie_connect_backend.Modules.Restaurants;
 using foodie_connect_backend.Modules.Socials.Dtos;
+using foodie_connect_backend.Shared.Classes.Errors;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -102,12 +103,14 @@ public class SocialsController(SocialsService socialsService, RestaurantsService
         var restaurant = await restaurantsService.GetRestaurantById(restaurantId);
         if (restaurant.IsFailure)
         {
-            return NotFound("Restaurant not found");
+            return NotFound(SocialError.RestaurantNotFound(restaurantId));
         }
+        
         if (restaurant.Value.HeadId != userId)
         {
-            return Forbid("You do not have permission to modify this restaurant's resources");
+            return StatusCode(StatusCodes.Status403Forbidden, AuthError.NotAuthorized());
         }
+        
         return null;
     }
 }

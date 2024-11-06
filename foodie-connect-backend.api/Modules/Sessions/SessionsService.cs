@@ -14,11 +14,11 @@ public class SessionsService(
     {
         var user = await userManager.FindByNameAsync(username);
         if (user == null || await userManager.IsInRoleAsync(user, "User"))
-            return Result<bool>.Failure(AppError.InvalidCredential("Invalid username or password"));
+            return Result<bool>.Failure(AuthError.InvalidCredentials());
 
         var result = await signInManager.PasswordSignInAsync(username, password, isPersistent: true, lockoutOnFailure: false);
         if (!result.Succeeded)
-            return Result<bool>.Failure(AppError.InvalidCredential("Invalid username or password"));
+            return Result<bool>.Failure(AuthError.InvalidCredentials());
 
         return Result<bool>.Success(true);
     }
@@ -27,11 +27,11 @@ public class SessionsService(
     {
         var user = await userManager.FindByNameAsync(username);
         if (user == null || await userManager.IsInRoleAsync(user, "Head"))
-            return Result<bool>.Failure(AppError.InvalidCredential("Invalid username or password"));
+            return Result<bool>.Failure(AuthError.InvalidCredentials());
 
         var result = await signInManager.PasswordSignInAsync(username, password, isPersistent: true, lockoutOnFailure: false);
         if (!result.Succeeded)
-            return Result<bool>.Failure(AppError.InvalidCredential("Invalid username or password"));
+            return Result<bool>.Failure(AuthError.InvalidCredentials());
 
         return Result<bool>.Success(true);
     }
@@ -45,7 +45,7 @@ public class SessionsService(
     public async Task<Result<SessionInfo>> GetUserSession(string userId)
     {
         var user = await userManager.FindByIdAsync(userId);
-        if (user == null) return Result<SessionInfo>.Failure(AppError.InvalidCredential("Invalid username or password"));
+        if (user == null) return Result<SessionInfo>.Failure(AuthError.InvalidCredentials());
         var roles = await userManager.GetRolesAsync(user);
         var sessionResponse = new SessionInfo
         {

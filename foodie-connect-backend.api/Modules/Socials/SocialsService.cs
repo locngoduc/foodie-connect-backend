@@ -8,7 +8,6 @@ namespace foodie_connect_backend.Modules.Socials;
 
 public class SocialsService(ApplicationDbContext dbContext)
 {
-
     public async Task<Result<List<SocialLinkResponseDto>>> GetRestaurantSocialLinksAsync(string restaurantId)
     {
         try
@@ -18,20 +17,21 @@ public class SocialsService(ApplicationDbContext dbContext)
                 .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
             if (restaurant == null)
-                return Result<List<SocialLinkResponseDto>>.Failure(AppError.RecordNotFound("Restaurant not found"));
+                return Result<List<SocialLinkResponseDto>>.Failure(SocialError.RestaurantNotFound(restaurantId));
 
             var socialLinksResponseDto = restaurant.SocialLinks
-            .Select(sl => new SocialLinkResponseDto
-            {
-                Id = sl.Id,
-                PlatformType = sl.PlatformType,
-                Url = sl.Url
-            }).ToList();
+                .Select(sl => new SocialLinkResponseDto
+                {
+                    Id = sl.Id,
+                    PlatformType = sl.PlatformType,
+                    Url = sl.Url
+                }).ToList();
+
             return Result<List<SocialLinkResponseDto>>.Success(socialLinksResponseDto);
         }
         catch (Exception ex)
         {
-            return Result<List<SocialLinkResponseDto>>.Failure(AppError.InternalError($"Error getting social links: {ex.Message}"));
+            return Result<List<SocialLinkResponseDto>>.Failure(AppError.InternalError());
         }
     }
 
@@ -44,10 +44,10 @@ public class SocialsService(ApplicationDbContext dbContext)
                 .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
             if (restaurant == null)
-                return Result<SocialLinkResponseDto>.Failure(AppError.RecordNotFound("Restaurant not found"));
+                return Result<SocialLinkResponseDto>.Failure(SocialError.RestaurantNotFound(restaurantId));
 
             if (restaurant.SocialLinks.Any(sl => sl.PlatformType == dto.PlatformType))
-                return Result<SocialLinkResponseDto>.Failure(AppError.Conflict($"Social link for {dto.PlatformType} already exists"));
+                return Result<SocialLinkResponseDto>.Failure(SocialError.SocialAlreadyExists(dto.PlatformType.ToString()));
 
             var socialLink = new SocialLink
             {
@@ -69,7 +69,7 @@ public class SocialsService(ApplicationDbContext dbContext)
         }
         catch (Exception ex)
         {
-            return Result<SocialLinkResponseDto>.Failure(AppError.InternalError($"Error getting social links: {ex.Message}"));
+            return Result<SocialLinkResponseDto>.Failure(AppError.InternalError());
         }
     }
 
@@ -77,9 +77,10 @@ public class SocialsService(ApplicationDbContext dbContext)
     {
         try
         {
-            var socialLink = await dbContext.SocialLinks.FirstOrDefaultAsync(sl => sl.Id == dto.Id && sl.RestaurantId == restaurantId);
+            var socialLink =
+                await dbContext.SocialLinks.FirstOrDefaultAsync(sl => sl.Id == dto.Id && sl.RestaurantId == restaurantId);
             if (socialLink == null)
-                return Result<SocialLinkResponseDto>.Failure(AppError.RecordNotFound("Social link not found"));
+                return Result<SocialLinkResponseDto>.Failure(SocialError.SocialDoesNotExist(dto.Id));
 
             var updatedSocialLink = new SocialLink
             {
@@ -88,22 +89,23 @@ public class SocialsService(ApplicationDbContext dbContext)
                 Url = dto.Url,
                 RestaurantId = restaurantId
             };
-            
+
             dbContext.ChangeTracker.Clear();
-            var result = dbContext.SocialLinks.Update(updatedSocialLink);
+            dbContext.SocialLinks.Update(updatedSocialLink);
             await dbContext.SaveChangesAsync();
 
             var socialLinksResponseDto = new SocialLinkResponseDto
             {
                 Id = updatedSocialLink.Id,
                 PlatformType = updatedSocialLink.PlatformType,
-                Url = updatedSocialLink.Url,
+                Url = updatedSocialLink.Url
             };
             return Result<SocialLinkResponseDto>.Success(socialLinksResponseDto);
         }
+        
         catch (Exception ex)
         {
-            return Result<SocialLinkResponseDto>.Failure(AppError.InternalError($"Error updating social link: {ex.Message}"));
+            return Result<SocialLinkResponseDto>.Failure(AppError.InternalError());
         }
     }
 
@@ -116,11 +118,11 @@ public class SocialsService(ApplicationDbContext dbContext)
                 .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
             if (restaurant == null)
-                return Result<bool>.Failure(AppError.RecordNotFound("Restaurant not found"));
+                return Result<bool>.Failure(SocialError.RestaurantNotFound(restaurantId));
 
             var socialLink = restaurant.SocialLinks.FirstOrDefault(sl => sl.Id == socialLinkId);
             if (socialLink == null)
-                return Result<bool>.Failure(AppError.RecordNotFound("Social link not found"));
+                return Result<bool>.Failure(SocialError.SocialDoesNotExist(socialLinkId));
 
             restaurant.SocialLinks.Remove(socialLink);
 
@@ -130,10 +132,10 @@ public class SocialsService(ApplicationDbContext dbContext)
 
             return Result<bool>.Success(true);
         }
+        
         catch (Exception ex)
         {
-            return Result<bool>.Failure(AppError.InternalError($"Error deleting social link: {ex.Message}"));
+            return Result<bool>.Failure(AppError.InternalError());
         }
     }
-
 }

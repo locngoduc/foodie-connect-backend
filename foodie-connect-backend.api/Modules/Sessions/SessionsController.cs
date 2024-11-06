@@ -41,7 +41,7 @@ namespace foodie_connect_backend.Modules.Sessions
                     return BadRequest(new { Message = "Login type not supported" });
             }
             
-            if (result.IsFailure) return Unauthorized(new GenericResponse { Message = result.Error.Message });
+            if (result.IsFailure) return Unauthorized(result.Error);
             return new GenericResponse { Message = "Successfully logged in" };
         }
 
@@ -62,7 +62,7 @@ namespace foodie_connect_backend.Modules.Sessions
             var identity = HttpContext.User.Identity as ClaimsIdentity;
             var userId = identity!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
             var result = await sessionsService.GetUserSession(userId);
-            if (result.IsFailure) return Unauthorized(new GenericResponse { Message = result.Error.Message });
+            if (result.IsFailure) return Unauthorized(result.Error);
             return Ok(result.Value);
         }
 
@@ -79,7 +79,7 @@ namespace foodie_connect_backend.Modules.Sessions
         public async Task<ActionResult<GenericResponse>> Logout()
         {
             var result = await sessionsService.Logout();
-            if (result.IsFailure) return Unauthorized(new GenericResponse { Message = result.Error.Message });
+            if (result.IsFailure) return Unauthorized(result.Error);
             return Ok(new GenericResponse { Message = "Successfully logged out" });
         }
     }

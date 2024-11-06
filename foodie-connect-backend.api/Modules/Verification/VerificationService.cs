@@ -11,8 +11,8 @@ public class VerificationService(UserManager<User> userManager, IFluentEmail flu
     public async Task<Result<bool>> SendConfirmationEmail(string userId)
     {
         var user = await userManager.FindByIdAsync(userId);
-        if (user == null) return Result<bool>.Failure(AppError.RecordNotFound("User not found"));
-        if (user.EmailConfirmed) return Result<bool>.Failure(AppError.ValidationError("Email is already confirmed"));
+        if (user == null) return Result<bool>.Failure(VerificationError.UserNotFound(userId));
+        if (user.EmailConfirmed) return Result<bool>.Failure(VerificationError.EmailAlreadyConfirmed());
         
         // Send verification email
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -29,10 +29,10 @@ public class VerificationService(UserManager<User> userManager, IFluentEmail flu
     public async Task<Result<bool>> ConfirmEmail(string userId, string token)
     {
         var user = await userManager.FindByIdAsync(userId);
-        if (user == null) return Result<bool>.Failure(AppError.RecordNotFound("No user found"));
+        if (user == null) return Result<bool>.Failure(VerificationError.UserNotFound(userId));
         
         var result = await userManager.ConfirmEmailAsync(user, token);
-        if (!result.Succeeded) return Result<bool>.Failure(AppError.BadToken("Token is not valid"));
+        if (!result.Succeeded) return Result<bool>.Failure(VerificationError.EmailVerificationTokenInvalid());
         
         return Result<bool>.Success(result.Succeeded);
     }

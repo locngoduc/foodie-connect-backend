@@ -5,6 +5,7 @@ using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Geometries;
 
 namespace foodie_connect_backend.Modules.Restaurants;
 
@@ -24,18 +25,13 @@ public class RestaurantsController(
     [Authorize(Roles = "Head")]
     public async Task<IActionResult> CreateRestaurant([FromBody] CreateRestaurantDto restaurantDto)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-        var head = await headsService.GetHeadById(userId);
-
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+        var head = await headsService.GetHeadById(userId);
+        
         var result = await restaurantsService.CreateRestaurant(restaurantDto, head.Value);
-
-        if (result.IsFailure)
-        {
-            if (result.Error.Code == AppError.ConflictErrorCode) return Conflict(result.Error);
-            return BadRequest(result.Error);
-        }
+        if (result is { IsFailure: true, Error.Code: RestaurantError.IncorrectCoordinatesCode }) return BadRequest(result.Error);
 
         return CreatedAtAction(nameof(GetRestaurant), new { id = result.Value.Id }, result.Value);
     }
@@ -48,6 +44,33 @@ public class RestaurantsController(
     {
         var result = await restaurantsService.GetRestaurantById(id);
         if (result.IsFailure) return NotFound(result.Error);
+        return Ok(result.Value);
+    }
+
+
+
+    /// <summary>
+    /// Gets restaurants within a specified radius of a location
+    /// </summary>
+    /// <param name="latitude">Latitude of the center point (-90 to 90)</param>
+    /// <param name="longitude">Longitude of the center point (-180 to 180)</param>
+    /// <param name="radius">Search radius in meters (default: 5000)</param>
+    /// <returns>List of restaurants within the specified radius</returns>
+    [HttpGet]
+    [ProducesResponseType(typeof(IEnumerable<RestaurantResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IEnumerable<RestaurantResponseDto>>> GetRestaurants(
+        [FromQuery] double latitude,
+        [FromQuery] double longitude,
+        [FromQuery] double radius = 5000)
+    {
+        var center = new Point(longitude, latitude) { SRID = 4326 };
+    
+        var result = await restaurantsService.GetRestaurantsInRadius(center, radius);
+    
+        if (!result.IsSuccess)
+            return BadRequest(result.Error);
+        
         return Ok(result.Value);
     }
 
@@ -77,7 +100,17 @@ public class RestaurantsController(
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
 
         var result = await restaurantsService.UploadLogo(restaurantQuery.Value.Id, file);
-        if (result.IsFailure) return BadRequest(result.Error);
+        if (result.IsFailure)
+        {
+            return result.Error.Code switch
+            {
+                RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
+                UploadError.ExceedMaxSizeCode => BadRequest(result.Error),
+                UploadError.TypeNotAllowedCode => BadRequest(result.Error),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+            };
+        }
+        
         return Ok(new GenericResponse { Message = "Logo updated successfully" });
     }
 
@@ -107,7 +140,17 @@ public class RestaurantsController(
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
 
         var result = await restaurantsService.UploadBanner(restaurantQuery.Value.Id, file);
-        if (result.IsFailure) return BadRequest(result.Error);
+        if (result.IsFailure)
+        {
+            return result.Error.Code switch
+            {
+                RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
+                UploadError.ExceedMaxSizeCode => BadRequest(result.Error),
+                UploadError.TypeNotAllowedCode => BadRequest(result.Error),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+            };
+        }
+        
         return Ok(new GenericResponse { Message = "Logo updated successfully" });
     }
 
@@ -130,13 +173,22 @@ public class RestaurantsController(
 
         var restaurantQuery = await restaurantsService.GetRestaurantById(id);
         if (restaurantQuery.IsFailure) return NotFound(restaurantQuery.Error);
-        Console.WriteLine($"Restaurant owner: {restaurantQuery.Value.HeadId}");
-        Console.WriteLine($"Requester: {userId}");
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
 
         var result = await restaurantsService.UploadImages(restaurantQuery.Value.Id, files);
-        if (result.IsFailure) return BadRequest(result.Error);
-        return Ok(new GenericResponse { Message = "Images uploaded successfully" });
+        if (result.IsFailure)
+        {
+            return result.Error.Code switch
+            {
+                RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
+                RestaurantError.RestaurantUploadPartialErrorCode => BadRequest(result.Error),
+                UploadError.ExceedMaxSizeCode => BadRequest(result.Error),
+                UploadError.TypeNotAllowedCode => BadRequest(result.Error),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+            };
+        }
+        
+        return new GenericResponse { Message = "Images uploaded successfully" };
     }
 
 
@@ -167,14 +219,13 @@ public class RestaurantsController(
         if (restaurantQuery.Value.HeadId != userId) return Forbid();
 
         var result = await restaurantsService.DeleteImage(restaurantQuery.Value.Id, imageId);
-        if (result.IsFailure)
-            return result.Error.Code switch
-            {
-                "RecordNotFound" => NotFound(result.Error),
-                _ => BadRequest(result.Error)
-            };
-        return Ok(new GenericResponse { Message = "Image deleted successfully" });
+        if (!result.IsFailure) return Ok(new GenericResponse { Message = "Image deleted successfully" });
+        
+        return result.Error.Code switch
+        {
+            RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
+            RestaurantError.ImageNotExistCode => NotFound(result.Error),
+            _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+        };
     }
-
-
 }

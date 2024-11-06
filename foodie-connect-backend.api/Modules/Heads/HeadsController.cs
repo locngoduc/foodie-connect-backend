@@ -31,11 +31,12 @@ namespace foodie_connect_backend.Modules.Heads
             
             if (result.IsFailure)
             {
-                if (result.Error.Code == AppError.ConflictErrorCode)
+                return result.Error.Code switch
                 {
-                    return Conflict(result.Error);
-                }
-                return BadRequest(result.Error);
+                    UserError.DuplicateUsernameCode => Conflict(result.Error),
+                    UserError.DuplicateEmailCode => Conflict(result.Error),
+                    _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+                };
             }
 
             var responseDto = new HeadResponseDto
@@ -96,17 +97,18 @@ namespace foodie_connect_backend.Modules.Heads
         public async Task<ActionResult<GenericResponse>> UploadAvatar(string id, IFormFile file)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null || userId != id) 
-                return Unauthorized(AppError.InvalidCredential("You are not authorized to perform this operation"));
-            
+            if (userId == null || userId != id)
+                return Unauthorized(AuthError.NotAuthorized());
+
             var result = await headsService.UploadAvatar(id, file);
             if (result.IsFailure)
             {
                 return result.Error.Code switch
                 {
-                    "RecordNotFound" => NotFound(result.Error),
-                    "ValidationError" => BadRequest(result.Error),
-                    _ => StatusCode(500, result.Error),
+                    UserError.UserNotFoundCode => NotFound(result.Error),
+                    UploadError.ExceedMaxSizeCode => BadRequest(result.Error),
+                    UploadError.TypeNotAllowedCode => BadRequest(result.Error),
+                    _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
             }
 
@@ -116,15 +118,15 @@ namespace foodie_connect_backend.Modules.Heads
         
         
         /// <summary>
-        /// Change a HEAD user password
+        /// Change a HEAD account password
         /// </summary>
         /// <param name="id"></param>
         /// <param name="changePasswordDto"></param>
         /// <returns>Password change result</returns>
         /// <response code="200">Password changed successfully</response>
         /// <response code="400">Invalid request body or new password does not meet requirements</response>
-        /// <response code="401">Unauthorized</response>
-        /// <response code="404">No HEAD user found</response>
+        /// <response code="401">Not authorized to change another user's password or old password is incorrect</response>
+        /// <response code="404">No HEAD account found</response>
         [HttpPatch("{id}/password")]
         [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -134,18 +136,19 @@ namespace foodie_connect_backend.Modules.Heads
         public async Task<ActionResult<GenericResponse>> ChangePassword(string id, ChangePasswordDto changePasswordDto)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null || userId != id) return Unauthorized(AppError.InvalidCredential("You are not authorized to change this user's password"));
-            
+            if (userId == null || userId != id) return Unauthorized(AuthError.NotAuthorized());
+
             var result = await headsService.ChangePassword(id, changePasswordDto);
             if (result.IsFailure)
             {
                 return result.Error.Code switch
                 {
-                    "RecordNotFound" => NotFound(result.Error),
-                    "InvalidCredential" => Unauthorized(result.Error),
-                    _ => BadRequest(result.Error)
+                    UserError.UserNotFoundCode => NotFound(result.Error),
+                    UserError.PasswordMismatchCode => Unauthorized(result.Error),
+                    _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
             }
+            
             return Ok(new GenericResponse { Message = "Password changed successfully" });
         }
     }

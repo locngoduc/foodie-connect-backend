@@ -1,3 +1,4 @@
+using System.Globalization;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.GeoCoder;
 using foodie_connect_backend.Modules.Restaurants.Dtos;
@@ -13,9 +14,9 @@ public class RestaurantsService(
     IUploaderService uploaderService,
     ApplicationDbContext dbContext,
     IGeoCoderService geoCoderService
-    )
+)
 {
-    private RestaurantResponseDto ToResponseDto(Restaurant restaurant)
+    private static RestaurantResponseDto ToResponseDto(Restaurant restaurant)
     {
         return new RestaurantResponseDto
         {
@@ -29,72 +30,71 @@ public class RestaurantsService(
             Images = restaurant.Images,
             CreatedAt = restaurant.CreatedAt,
             FormattedAddress = restaurant.Area?.FormattedAddress,
-            Latitude = restaurant.Location.Y,    
-            Longitude = restaurant.Location.X,   
+            Latitude = restaurant.Location.Y,
+            Longitude = restaurant.Location.X,
             HeadId = restaurant.HeadId
         };
     }
-    
-  public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
-{
-    await using var transaction = await dbContext.Database.BeginTransactionAsync();
-    try
-    {
-        var coordinates = restaurant.LatitudeLongitude.Split(',');
 
-        if (coordinates.Length != 2 ||
-            !double.TryParse(coordinates[0], System.Globalization.NumberStyles.Float, 
-                System.Globalization.CultureInfo.InvariantCulture, out var latitude) ||
-            !double.TryParse(coordinates[1], System.Globalization.NumberStyles.Float, 
-                System.Globalization.CultureInfo.InvariantCulture, out var longitude))
+    public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
+    {
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
+        try
         {
-            return Result<RestaurantResponseDto>.Failure(AppError.Conflict("Invalid coordinate format"));
+            var coordinates = restaurant.LatitudeLongitude.Split(',');
+
+            if (coordinates.Length != 2 ||
+                !double.TryParse(coordinates[0], NumberStyles.Float,
+                    CultureInfo.InvariantCulture, out var latitude) ||
+                !double.TryParse(coordinates[1], NumberStyles.Float,
+                    CultureInfo.InvariantCulture, out var longitude))
+                return Result<RestaurantResponseDto>.Failure(RestaurantError.IncorrectCoordinates());
+
+            var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
+
+            var newRestaurant = new Restaurant
+            {
+                Name = restaurant.Name,
+                Phone = restaurant.Phone,
+                OpenTime = restaurant.OpenTime,
+                CloseTime = restaurant.CloseTime,
+                Status = restaurant.Status,
+                HeadId = head.Id,
+                Location = locationPoint
+            };
+
+            var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
+            if (resultArea.IsFailure)
+                return Result<RestaurantResponseDto>.Failure(
+                    AppError.InternalError());
+
+            await dbContext.Areas.AddAsync(resultArea.Value);
+
+            newRestaurant.AreaId = resultArea.Value.Id;
+
+            await dbContext.Restaurants.AddAsync(newRestaurant);
+            await dbContext.SaveChangesAsync();
+
+            await transaction.CommitAsync();
+
+            var response = ToResponseDto(newRestaurant);
+            return Result<RestaurantResponseDto>.Success(response);
         }
-
-        var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
-
-        var newRestaurant = new Restaurant
+        catch (Exception ex)
         {
-            Name = restaurant.Name,
-            Phone = restaurant.Phone,
-            OpenTime = restaurant.OpenTime,
-            CloseTime = restaurant.CloseTime,
-            Status = restaurant.Status,
-            HeadId = head.Id,
-            Location = locationPoint 
-        };
-        
-        var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
-        if (resultArea.IsFailure)
-            return Result<RestaurantResponseDto>.Failure(AppError.InternalError("Error occurred while creating a new area."));
-
-        await dbContext.Areas.AddAsync(resultArea.Value);
-
-        newRestaurant.AreaId = resultArea.Value.Id;
-
-        await dbContext.Restaurants.AddAsync(newRestaurant);
-        await dbContext.SaveChangesAsync();
-
-        await transaction.CommitAsync();
-    
-        var response = ToResponseDto(newRestaurant);
-        return Result<RestaurantResponseDto>.Success(response);
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error creating restaurant: {ex.Message}");
+            return Result<RestaurantResponseDto>.Failure(AppError.InternalError());
+        }
     }
-    catch (Exception ex)
-    {
-        await transaction.RollbackAsync();
-        Console.WriteLine($"Error creating restaurant: {ex.Message}");
-        return Result<RestaurantResponseDto>.Failure(AppError.InternalError("Failed to create restaurant"));
-    }
-}
 
 
     public async Task<Result<Restaurant>> UpdateRestaurant(string restaurantId, CreateRestaurantDto restaurant)
     {
         try
         {
-            var result = await dbContext.Restaurants.FindAsync(restaurantId);   
-            if (result == null) return Result<Restaurant>.Failure(AppError.RecordNotFound("Restaurant not found"));
+            var result = await dbContext.Restaurants.FindAsync(restaurantId);
+            if (result == null) return Result<Restaurant>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
 
             var currRestaurant = result;
             currRestaurant.Name = restaurant.Name;
@@ -110,7 +110,7 @@ public class RestaurantsService(
         catch (Exception ex)
         {
             Console.WriteLine($"Error updating restaurant: {ex.Message}");
-            return Result<Restaurant>.Failure(AppError.InternalError("Failed to update restaurant"));
+            return Result<Restaurant>.Failure(AppError.InternalError());
         }
     }
 
@@ -118,14 +118,25 @@ public class RestaurantsService(
     {
         var restaurant = await dbContext.Restaurants
             .Include(r => r.SocialLinks)
-            .Include(r=>r.Area)
+            .Include(r => r.Area)
             .FirstOrDefaultAsync(r => r.Id == id);
 
-        
         if (restaurant == null)
-            return Result<RestaurantResponseDto>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
+            return Result<RestaurantResponseDto>.Failure(RestaurantError.RestaurantNotExist(id));
+
         var response = ToResponseDto(restaurant);
         return Result<RestaurantResponseDto>.Success(response);
+    }
+
+    public async Task<Result<List<RestaurantResponseDto>>> GetRestaurantsInRadius(Point center, double radius)
+    {
+        var restaurants = await dbContext.Restaurants
+            .Where(restaurant => restaurant.Location.Distance(center) <= radius)
+            .Include(restaurant => restaurant.Area)
+            .Select(restaurant => ToResponseDto(restaurant))
+            .ToListAsync();
+
+        return Result<List<RestaurantResponseDto>>.Success(restaurants);
     }
 
     private async Task<Result<bool>> UploadImage(string restaurantId, IFormFile file, string publicId,
@@ -133,7 +144,7 @@ public class RestaurantsService(
     {
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
         if (restaurant is null)
-            return Result<bool>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
+            return Result<bool>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
 
         var imageOptions = new ImageFileOptions
         {
@@ -157,24 +168,21 @@ public class RestaurantsService(
         catch (Exception ex)
         {
             Console.WriteLine($"Error saving changes: {ex.Message}");
-            return Result<bool>.Failure(AppError.InternalError("Failed to update restaurant's images"));
+            return Result<bool>.Failure(AppError.InternalError());
         }
     }
 
     public async Task<Result<bool>> DeleteImage(string restaurantId, string imageId)
     {
-        if (string.IsNullOrEmpty(restaurantId) || string.IsNullOrEmpty(imageId))
-            return Result<bool>.Failure(AppError.ValidationError("Restaurant ID and Image ID are required"));
-
         var restaurant = await dbContext.Restaurants
             .AsTracking()
             .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
         if (restaurant == null)
-            return Result<bool>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
+            return Result<bool>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
 
         if (!restaurant.Images.Contains(imageId))
-            return Result<bool>.Failure(AppError.RecordNotFound("Image not found"));
+            return Result<bool>.Failure(RestaurantError.ImageNotExist(imageId));
 
         try
         {
@@ -182,14 +190,12 @@ public class RestaurantsService(
             await dbContext.SaveChangesAsync();
 
             var deleteResult = await uploaderService.DeleteFileAsync(imageId);
-
-            if (deleteResult.IsFailure)
-                return Result<bool>.Failure(deleteResult.Error);
-            return Result<bool>.Success(true);
+            return deleteResult.IsFailure ? Result<bool>.Failure(deleteResult.Error) : Result<bool>.Success(true);
         }
         catch (Exception ex)
         {
-            return Result<bool>.Failure(AppError.InternalError($"Failed to delete image. Ex: {ex.Message}"));
+            Console.WriteLine($"Error deleting image: {ex.Message}");
+            return Result<bool>.Failure(AppError.InternalError());
         }
     }
 
@@ -207,7 +213,7 @@ public class RestaurantsService(
     {
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
         if (restaurant == null)
-            return Result<bool>.Failure(AppError.RecordNotFound("No restaurant is associated with this id"));
+            return Result<bool>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
 
         var uploadTasks = files.Select(file => UploadImage(
             restaurantId,
@@ -219,9 +225,8 @@ public class RestaurantsService(
         var results = await Task.WhenAll(uploadTasks);
 
         if (results.Any(r => r.IsFailure))
-            return Result<bool>.Failure(AppError.ValidationError("Some images failed to upload."));
+            return Result<bool>.Failure(RestaurantError.RestaurantUploadPartialError());
 
         return Result<bool>.Success(true);
     }
-
 }

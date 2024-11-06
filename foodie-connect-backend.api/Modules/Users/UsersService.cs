@@ -28,20 +28,20 @@ public class UsersService(
         var result = await userManager.CreateAsync(newUser, user.Password);
         await userManager.AddToRoleAsync(newUser, "User");
         
+        if (!result.Succeeded)
+        {
+            return result.Errors.FirstOrDefault()?.Code switch
+            {
+                "DuplicateUserName" => Result<User>.Failure(UserError.DuplicateUsername(user.UserName)),
+                "DuplicateEmail" => Result<User>.Failure(UserError.DuplicateEmail(user.Email)),
+                _ => Result<User>.Failure(AppError.UnexpectedError(result.Errors.First().Description))
+            };
+        }
+        
         // Send verification email
         // This introduces tight-coupling between Heads and Verification service
         // TODO: Implement a pub/sub that invokes and consumes UserRegistered event
         await verificationService.SendConfirmationEmail(newUser.Id);
-        
-        if (!result.Succeeded)
-        {
-            if (result.Errors.FirstOrDefault()?.Code == "DuplicateUserName" ||
-                result.Errors.FirstOrDefault()?.Code == "DuplicateEmail")
-            {
-                return Result<User>.Failure(AppError.Conflict(result.Errors.First().Description));
-            }
-            return Result<User>.Failure(AppError.ValidationError(result.Errors.First().Description));
-        }
         
         return Result<User>.Success(newUser);
     }
@@ -50,7 +50,7 @@ public class UsersService(
     {
         var head = await userManager.FindByIdAsync(id);
         if (head == null || !await userManager.IsInRoleAsync(head, "User")) 
-            return Result<User>.Failure(AppError.RecordNotFound("No user is associated with this id"));
+            return Result<User>.Failure(UserError.UserNotFound(id));
         
         return Result<User>.Success(head);
     }
@@ -59,18 +59,18 @@ public class UsersService(
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null || !await userManager.IsInRoleAsync(user, "User"))
-            return Result<bool>.Failure(AppError.RecordNotFound("No user is associated with this id"));
+            return Result<bool>.Failure(UserError.UserNotFound(userId));
+        
         var result = await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
         if (!result.Succeeded)
         {
-            switch (result.Errors.First().Code)
+            return result.Errors.First().Code switch
             {
-                case "PasswordMismatch":
-                    return Result<bool>.Failure(AppError.InvalidCredential(result.Errors.First().Description));
-                default:
-                    return Result<bool>.Failure(AppError.ValidationError(result.Errors.First().Description));
-            }
+                "PasswordMismatch" => Result<bool>.Failure(UserError.PasswordMismatch()),
+                _ => Result<bool>.Failure(AppError.UnexpectedError(result.Errors.First().Description))
+            };
         }
+        
         return Result<bool>.Success(true);
     }
 
@@ -78,7 +78,7 @@ public class UsersService(
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null || !await userManager.IsInRoleAsync(user, "User"))
-            return Result<bool>.Failure(AppError.RecordNotFound("No user is associated with this id"));
+            return Result<bool>.Failure(UserError.UserNotFound(userId));
 
         var uploadParams = new ImageFileOptions()
         {
@@ -93,7 +93,8 @@ public class UsersService(
             user.AvatarId = uploadResult.Value;
             var updateResult = await userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
-                return Result<bool>.Failure(AppError.ValidationError(updateResult.Errors.First().Description));
+                return Result<bool>.Failure(AppError.InternalError());
+            
             return Result<bool>.Success(true);
         }
 
@@ -104,14 +105,14 @@ public class UsersService(
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null || !await userManager.IsInRoleAsync(user, "User"))
-            return Result<bool>.Failure(AppError.RecordNotFound("No user is associated with this id"));
+            return Result<bool>.Failure(UserError.UserNotFound(userId));
     
         try
         {
             var removeResult = await userManager.RemoveFromRoleAsync(user, "User");
             if (!removeResult.Succeeded)
             {
-                return Result<bool>.Failure(AppError.InternalError("Failed to remove User role"));
+                return Result<bool>.Failure(AppError.InternalError());
             }
 
             var addResult = await userManager.AddToRoleAsync(user, "Head");
@@ -119,7 +120,7 @@ public class UsersService(
             {
                 // Rollback the remove operation if add fails
                 await userManager.AddToRoleAsync(user, "User");
-                return Result<bool>.Failure(AppError.InternalError("Failed to add Head role"));
+                return Result<bool>.Failure(AppError.InternalError());
             }
 
             await signInManager.SignOutAsync();
@@ -132,7 +133,8 @@ public class UsersService(
             {
                 await userManager.AddToRoleAsync(user, "User");
             }
-            return Result<bool>.Failure(AppError.InvalidCredential($"Role upgrade failed: {ex.Message}"));
+            
+            return Result<bool>.Failure(AppError.InternalError());
         }
     }
 }

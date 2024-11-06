@@ -271,7 +271,7 @@ public class RestaurantsServiceTests
         mockFile.Setup(f => f.OpenReadStream()).Returns(new MemoryStream(Encoding.UTF8.GetBytes("test image")));
 
         _mockUploaderService.Setup(c => c.UploadImageAsync(It.IsAny<IFormFile>(), It.IsAny<ImageFileOptions>()))
-            .ReturnsAsync(Result<string>.Failure(AppError.ValidationError("Invalid file type")));
+            .ReturnsAsync(Result<string>.Failure(UploadError.TypeNotAllowed(".gif", [".jpg", ".png"])));
 
         // Act
         var result = await _service.UploadBanner(restaurantId, mockFile.Object);
@@ -305,7 +305,7 @@ public class RestaurantsServiceTests
         mockFile.Setup(f => f.OpenReadStream()).Returns(new MemoryStream(Encoding.UTF8.GetBytes("test image")));
 
         _mockUploaderService.Setup(c => c.UploadImageAsync(It.IsAny<IFormFile>(), It.IsAny<ImageFileOptions>()))
-            .ReturnsAsync(Result<string>.Failure(AppError.ValidationError("File too large")));
+            .ReturnsAsync(Result<string>.Failure(UploadError.ExceedMaxSize(6*1024*1024, 5*1024*1024)));
 
         // Act
         var result = await _service.UploadBanner(restaurantId, mockFile.Object);
@@ -339,7 +339,7 @@ public class RestaurantsServiceTests
         mockFile.Setup(f => f.OpenReadStream()).Returns(new MemoryStream(Encoding.UTF8.GetBytes("test image")));
 
         _mockUploaderService.Setup(c => c.UploadImageAsync(It.IsAny<IFormFile>(), It.IsAny<ImageFileOptions>()))
-            .ReturnsAsync(Result<string>.Failure(AppError.ValidationError("Invalid file type")));
+            .ReturnsAsync(Result<string>.Failure(UploadError.TypeNotAllowed(".gif", [".jpg", ".png"])));
 
         // Act
         var result = await _service.UploadLogo(restaurantId, mockFile.Object);
@@ -373,7 +373,7 @@ public class RestaurantsServiceTests
         mockFile.Setup(f => f.OpenReadStream()).Returns(new MemoryStream(Encoding.UTF8.GetBytes("test image")));
 
         _mockUploaderService.Setup(c => c.UploadImageAsync(It.IsAny<IFormFile>(), It.IsAny<ImageFileOptions>()))
-            .ReturnsAsync(Result<string>.Failure(AppError.ValidationError("File too large")));
+            .ReturnsAsync(Result<string>.Failure(UploadError.ExceedMaxSize(6*1024*1024, 5*1024*1024)));
 
         // Act
         var result = await _service.UploadLogo(restaurantId, mockFile.Object);
