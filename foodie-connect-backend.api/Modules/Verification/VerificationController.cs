@@ -17,14 +17,18 @@ public class VerificationController(VerificationService verificationService) : C
     /// </summary>
     /// <returns></returns>
     /// <response code="200">Successfully sent verification email</response>
-    /// <response code="400">User email is already verified</response>
-    /// <response code="401">Not logged-in</response>
-    /// <response code="500">Internal error</response>
+    /// <response code="400">
+    /// Email is already confirmed
+    /// - EMAIL_ALREADY_CONFIRMED: This email is already confirmed
+    /// </response>
+    /// <response code="401">
+    /// User is not authenticated
+    /// - NOT_AUTHENTICATED: Only authenticated users can perform this action
+    /// </response>
     [HttpGet("email")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [Authorize]
     public async Task<ActionResult<GenericResponse>> ResendConfirmationEmail()
     {
@@ -49,14 +53,18 @@ public class VerificationController(VerificationService verificationService) : C
     /// <param name="dto"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    /// <response code="400">Invalid request body or invalid token</response>
-    /// <response code="401">Not logged in</response>
-    /// <response code="500">Internal error</response>
+    /// <response code="400">
+    /// Invalid request body or invalid token
+    /// - EMAIL_TOKEN_INVALID: This token has expired or is invalid
+    /// </response>
+    /// <response code="401">
+    /// User is not authenticated
+    /// - NOT_AUTHENTICATED: Only authenticated users can perform this action
+    /// </response>
     [HttpPost("email")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [Authorize]
     public async Task<ActionResult<GenericResponse>> ConfirmEmail(ConfirmEmailDto dto)
     {

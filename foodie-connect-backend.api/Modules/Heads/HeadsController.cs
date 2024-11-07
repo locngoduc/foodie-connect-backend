@@ -14,13 +14,25 @@ namespace foodie_connect_backend.Modules.Heads
     public class HeadsController(HeadsService headsService) : ControllerBase
     {
         /// <summary>
-        /// Create a HEAD account
+        /// Creates a new user account
         /// </summary>
-        /// <param name="head"></param>
-        /// <returns>The newly created HEAD account</returns>
-        /// <response code="201">Returns the newly created HEAD account</response>
-        /// <response code="400">Request body does not meet specified requirements</response>
-        /// <response code="409">Username or Email is taken</response>
+        /// <param name="head">User creation data transfer object</param>
+        /// <returns>The newly created user account</returns>
+        /// <response code="201">Returns the newly created head account</response>
+        /// <response code="400">
+        /// Request body does not meet specified requirements
+        /// - PASSWORD_NOT_VALID: Password does not meet requirements: at least 1x uppercase letter, 1x number, and 1x special character 
+        /// </response>
+        /// <response code="409">
+        /// Conflict with existing data
+        /// - USERNAME_ALREADY_EXISTS: The requested username is already taken
+        /// - EMAIL_ALREADY_EXISTS: The requested email is already registered
+        /// </response>
+        /// <response code="500">
+        /// Internal server error
+        /// - INTERNAL_ERROR: An unexpected internal error occurred
+        /// - UNEXPECTED_ERROR: An unexpected error occurred
+        /// </response>
         [HttpPost]
         [ProducesResponseType(typeof(HeadResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -33,8 +45,8 @@ namespace foodie_connect_backend.Modules.Heads
             {
                 return result.Error.Code switch
                 {
-                    UserError.UserNotFoundCode => NotFound(result.Error),
-                    UserError.PasswordMismatchCode => Unauthorized(result.Error),
+                    UserError.DuplicateUsernameCode => Conflict(result.Error),
+                    UserError.DuplicateEmailCode => Conflict(result.Error),
                     UserError.PasswordNotValidCode => BadRequest(result.Error),
                     _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
@@ -54,12 +66,15 @@ namespace foodie_connect_backend.Modules.Heads
         
         
         /// <summary>
-        /// Query basic information about a HEAD user
+        /// Query basic information about a HEAD account
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>Information about the HEAD user without sensitive information</returns>
-        /// <response code="200">Returns the HEAD user information</response>
-        /// <response code="404">HEAD user not found</response>
+        /// <returns>Information about the USER account without sensitive information</returns>
+        /// <response code="200">Returns the USER account information</response>
+        /// <response code="404">
+        /// Cannot find the queried user
+        /// - USER_NOT_FOUND: User does not exist or is of different type (USER or HEAD)
+        /// </response>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(HeadResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -86,14 +101,24 @@ namespace foodie_connect_backend.Modules.Heads
         /// <param name="file"></param>
         /// <returns></returns>
         /// <response code="200">Successfully uploaded avatar</response>
-        /// <response code="400">Invalid body. Allowed extensions are png, jpg, jpeg, and webp. Image must be less than 5MB</response>
-        /// <response code="401">Not logged in or not authorized to change another user avatar</response>
-        /// <response code="404">Invalid id provided</response>
+        /// <response code="400">
+        /// Image does not meet requirements
+        /// - TYPE_NOT_ALLOWED: The image's extension is not allowed, allowed extensions: .png, .jpg, .jpeg, .webp
+        /// - EXCEED_MAX_SIZE: Maximum file size is 5MB
+        /// </response>
+        /// <response code="401">
+        /// User is not authenticated
+        /// - NOT_AUTHENTICATED: Only authenticated users can perform this action
+        /// </response>
+        /// <response code="403">
+        /// User is not authorized
+        /// - NOT_AUTHORIZED: Users can only change their own accounts' avatars
+        /// </response>
         [HttpPatch("{id}/avatar")]
         [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize]
         public async Task<ActionResult<GenericResponse>> UploadAvatar(string id, IFormFile file)
         {
@@ -125,14 +150,24 @@ namespace foodie_connect_backend.Modules.Heads
         /// <param name="changePasswordDto"></param>
         /// <returns>Password change result</returns>
         /// <response code="200">Password changed successfully</response>
-        /// <response code="400">Invalid request body or new password does not meet requirements</response>
-        /// <response code="401">Not authorized to change another user's password or old password is incorrect</response>
-        /// <response code="404">No HEAD account found</response>
+        /// <response code="400">
+        /// Password does not meet requirements
+        /// - PASSWORD_NOT_VALID: Password does not meet requirements: at least 1x uppercase letter, 1x number, and 1x special character 
+        /// </response>
+        /// <response code="401">
+        /// User is not authenticated
+        /// - NOT_AUTHENTICATED: Only authenticated users can perform this action
+        /// </response>
+        /// <response code="403">
+        /// User is not authorized
+        /// - NOT_AUTHORIZED: Users can only change their own accounts' passwords
+        /// - PASSWORD_MISMATCH: Old password is incorrect
+        /// </response>
         [HttpPatch("{id}/password")]
         [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize]
         public async Task<ActionResult<GenericResponse>> ChangePassword(string id, ChangePasswordDto changePasswordDto)
         {

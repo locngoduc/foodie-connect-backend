@@ -6,6 +6,7 @@ public abstract class UserError
     public const string DuplicateUsernameCode = "USERNAME_ALREADY_EXISTS";
     public const string DuplicateEmailCode = "EMAIL_ALREADY_EXISTS";
     public const string PasswordMismatchCode = "PASSWORD_MISMATCH";
+    public const string PasswordNotValidCode = "PASSWORD_NOT_VALID";
 
     public static AppError UserNotFound(string id)
     {
@@ -25,5 +26,10 @@ public abstract class UserError
     public static AppError PasswordMismatch()
     {
         return new AppError(PasswordMismatchCode, $"The provided password does not match the current password of the user");
+    }
+
+    public static AppError PasswordNotValid(string reason)
+    {
+        return new AppError(PasswordNotValidCode, reason);
     }
 }

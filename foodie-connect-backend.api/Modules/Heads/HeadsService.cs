@@ -82,6 +82,7 @@ public class HeadsService(
                 nameof(IdentityErrorDescriber.PasswordRequiresLower) => Result<bool>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
                 nameof(IdentityErrorDescriber.PasswordRequiresUpper) => Result<bool>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
                 nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric) => Result<bool>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordMismatch) => Result<bool>.Failure(UserError.PasswordMismatch()),
                 _ => Result<bool>.Failure(AppError.UnexpectedError(result.Errors.First().Description))
             };
         }

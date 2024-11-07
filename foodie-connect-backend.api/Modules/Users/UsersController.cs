@@ -5,6 +5,7 @@ using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace foodie_connect_backend.Modules.Users
 {
@@ -14,13 +15,25 @@ namespace foodie_connect_backend.Modules.Users
     public class UsersController(UsersService usersService) : ControllerBase
     {
         /// <summary>
-        /// Create a USER account
+        /// Creates a new user account
         /// </summary>
-        /// <param name="user"></param>
-        /// <returns>The newly created USER account</returns>
-        /// <response code="201">Returns the newly created USER account</response>
-        /// <response code="400">Request body does not meet specified requirements</response>
-        /// <response code="409">Username or Email is taken</response>
+        /// <param name="user">User creation data transfer object</param>
+        /// <returns>The newly created user account</returns>
+        /// <response code="201">Returns the newly created user account</response>
+        /// <response code="400">
+        /// Request body does not meet specified requirements
+        /// - PASSWORD_NOT_VALID: Password does not meet requirements: at least 1x uppercase letter, 1x number, and 1x special character 
+        /// </response>
+        /// <response code="409">
+        /// Conflict with existing data
+        /// - USERNAME_ALREADY_EXISTS: The requested username is already taken
+        /// - EMAIL_ALREADY_EXISTS: The requested email is already registered
+        /// </response>
+        /// <response code="500">
+        /// Internal server error
+        /// - INTERNAL_ERROR: An unexpected internal error occurred
+        /// - UNEXPECTED_ERROR: An unexpected error occurred
+        /// </response>
         [HttpPost]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -34,6 +47,7 @@ namespace foodie_connect_backend.Modules.Users
                 {
                     UserError.DuplicateUsernameCode => Conflict(result.Error),
                     UserError.DuplicateEmailCode => Conflict(result.Error),
+                    UserError.PasswordNotValidCode => BadRequest(result.Error),
                     _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
             }
@@ -56,7 +70,10 @@ namespace foodie_connect_backend.Modules.Users
         /// <param name="id"></param>
         /// <returns>Information about the USER account without sensitive information</returns>
         /// <response code="200">Returns the USER account information</response>
-        /// <response code="404">USER account not found</response>
+        /// <response code="404">
+        /// Cannot find the queried user
+        /// - USER_NOT_FOUND: User does not exist or is of different type (USER or HEAD)
+        /// </response>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -84,21 +101,30 @@ namespace foodie_connect_backend.Modules.Users
         /// <param name="file"></param>
         /// <returns></returns>
         /// <response code="200">Successfully uploaded avatar</response>
-        /// <response code="400">Invalid image. Allowed extensions are png, jpg, jpeg, and webp. Image must be less than 5MB</response>
-        /// <response code="401">Not logged in</response>
-        /// <response code="403">Not authorized to change this user's avatar</response>
-        /// <response code="404">No user with this id was found</response>
+        /// <response code="400">
+        /// Image does not meet requirements
+        /// - TYPE_NOT_ALLOWED: The image's extension is not allowed, allowed extensions: .png, .jpg, .jpeg, .webp
+        /// - EXCEED_MAX_SIZE: Maximum file size is 5MB
+        /// </response>
+        /// <response code="401">
+        /// User is not authenticated
+        /// - NOT_AUTHENTICATED: Only authenticated users can perform this action
+        /// </response>
+        /// <response code="403">
+        /// User is not authorized
+        /// - NOT_AUTHORIZED: Users can only change their own accounts' avatars
+        /// </response>
         [HttpPatch("{id}/avatar")]
         [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize]
         public async Task<ActionResult<GenericResponse>> UploadAvatar(string id, IFormFile file)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (userId == null || userId != id)
-                return Unauthorized(AuthError.NotAuthorized());
+                return StatusCode(StatusCodes.Status403Forbidden, AuthError.NotAuthorized());
 
             var result = await usersService.UploadAvatar(id, file);
             if (result.IsFailure)
@@ -124,19 +150,29 @@ namespace foodie_connect_backend.Modules.Users
         /// <param name="changePasswordDto"></param>
         /// <returns>Password change result</returns>
         /// <response code="200">Password changed successfully</response>
-        /// <response code="400">Invalid request body or new password does not meet requirements</response>
-        /// <response code="401">Not authorized to change another user's password or old password is incorrect</response>
-        /// <response code="404">No USER account found</response>
+        /// <response code="400">
+        /// Password does not meet requirements
+        /// - PASSWORD_NOT_VALID: Password does not meet requirements: at least 1x uppercase letter, 1x number, and 1x special character 
+        /// </response>
+        /// <response code="401">
+        /// User is not authenticated
+        /// - NOT_AUTHENTICATED: Only authenticated users can perform this action
+        /// </response>
+        /// <response code="403">
+        /// User is not authorized
+        /// - NOT_AUTHORIZED: Users can only change their own accounts' passwords
+        /// - PASSWORD_MISMATCH: Old password is incorrect
+        /// </response>
         [HttpPatch("{id}/password")]
         [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize]
         public async Task<ActionResult<GenericResponse>> ChangePassword(string id, ChangePasswordDto changePasswordDto)
         {
             var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-            if (userId == null || userId != id) return Unauthorized(AuthError.NotAuthorized());
+            if (userId == null || userId != id) return StatusCode(StatusCodes.Status403Forbidden, AuthError.NotAuthorized());
 
             var result = await usersService.ChangePassword(id, changePasswordDto);
             if (result.IsFailure)
@@ -144,7 +180,7 @@ namespace foodie_connect_backend.Modules.Users
                 return result.Error.Code switch
                 {
                     UserError.UserNotFoundCode => NotFound(result.Error),
-                    UserError.PasswordMismatchCode => Unauthorized(result.Error),
+                    UserError.PasswordMismatchCode => StatusCode(StatusCodes.Status403Forbidden, result.Error),
                     UserError.PasswordNotValidCode => BadRequest(result.Error),
                     _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
@@ -161,19 +197,23 @@ namespace foodie_connect_backend.Modules.Users
         /// <param name="id"></param>
         /// <returns></returns>
         /// <response code="200">Successfully upgraded the user account. REQUIRES USER TO RE-LOGIN</response>
-        /// <response code="400">Something unexpected happened</response>
-        /// <response code="401">Not authorized to perform this action. Possible invalid id provided</response>
-        /// <response code="403">User is already a HEAD account</response>
+        /// <response code="401">
+        /// User is not authenticated
+        /// - NOT_AUTHENTICATED: Only authenticated users can perform this action
+        /// </response>
+        /// <response code="403">
+        /// User is not authorized or is already a HEAD
+        /// - NOT_AUTHORIZED: Users can only upgrade their own accounts
+        /// </response>
         [HttpPatch("{id}/type")]
         [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [Authorize(Roles = "User")]
         public async Task<ActionResult<GenericResponse>> UpgradeToHead(string id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null || userId != id) return Unauthorized(AuthError.NotAuthorized());
+            if (userId == null || userId != id) return StatusCode(StatusCodes.Status403Forbidden, AuthError.NotAuthorized());
 
             var upgradeResult = await usersService.UpgradeToHead(userId);
             if (upgradeResult.IsFailure)

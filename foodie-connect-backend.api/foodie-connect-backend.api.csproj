@@ -42,6 +42,7 @@
     <ItemGroup>
         <Folder Include="Migrations\" />
         <Folder Include="Modules\" />
+        <Folder Include="Modules\Users\Errors\" />
     </ItemGroup>
 
 </Project>
