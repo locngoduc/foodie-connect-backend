@@ -7,7 +7,7 @@ services:
       - postgres
   
   postgres:
-    image: postgres:16.4
+    image: postgis/postgis:17-3.5
     container_name: foodie-postgres
     volumes:
         - foodie-data:/var/lib/postgresql/data 
