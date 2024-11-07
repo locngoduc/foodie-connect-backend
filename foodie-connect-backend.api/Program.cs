@@ -11,7 +11,10 @@ using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Modules.Users;
 using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes.Errors;
+using foodie_connect_backend.Shared.Policies;
+using foodie_connect_backend.Shared.Policies.Restaurant;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
@@ -70,6 +73,12 @@ builder.Services.AddAuthentication()
         };
     });
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RestaurantOwner", policy =>
+        policy.Requirements.Add(new RestaurantOwnerRequirement()));
+});
+
 builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEmail = true; })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -99,6 +108,8 @@ builder.Services.AddScoped<SessionsService>();
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<RestaurantsService>();
 builder.Services.AddScoped<SocialsService>();
+builder.Services.AddScoped<IAuthorizationHandler, RestaurantOwnerHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, CustomAuthorizationMiddlewareResultHandler>();
 
 // Configure CORS
 builder.Services.AddCors(options =>
