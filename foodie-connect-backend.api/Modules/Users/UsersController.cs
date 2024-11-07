@@ -145,6 +145,7 @@ namespace foodie_connect_backend.Modules.Users
                 {
                     UserError.UserNotFoundCode => NotFound(result.Error),
                     UserError.PasswordMismatchCode => Unauthorized(result.Error),
+                    UserError.PasswordNotValidCode => BadRequest(result.Error),
                     _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
             }

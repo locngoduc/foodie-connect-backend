@@ -33,8 +33,9 @@ namespace foodie_connect_backend.Modules.Heads
             {
                 return result.Error.Code switch
                 {
-                    UserError.DuplicateUsernameCode => Conflict(result.Error),
-                    UserError.DuplicateEmailCode => Conflict(result.Error),
+                    UserError.UserNotFoundCode => NotFound(result.Error),
+                    UserError.PasswordMismatchCode => Unauthorized(result.Error),
+                    UserError.PasswordNotValidCode => BadRequest(result.Error),
                     _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
             }
@@ -56,7 +57,7 @@ namespace foodie_connect_backend.Modules.Heads
         /// Query basic information about a HEAD user
         /// </summary>
         /// <param name="id"></param>
-        /// <returns>Information about the HEAD user without sensitive informations</returns>
+        /// <returns>Information about the HEAD user without sensitive information</returns>
         /// <response code="200">Returns the HEAD user information</response>
         /// <response code="404">HEAD user not found</response>
         [HttpGet("{id}")]
@@ -145,6 +146,7 @@ namespace foodie_connect_backend.Modules.Heads
                 {
                     UserError.UserNotFoundCode => NotFound(result.Error),
                     UserError.PasswordMismatchCode => Unauthorized(result.Error),
+                    UserError.PasswordNotValidCode => BadRequest(result.Error),
                     _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
             }

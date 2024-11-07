@@ -32,8 +32,13 @@ public class UsersService(
         {
             return result.Errors.FirstOrDefault()?.Code switch
             {
-                "DuplicateUserName" => Result<User>.Failure(UserError.DuplicateUsername(user.UserName)),
-                "DuplicateEmail" => Result<User>.Failure(UserError.DuplicateEmail(user.Email)),
+                nameof(IdentityErrorDescriber.DuplicateUserName) => Result<User>.Failure(UserError.DuplicateUsername(user.UserName)),
+                nameof(IdentityErrorDescriber.DuplicateEmail) => Result<User>.Failure(UserError.DuplicateEmail(user.Email)),
+                nameof(IdentityErrorDescriber.PasswordTooShort) => Result<User>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordRequiresDigit) => Result<User>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordRequiresLower) => Result<User>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordRequiresUpper) => Result<User>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric) => Result<User>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
                 _ => Result<User>.Failure(AppError.UnexpectedError(result.Errors.First().Description))
             };
         }
@@ -71,9 +76,13 @@ public class UsersService(
         var result = await userManager.ChangePasswordAsync(user, changePasswordDto.OldPassword, changePasswordDto.NewPassword);
         if (!result.Succeeded)
         {
-            return result.Errors.First().Code switch
+            return result.Errors.FirstOrDefault()?.Code switch
             {
-                "PasswordMismatch" => Result<bool>.Failure(UserError.PasswordMismatch()),
+                nameof(IdentityErrorDescriber.PasswordTooShort) => Result<bool>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordRequiresDigit) => Result<bool>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordRequiresLower) => Result<bool>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordRequiresUpper) => Result<bool>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
+                nameof(IdentityErrorDescriber.PasswordRequiresNonAlphanumeric) => Result<bool>.Failure(UserError.PasswordNotValid(result.Errors.First().Description)),
                 _ => Result<bool>.Failure(AppError.UnexpectedError(result.Errors.First().Description))
             };
         }
