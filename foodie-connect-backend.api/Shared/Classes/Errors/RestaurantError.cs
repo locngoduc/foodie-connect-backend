@@ -6,6 +6,8 @@ public abstract class RestaurantError
     public const string RestaurantUploadPartialErrorCode = "RESTAURANT_UPLOAD_PARTIAL";
     public const string IncorrectCoordinatesCode = "INCORRECT_COORDINATES";
     public const string ImageNotExistCode = "IMAGE_NOT_EXIST";
+    public const string DishCategoryAlreadyExistCode = "DISH_CATEGORY_ALREADY_EXIST";
+    public const string DishCategoryNotExistCode = "DISH_CATEGORY_NOT_EXIST";
 
     public static AppError RestaurantNotExist(string id)
     {
@@ -33,5 +35,19 @@ public abstract class RestaurantError
         return new AppError(
             RestaurantUploadPartialErrorCode,
             "Some images were unable to be uploaded.");
+    }
+
+    public static AppError DishCategoryAlreadyExist(string categoryName)
+    {
+        return new AppError(
+            DishCategoryAlreadyExistCode,
+            $"The category name '{categoryName}' already exist.");
+    }
+
+    public static AppError DishCategoryNotExist(string categoryName)
+    {
+        return new AppError(
+            DishCategoryNotExistCode,
+            $"The category name '{categoryName}' does not exist.");
     }
 }

@@ -2,6 +2,7 @@ using System.Globalization;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.GeoCoder;
 using foodie_connect_backend.Modules.Restaurants.Dtos;
+using foodie_connect_backend.Modules.Restaurants.Mappers;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
@@ -228,5 +229,92 @@ public class RestaurantsService(
             return Result<bool>.Failure(RestaurantError.RestaurantUploadPartialError());
 
         return Result<bool>.Success(true);
+    }
+
+    public async Task<Result<DishCategory>> AddDishCategory(string restaurantId, string categoryName)
+    {
+        var restaurant = await dbContext.Restaurants
+            .Include(restaurant => restaurant.DishCategories)
+            .FirstOrDefaultAsync(restaurant => restaurant.Id == restaurantId);
+        
+        // Checks
+        if (restaurant == null) 
+            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+        if (restaurant.DishCategories.Any(x => x.CategoryName == categoryName)) 
+            return Result<DishCategory>.Failure(RestaurantError.DishCategoryAlreadyExist(categoryName));
+
+        // Adds dish category to restaurant
+        var newDishCategory = new DishCategory { CategoryName = categoryName };
+        restaurant.DishCategories.Add(newDishCategory);
+        await dbContext.SaveChangesAsync();
+        
+        return Result<DishCategory>.Success(newDishCategory);
+    }
+
+    public async Task<Result<DishCategory>> DeleteDishCategory(string restaurantId, string categoryName)
+    {
+        var restaurant = await dbContext.Restaurants
+            .Include(restaurant => restaurant.DishCategories)
+            .FirstOrDefaultAsync(restaurant => restaurant.Id == restaurantId);
+    
+        // Checks
+        if (restaurant == null) 
+            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+        if (restaurant.DishCategories.All(x => x.CategoryName != categoryName)) 
+            return Result<DishCategory>.Failure(RestaurantError.DishCategoryNotExist(categoryName));
+    
+        // Delete category from dishes
+        var dishesWithCategory = await dbContext.Dishes
+            .Include(dish => dish.Categories)
+            .Where(dish => dish.Categories.Any(dishCategory => dishCategory.CategoryName == categoryName))
+            .ToListAsync();
+        
+        foreach (var dish in dishesWithCategory)
+        {
+            dish.Categories.Remove(dish.Categories.Single(x => x.CategoryName == categoryName));
+        }
+    
+        // Remove the category from the restaurant
+        var categoryToRemove = restaurant.DishCategories.Single(x => x.CategoryName == categoryName);
+        restaurant.DishCategories.Remove(categoryToRemove);
+    
+        // Save changes to database
+        await dbContext.SaveChangesAsync();
+    
+        return Result<DishCategory>.Success(categoryToRemove);
+    }
+
+    public async Task<Result<DishCategory[]>> GetDishCategories(string restaurantId)
+    {
+        var restaurant = await dbContext.Restaurants
+            .Include(restaurant => restaurant.DishCategories)
+            .FirstOrDefaultAsync(restaurant => restaurant.Id == restaurantId);
+    
+        // Checks
+        if (restaurant == null) 
+            return Result<DishCategory[]>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+        
+        return Result<DishCategory[]>.Success(restaurant.DishCategories.ToArray());
+    }
+
+    public async Task<Result<DishCategory>> RenameDishCategory(string restaurantId, string oldName, string newName)
+    {
+        var restaurant = await dbContext.Restaurants
+            .Include(restaurant => restaurant.DishCategories)
+            .FirstOrDefaultAsync(restaurant => restaurant.Id == restaurantId);
+    
+        // Checks
+        if (restaurant == null) 
+            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+        if (restaurant.DishCategories.All(x => x.CategoryName != oldName))
+            return Result<DishCategory>.Failure(RestaurantError.DishCategoryNotExist(oldName));
+        if (restaurant.DishCategories.Any(x => x.CategoryName == newName))
+            return Result<DishCategory>.Failure(RestaurantError.DishCategoryAlreadyExist(newName));
+        
+        // Rename the category
+        restaurant.DishCategories.Single(x => x.CategoryName == oldName).CategoryName = newName;
+        await dbContext.SaveChangesAsync();
+        
+        return Result<DishCategory>.Success(restaurant.DishCategories.Single(x => x.CategoryName == newName));
     }
 }

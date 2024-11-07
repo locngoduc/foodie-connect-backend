@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Enums;
@@ -7,11 +6,12 @@ using NetTopologySuite.Geometries;
 
 namespace foodie_connect_backend.Data;
 
-public class Restaurant
+public sealed class Restaurant
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    [MaxLength(128)]
+    public string Id { get; init; } = Guid.NewGuid().ToString();
 
-    [Required] [MaxLength(64)] public string Name { get; set; } = null!;
+    [Required] [MaxLength(128)] public string Name { get; set; } = null!;
 
     [Required] public int OpenTime { get; set; }
 
@@ -19,36 +19,37 @@ public class Restaurant
 
     public RestaurantStatus Status { get; set; } = RestaurantStatus.Open;
 
-    public ICollection<SocialLink> SocialLinks { get; set; } = new List<SocialLink>();
+    public ICollection<SocialLink> SocialLinks { get; init; } = new List<SocialLink>();
 
     [Required]
     [MinLength(10)]
     [MaxLength(10)]
     public string Phone { get; set; } = null!;
 
-    [MaxLength(64)] public IList<string> Images { get; set; } = new List<string>();
+    [MaxLength(128)] public IList<string> Images { get; init; } = new List<string>();
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; init; } = DateTime.UtcNow;
 
+    [MaxLength(128)]
     public string? AreaId { get; set; }
 
-    public bool IsDeleted { get; set; } = false;
+    public bool IsDeleted { get; init; }
 
-    [Required]
-    [JsonIgnore]
-    public Point Location { get; set; }
-    
-    [JsonIgnore] public virtual Area? Area { get; set; }
+    public ICollection<DishCategory> DishCategories { get; init; } = new List<DishCategory>();
 
-    [JsonIgnore] public virtual ICollection<Dish> Dishes { get; set; } = new List<Dish>();
+    [Required] [JsonIgnore] public Point Location { get; init; } = null!;
 
-    [JsonIgnore] public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
+    [JsonIgnore] public Area? Area { get; init; }
 
-    [JsonIgnore] public virtual ICollection<Promotion> Promotions { get; set; } = new List<Promotion>();
+    [JsonIgnore] public ICollection<Dish> Dishes { get; init; } = new List<Dish>();
 
-    [JsonIgnore] public virtual ICollection<Service> Services { get; set; } = new List<Service>();
+    [JsonIgnore] public ICollection<Review> Reviews { get; init; } = new List<Review>();
 
-    public string HeadId { get; set; } = null!;
+    [JsonIgnore] public ICollection<Promotion> Promotions { get; init; } = new List<Promotion>();
+
+    [JsonIgnore] public ICollection<Service> Services { get; init; } = new List<Service>();
+
+    [MaxLength(128)] public string HeadId { get; init; } = null!;
 }

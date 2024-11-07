@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -13,9 +14,11 @@ using foodie_connect_backend.Data;
 namespace foodie_connect_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241107074455_Removed DishCategoryId in favor of composite key")]
+    partial class RemovedDishCategoryIdinfavorofcompositekey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,10 +31,10 @@ namespace foodie_connect_backend.Migrations
             modelBuilder.Entity("DishDishCategory", b =>
                 {
                     b.Property<string>("DishesId")
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("CategoriesRestaurantId")
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("CategoriesCategoryName")
                         .HasColumnType("character varying(32)");
@@ -199,7 +202,7 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2024, 11, 7, 8, 42, 7, 231, DateTimeKind.Utc).AddTicks(383));
+                        .HasDefaultValue(new DateTime(2024, 11, 7, 7, 44, 54, 404, DateTimeKind.Utc).AddTicks(8973));
 
                     b.Property<string>("FormattedAddress")
                         .IsRequired()
@@ -251,7 +254,7 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2024, 11, 7, 8, 42, 7, 231, DateTimeKind.Utc).AddTicks(870));
+                        .HasDefaultValue(new DateTime(2024, 11, 7, 7, 44, 54, 404, DateTimeKind.Utc).AddTicks(9421));
 
                     b.HasKey("Id");
 
@@ -261,8 +264,8 @@ namespace foodie_connect_backend.Migrations
             modelBuilder.Entity("foodie_connect_backend.Data.Dish", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -290,8 +293,8 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<string>("RestaurantId")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -309,8 +312,8 @@ namespace foodie_connect_backend.Migrations
             modelBuilder.Entity("foodie_connect_backend.Data.DishCategory", b =>
                 {
                     b.Property<string>("RestaurantId")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("CategoryName")
                         .HasMaxLength(32)
@@ -335,7 +338,7 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DishId")
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("timestamp with time zone");
@@ -349,7 +352,7 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("character varying(32)");
 
                     b.Property<string>("RestaurantId")
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Target")
                         .IsRequired()
@@ -371,12 +374,12 @@ namespace foodie_connect_backend.Migrations
             modelBuilder.Entity("foodie_connect_backend.Data.Restaurant", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("AreaId")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("CloseTime")
                         .HasColumnType("integer");
@@ -386,13 +389,13 @@ namespace foodie_connect_backend.Migrations
 
                     b.Property<string>("HeadId")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string[]>("Images")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
-                        .HasMaxLength(128)
+                        .HasMaxLength(64)
                         .HasColumnType("text[]")
                         .HasDefaultValue(new string[0]);
 
@@ -446,7 +449,7 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("DishId")
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -455,7 +458,7 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("RestaurantId")
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("Type")
                         .HasColumnType("integer");
@@ -489,7 +492,7 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("RestaurantId")
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -510,8 +513,8 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("AvatarId")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -589,7 +592,7 @@ namespace foodie_connect_backend.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("RestaurantId")
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Url")
                         .IsRequired()

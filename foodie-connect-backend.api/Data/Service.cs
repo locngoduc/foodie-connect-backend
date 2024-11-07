@@ -6,7 +6,7 @@ public sealed class Service
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    [MaxLength(64)] public string Name { get; set; } = string.Empty;
+    [MaxLength(128)] public string Name { get; set; } = string.Empty;
 
     public bool IsDeleted { get; set; } = false;
 

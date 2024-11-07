@@ -11,7 +11,7 @@ public class User : IdentityUser
     [MaxLength(50)]
     public string DisplayName { get; set; } = null!;
 
-    [MaxLength(64)]
+    [MaxLength(128)]
     public string? AvatarId { get; set; } = String.Empty;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

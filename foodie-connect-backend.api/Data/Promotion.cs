@@ -8,7 +8,7 @@ public class Promotion
 
     [Required] [MaxLength(32)] public string Name { get; set; } = null!;
 
-    [Required] [MaxLength(64)] public string Target { get; set; } = null!;
+    [Required] [MaxLength(128)] public string Target { get; set; } = null!;
 
     [MaxLength(256)] public string BannerUrl { get; set; } = string.Empty;
 

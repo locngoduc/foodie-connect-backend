@@ -4,21 +4,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace foodie_connect_backend.Data;
 
-public class ApplicationDbContext : IdentityDbContext<User>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User>(options)
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-    }
-
-    public DbSet<Area> Areas { get; set; } = null!;
-    public DbSet<Restaurant> Restaurants { get; set; } = null!;
-    public DbSet<Dish> Dishes { get; set; } = null!;
-    public DbSet<Promotion> Promotions { get; set; } = null!;
-    public DbSet<Service> Services { get; set; } = null!;
-    public DbSet<Review> Reviews { get; set; } = null!;
-    public DbSet<Category> Categories { get; set; } = null!;
-    public DbSet<DishesCategory> DishesCategories { get; set; } = null!;
-    public DbSet<SocialLink> SocialLinks { get; set; } = null!;
+    public DbSet<Area> Areas { get; init; } = null!;
+    public DbSet<Restaurant> Restaurants { get; init; } = null!;
+    public DbSet<Dish> Dishes { get; init; } = null!;
+    public DbSet<Promotion> Promotions { get; init; } = null!;
+    public DbSet<Service> Services { get; init; } = null!;
+    public DbSet<Review> Reviews { get; init; } = null!;
+    public DbSet<DishCategory> DishCategories { get; init; } = null!;
+    public DbSet<SocialLink> SocialLinks { get; init; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -157,22 +152,6 @@ public class ApplicationDbContext : IdentityDbContext<User>
             entity.HasOne(d => d.Restaurant)
                 .WithMany(r => r.Dishes)
                 .HasForeignKey(d => d.RestaurantId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // DishesCategory Configuration
-        modelBuilder.Entity<DishesCategory>(entity =>
-        {
-            entity.HasKey(dc => new { dc.DishId, dc.CategoryId });
-
-            entity.HasOne(dc => dc.Dish)
-                .WithMany(d => d.DishesCategories)
-                .HasForeignKey(dc => dc.DishId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(dc => dc.Category)
-                .WithMany(c => c.DishesCategories)
-                .HasForeignKey(dc => dc.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
