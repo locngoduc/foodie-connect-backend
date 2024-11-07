@@ -11,7 +11,7 @@ public abstract class RestaurantError
     {
         return new AppError(
             RestaurantNotExistCode,
-            $"The restaurant with id \"{id}\" does not exist.");
+            $"The restaurant with id '{id}' does not exist.");
     }
 
     public static AppError IncorrectCoordinates()
@@ -25,7 +25,7 @@ public abstract class RestaurantError
     {
         return new AppError(
             ImageNotExistCode,
-            $"The image with id \"{id}\" does not exist.");
+            $"The image with id '{id}' does not exist.");
     }
 
     public static AppError RestaurantUploadPartialError()

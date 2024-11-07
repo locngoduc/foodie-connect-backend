@@ -6,6 +6,6 @@ public abstract class DishError
 
     public static AppError DishNotFound(string id)
     {
-        return new AppError(DishNotFoundCode, $"No dish with id \"{id}\" was found.");
+        return new AppError(DishNotFoundCode, $"No dish with id '{id}' was found.");
     }
 }

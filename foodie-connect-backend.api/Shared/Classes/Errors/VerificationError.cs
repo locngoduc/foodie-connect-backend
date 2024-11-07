@@ -8,7 +8,7 @@ public abstract class VerificationError
 
     public static AppError UserNotFound(string id)
     {
-        return new AppError(UserNotFoundCode, $"User with id \"{id}\" not found");
+        return new AppError(UserNotFoundCode, $"User with id '{id}' not found");
     }
 
     public static AppError EmailAlreadyConfirmed()

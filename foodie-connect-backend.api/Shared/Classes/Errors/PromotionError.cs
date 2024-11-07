@@ -6,6 +6,6 @@ public abstract class PromotionError
     {
         return new AppError(
             "PromotionNotFound",
-            $"No promotion with the ID \"{promotionId}\" was found");
+            $"No promotion with the ID '{promotionId}' was found");
     }
 }

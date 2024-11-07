@@ -9,17 +9,17 @@ public abstract class UserError
 
     public static AppError UserNotFound(string id)
     {
-        return new AppError(UserNotFoundCode, $"User with id \"{id}\" not found");
+        return new AppError(UserNotFoundCode, $"User with id '{id}' not found");
     }
 
     public static AppError DuplicateUsername(string username)
     {
-        return new AppError(DuplicateUsernameCode, $"The username \"{username}\" is already taken");
+        return new AppError(DuplicateUsernameCode, $"The username '{username}' is already taken");
     }
 
     public static AppError DuplicateEmail(string email)
     {
-        return new AppError(DuplicateEmailCode, $"The email \"{email}\" is already taken");
+        return new AppError(DuplicateEmailCode, $"The email '{email}' is already taken");
     }
 
     public static AppError PasswordMismatch()
