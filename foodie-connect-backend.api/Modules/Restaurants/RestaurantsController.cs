@@ -109,16 +109,10 @@ public class RestaurantsController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [Authorize(Roles = "Head")]
+    [Authorize(Policy = "RestaurantOwner")]
     public async Task<ActionResult<GenericResponse>> UpdateLogo(string id, IFormFile file)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-
-        var restaurantQuery = await restaurantsService.GetRestaurantById(id);
-        if (restaurantQuery.IsFailure) return NotFound(RestaurantError.RestaurantNotExist(id));
-        if (restaurantQuery.Value.HeadId != userId) return StatusCode(StatusCodes.Status403Forbidden, AuthError.NotAuthorized());
-
-        var result = await restaurantsService.UploadLogo(restaurantQuery.Value.Id, file);
+        var result = await restaurantsService.UploadLogo(id, file);
         if (result.IsFailure)
         {
             return result.Error.Code switch
@@ -165,16 +159,10 @@ public class RestaurantsController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [Authorize(Roles = "Head")]
+    [Authorize(Policy = "RestaurantOwner")]
     public async Task<ActionResult<GenericResponse>> UpdateBanner(string id, IFormFile file)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-
-        var restaurantQuery = await restaurantsService.GetRestaurantById(id);
-        if (restaurantQuery.IsFailure) return NotFound(RestaurantError.RestaurantNotExist(id));
-        if (restaurantQuery.Value.HeadId != userId) return StatusCode(StatusCodes.Status403Forbidden, AuthError.NotAuthorized());
-
-        var result = await restaurantsService.UploadBanner(restaurantQuery.Value.Id, file);
+        var result = await restaurantsService.UploadBanner(id, file);
         if (result.IsFailure)
         {
             return result.Error.Code switch
@@ -217,7 +205,7 @@ public class RestaurantsController(
     /// - RESTAURANT_NOT_EXIST: This restaurant does not exist
     /// </response>
     [HttpPost("{id}/images")]
-    [Authorize(Roles = "Head")]
+    [Authorize(Policy = "RestaurantOwner")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -225,13 +213,7 @@ public class RestaurantsController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<GenericResponse>> UploadImages(string id, IFormFile[] files)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-
-        var restaurantQuery = await restaurantsService.GetRestaurantById(id);
-        if (restaurantQuery.IsFailure) return NotFound(RestaurantError.RestaurantNotExist(id));
-        if (restaurantQuery.Value.HeadId != userId) return StatusCode(StatusCodes.Status403Forbidden, AuthError.NotAuthorized());
-
-        var result = await restaurantsService.UploadImages(restaurantQuery.Value.Id, files);
+        var result = await restaurantsService.UploadImages(id, files);
         if (result.IsFailure)
         {
             return result.Error.Code switch
@@ -272,16 +254,10 @@ public class RestaurantsController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [Authorize(Roles = "Head")]
+    [Authorize(Policy = "RestaurantOwner")]
     public async Task<ActionResult<GenericResponse>> DeleteImage(string id, string imageId)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
-
-        var restaurantQuery = await restaurantsService.GetRestaurantById(id);
-        if (restaurantQuery.IsFailure) return NotFound(RestaurantError.RestaurantNotExist(id));
-        if (restaurantQuery.Value.HeadId != userId) return StatusCode(StatusCodes.Status403Forbidden, AuthError.NotAuthorized());
-
-        var result = await restaurantsService.DeleteImage(restaurantQuery.Value.Id, imageId);
+        var result = await restaurantsService.DeleteImage(id, imageId);
         if (!result.IsFailure) return Ok(new GenericResponse { Message = "Image deleted successfully" });
         
         return result.Error.Code switch
