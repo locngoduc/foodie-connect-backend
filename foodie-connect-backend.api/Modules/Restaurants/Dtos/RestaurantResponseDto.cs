@@ -1,3 +1,4 @@
+using foodie_connect_backend.Data;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Enums;
 
@@ -5,7 +6,7 @@ namespace foodie_connect_backend.Modules.Restaurants.Dtos;
 
 public record RestaurantResponseDto()
 {
-    public string Id { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
     public int OpenTime { get; set; }
     public int CloseTime { get; set; }

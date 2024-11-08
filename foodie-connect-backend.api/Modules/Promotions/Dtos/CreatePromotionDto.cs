@@ -10,7 +10,7 @@ public record CreatePromotionDto
 
     [Required] public DateTime ExpiredAt { get; set; }
 
-    [Required] public string DishId { get; set; }
+    [Required] public Guid DishId { get; set; }
 
-    [Required] public string RestaurantId { get; set; }
+    [Required] public Guid RestaurantId { get; set; }
 }

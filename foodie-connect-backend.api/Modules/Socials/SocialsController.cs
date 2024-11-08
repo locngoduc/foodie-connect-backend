@@ -14,7 +14,7 @@ public class SocialsController(SocialsService socialsService, RestaurantsService
     [HttpGet]
     [ProducesResponseType(typeof(List<SocialLinkResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetRestaurantSocialLinks(string restaurantId)
+    public async Task<IActionResult> GetRestaurantSocialLinks(Guid restaurantId)
     {
         var result = await socialsService.GetRestaurantSocialLinksAsync(restaurantId);
         return result.IsSuccess ? Ok(result.Value) : NotFound(result.Error);
@@ -24,7 +24,7 @@ public class SocialsController(SocialsService socialsService, RestaurantsService
     [ProducesResponseType(typeof(SocialLinkResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [Authorize(Roles = "Head")]
-    public async Task<IActionResult> AddSocialLink(string restaurantId, CreateSocialDto dto)
+    public async Task<IActionResult> AddSocialLink(Guid restaurantId, CreateSocialDto dto)
     {
         if (!ModelState.IsValid)
         {
@@ -55,7 +55,7 @@ public class SocialsController(SocialsService socialsService, RestaurantsService
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Authorize(Roles = "Head")]
     public async Task<IActionResult> UpdateSocialLink(
-        string restaurantId,
+        Guid restaurantId,
         string id,
         UpdateSocialDto dto)
     {
@@ -83,7 +83,7 @@ public class SocialsController(SocialsService socialsService, RestaurantsService
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Authorize(Roles = "Head")]
-    public async Task<IActionResult> DeleteSocialLink(string restaurantId, string id)
+    public async Task<IActionResult> DeleteSocialLink(Guid restaurantId, string id)
     {
         var identity = HttpContext.User.Identity as ClaimsIdentity;
         var userId = identity!.FindFirst(ClaimTypes.NameIdentifier)!.Value;
@@ -98,7 +98,7 @@ public class SocialsController(SocialsService socialsService, RestaurantsService
         return NoContent();
     }
 
-    private async Task<IActionResult> CheckRestaurantAuthorization(string restaurantId, string userId)
+    private async Task<IActionResult> CheckRestaurantAuthorization(Guid restaurantId, string userId)
     {
         var restaurant = await restaurantsService.GetRestaurantById(restaurantId);
         if (restaurant.IsFailure)

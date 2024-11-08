@@ -6,7 +6,7 @@ public abstract class SocialError
     public const string SocialAlreadyExistCode = "SOCIAL_ALREADY_EXISTS";
     public const string SocialDoesNotExistCode = "SOCIAL_NOT_FOUND";
 
-    public static AppError RestaurantNotFound(string id)
+    public static AppError RestaurantNotFound(Guid id)
     {
         return new AppError(RestaurantNotFoundCode, $"Restaurant with id '{id}' not found");
     }

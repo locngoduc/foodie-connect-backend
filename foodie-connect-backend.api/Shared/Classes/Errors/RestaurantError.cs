@@ -8,8 +8,10 @@ public abstract class RestaurantError
     public const string ImageNotExistCode = "IMAGE_NOT_EXIST";
     public const string DishCategoryAlreadyExistCode = "DISH_CATEGORY_ALREADY_EXIST";
     public const string DishCategoryNotExistCode = "DISH_CATEGORY_NOT_EXIST";
+    public const string NotOwnerCode = "NOT_OWNER";
+    public const string DuplicateNameCode = "DUPLICATE_NAME";
 
-    public static AppError RestaurantNotExist(string id)
+    public static AppError RestaurantNotExist(Guid id)
     {
         return new AppError(
             RestaurantNotExistCode,
@@ -49,5 +51,19 @@ public abstract class RestaurantError
         return new AppError(
             DishCategoryNotExistCode,
             $"The category name '{categoryName}' does not exist.");
+    }
+
+    public static AppError NotOwner(Guid restaurantId)
+    {
+        return new AppError(
+            NotOwnerCode,
+            $"You are not the owner of this restaurant ({restaurantId})");
+    }
+
+    public static AppError DuplicateName(string restaurantName)
+    {
+        return new AppError(
+            DuplicateNameCode,
+            $"The restaurant name '{restaurantName}' already exist.");
     }
 }

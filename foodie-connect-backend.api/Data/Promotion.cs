@@ -4,7 +4,7 @@ namespace foodie_connect_backend.Data;
 
 public class Promotion
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public Guid Id { get; set; }
 
     [Required] [MaxLength(32)] public string Name { get; set; } = null!;
 
@@ -20,9 +20,9 @@ public class Promotion
 
     public bool IsDeleted { get; set; } = false;
 
-    public string? RestaurantId { get; set; }
+    public Guid RestaurantId { get; set; }
 
-    public string? DishId { get; set; }
+    public Guid DishId { get; set; }
 
     public virtual Dish? Dish { get; set; }
 

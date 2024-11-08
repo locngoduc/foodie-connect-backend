@@ -34,16 +34,22 @@ public class RestaurantsController(
         var head = await headsService.GetHeadById(userId);
         
         var result = await restaurantsService.CreateRestaurant(restaurantDto, head.Value);
-        if (result is { IsFailure: true, Error.Code: RestaurantError.IncorrectCoordinatesCode }) return BadRequest(result.Error);
+        if (result.IsFailure)
+            return result.Error.Code switch
+            {
+                RestaurantError.IncorrectCoordinatesCode => BadRequest(result.Error),
+                RestaurantError.DuplicateNameCode => Conflict(result.Error),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+            };
 
         return CreatedAtAction(nameof(GetRestaurant), new { id = result.Value.Id }, result.Value);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<RestaurantResponseDto>> GetRestaurant([FromRoute] string id)
+    public async Task<ActionResult<RestaurantResponseDto>> GetRestaurant(Guid id)
     {
         var result = await restaurantsService.GetRestaurantById(id);
         if (result.IsFailure) return NotFound(result.Error);
@@ -97,20 +103,20 @@ public class RestaurantsController(
     /// </response>
     /// <response code="403">
     /// User is not authorized
-    /// - NOT_AUTHORIZED: This user is not a HEAD or is trying to change the logo of a restaurant they do not own
+    /// - NOT_OWNER: Only the owner of a restaurant can update it
     /// </response>
     /// <response code="404">
     /// User is not authorized
     /// - RESTAURANT_NOT_EXIST: This restaurant does not exist
     /// </response>
-    [HttpPut("{id}/logo")]
+    [HttpPut("{id:guid}/logo")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Authorize(Policy = "RestaurantOwner")]
-    public async Task<ActionResult<GenericResponse>> UpdateLogo(string id, IFormFile file)
+    public async Task<ActionResult<GenericResponse>> UpdateLogo(Guid id, IFormFile file)
     {
         var result = await restaurantsService.UploadLogo(id, file);
         if (result.IsFailure)
@@ -147,20 +153,20 @@ public class RestaurantsController(
     /// </response>
     /// <response code="403">
     /// User is not authorized
-    /// - NOT_AUTHORIZED: This user is not a HEAD or is trying to change the banner of a restaurant they do not own
+    /// - NOT_OWNER: Only the owner of a restaurant can update it
     /// </response>
     /// <response code="404">
     /// User is not authorized
     /// - RESTAURANT_NOT_EXIST: This restaurant does not exist
     /// </response>
-    [HttpPut("{id}/banner")]
+    [HttpPut("{id:guid}/banner")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Authorize(Policy = "RestaurantOwner")]
-    public async Task<ActionResult<GenericResponse>> UpdateBanner(string id, IFormFile file)
+    public async Task<ActionResult<GenericResponse>> UpdateBanner(Guid id, IFormFile file)
     {
         var result = await restaurantsService.UploadBanner(id, file);
         if (result.IsFailure)
@@ -198,20 +204,20 @@ public class RestaurantsController(
     /// </response>
     /// <response code="403">
     /// User is not authorized
-    /// - NOT_AUTHORIZED: This user is not a HEAD or is trying to change the gallery of a restaurant they do not own
+    /// - NOT_OWNER: Only the owner of a restaurant can update it
     /// </response>
     /// <response code="404">
     /// User is not authorized
     /// - RESTAURANT_NOT_EXIST: This restaurant does not exist
     /// </response>
-    [HttpPost("{id}/images")]
+    [HttpPost("{id:guid}/images")]
     [Authorize(Policy = "RestaurantOwner")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GenericResponse>> UploadImages(string id, IFormFile[] files)
+    public async Task<ActionResult<GenericResponse>> UploadImages(Guid id, IFormFile[] files)
     {
         var result = await restaurantsService.UploadImages(id, files);
         if (result.IsFailure)
@@ -245,17 +251,17 @@ public class RestaurantsController(
     /// </response>
     /// <response code="403">
     /// User is not authorized
-    /// - NOT_AUTHORIZED: This user is not a HEAD or is trying to change the gallery of a restaurant they do not own
+    /// - NOT_OWNER: Only the owner of a restaurant can update it
     /// </response>
     /// <response code="500">An unexpected error occured. Recheck if image still exist.</response>
-    [HttpDelete("{id}/images/{*imageId}")]
+    [HttpDelete("{id:guid}/images/{*imageId}")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [Authorize(Policy = "RestaurantOwner")]
-    public async Task<ActionResult<GenericResponse>> DeleteImage(string id, string imageId)
+    public async Task<ActionResult<GenericResponse>> DeleteImage(Guid id, string imageId)
     {
         var result = await restaurantsService.DeleteImage(id, imageId);
         if (!result.IsFailure) return Ok(new GenericResponse { Message = "Image deleted successfully" });
@@ -280,10 +286,10 @@ public class RestaurantsController(
     /// Restaurant not found
     /// - RESTAURANT_NOT_EXIST: The provided ID does not correspond to any restaurant
     /// </response>
-    [HttpGet("{id}/categories")]
+    [HttpGet("{id:guid}/categories")]
     [ProducesResponseType(typeof(DishCategoryResponseDto[]), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DishCategoryResponseDto[]>> GetCategories(string id)
+    public async Task<ActionResult<DishCategoryResponseDto[]>> GetCategories(Guid id)
     {
         var result = await restaurantsService.GetDishCategories(id);
         if (result.IsFailure) return NotFound(result.Error);
@@ -307,7 +313,7 @@ public class RestaurantsController(
     /// </response>
     /// <response code="403">
     /// Insufficient permission
-    /// - NOT_AUTHORIZED: Only the owner of the restaurant can perform this action
+    /// - NOT_OWNER: Only the owner of a restaurant can update it
     /// </response>
     /// <response code="404">
     /// Restaurant not found
@@ -317,7 +323,7 @@ public class RestaurantsController(
     /// Conflict with existing categories
     /// - DISH_CATEGORY_ALREADY_EXIST: This category name already exists
     /// </response>
-    [HttpPost("{id}/categories")]
+    [HttpPost("{id:guid}/categories")]
     [Authorize(Policy = "RestaurantOwner")]
     [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -325,7 +331,7 @@ public class RestaurantsController(
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<DishCategoryResponseDto>> AddDishCategory(string id, CreateDishCategoryDto dto)
+    public async Task<ActionResult<DishCategoryResponseDto>> AddDishCategory(Guid id, CreateDishCategoryDto dto)
     {
         var result = await restaurantsService.AddDishCategory(id, dto.CategoryName);
         if (result.IsFailure)
@@ -355,21 +361,21 @@ public class RestaurantsController(
     /// </response>
     /// <response code="403">
     /// Insufficient permission
-    /// - NOT_AUTHORIZED: Only the owner of the restaurant can perform this action
+    /// - NOT_OWNER: Only the owner of a restaurant can update it
     /// </response>
     /// <response code="404">
     /// Not found
     /// - RESTAURANT_NOT_EXIST: This restaurant does not exist
     /// - DISH_CATEGORY_NOT_EXIST: The supplied category name does not exist in this restaurant
     /// </response>
-    [HttpDelete("{id}/categories/{categoryName}")]
+    [HttpDelete("{id:guid}/categories/{categoryName}")]
     [Authorize(Policy = "RestaurantOwner")]
     [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DishCategoryResponseDto>> DeleteDishCategory(string id, string categoryName)
+    public async Task<ActionResult<DishCategoryResponseDto>> DeleteDishCategory(Guid id, string categoryName)
     {
         var result = await restaurantsService.DeleteDishCategory(id, categoryName);
         if (result.IsFailure)
@@ -398,7 +404,7 @@ public class RestaurantsController(
     /// </response>
     /// <response code="403">
     /// Insufficient permission
-    /// - NOT_AUTHORIZED: Only the owner of the restaurant can perform this action
+    /// - NOT_OWNER: Only the owner of a restaurant can update it
     /// </response>
     /// <response code="404">
     /// Not found
@@ -409,7 +415,7 @@ public class RestaurantsController(
     /// Conflict with existing categories
     /// - DISH_CATEGORY_ALREADY_EXIST: The new category name conflicts with an existing category
     /// </response>
-    [HttpPut("{id}/categories/{categoryName}")]
+    [HttpPut("{id:guid}/categories/{categoryName}")]
     [Authorize(Policy = "RestaurantOwner")]
     [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -417,7 +423,7 @@ public class RestaurantsController(
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<DishCategoryResponseDto>> RenameDishCategory(string id, string categoryName, RenameDishCategoryDto dto)
+    public async Task<ActionResult<DishCategoryResponseDto>> RenameDishCategory(Guid id, string categoryName, RenameDishCategoryDto dto)
     {
         var result = await restaurantsService.RenameDishCategory(id, categoryName, dto.NewName);
         if (result.IsFailure)

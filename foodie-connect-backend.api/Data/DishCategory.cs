@@ -8,7 +8,7 @@ namespace foodie_connect_backend.Data;
 [PrimaryKey(nameof(RestaurantId), nameof(CategoryName))]
 public class DishCategory
 {
-    [MaxLength(128)] public string RestaurantId { get; set; } = null!;
+    [MaxLength(128)] public Guid RestaurantId { get; set; }
     [Required] [MaxLength(32)] public string CategoryName { get; set; } = null!;
     
     public ICollection<Dish> Dishes { get; set; } = new List<Dish>();

@@ -8,8 +8,7 @@ namespace foodie_connect_backend.Data;
 
 public sealed class Restaurant
 {
-    [MaxLength(128)]
-    public string Id { get; init; } = Guid.NewGuid().ToString();
+    public Guid Id { get; set; }
 
     [Required] [MaxLength(128)] public string Name { get; set; } = null!;
 
@@ -31,9 +30,8 @@ public sealed class Restaurant
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; init; } = DateTime.UtcNow;
-
-    [MaxLength(128)]
-    public string? AreaId { get; set; }
+    
+    public Guid AreaId { get; set; }
 
     public bool IsDeleted { get; init; }
 
@@ -45,7 +43,7 @@ public sealed class Restaurant
 
     [JsonIgnore] public ICollection<Dish> Dishes { get; init; } = new List<Dish>();
 
-    [JsonIgnore] public ICollection<Review> Reviews { get; init; } = new List<Review>();
+    [JsonIgnore] public ICollection<DishReview> Reviews { get; init; } = new List<DishReview>();
 
     [JsonIgnore] public ICollection<Promotion> Promotions { get; init; } = new List<Promotion>();
 

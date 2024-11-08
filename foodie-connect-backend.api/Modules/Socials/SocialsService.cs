@@ -8,7 +8,7 @@ namespace foodie_connect_backend.Modules.Socials;
 
 public class SocialsService(ApplicationDbContext dbContext)
 {
-    public async Task<Result<List<SocialLinkResponseDto>>> GetRestaurantSocialLinksAsync(string restaurantId)
+    public async Task<Result<List<SocialLinkResponseDto>>> GetRestaurantSocialLinksAsync(Guid restaurantId)
     {
         try
         {
@@ -35,7 +35,7 @@ public class SocialsService(ApplicationDbContext dbContext)
         }
     }
 
-    public async Task<Result<SocialLinkResponseDto>> AddSocialLinkAsync(string restaurantId, CreateSocialDto dto)
+    public async Task<Result<SocialLinkResponseDto>> AddSocialLinkAsync(Guid restaurantId, CreateSocialDto dto)
     {
         try
         {
@@ -73,7 +73,7 @@ public class SocialsService(ApplicationDbContext dbContext)
         }
     }
 
-    public async Task<Result<SocialLinkResponseDto>> UpdateSocialLinkAsync(string restaurantId, UpdateSocialDto dto)
+    public async Task<Result<SocialLinkResponseDto>> UpdateSocialLinkAsync(Guid restaurantId, UpdateSocialDto dto)
     {
         try
         {
@@ -109,7 +109,7 @@ public class SocialsService(ApplicationDbContext dbContext)
         }
     }
 
-    public async Task<Result<bool>> DeleteSocialLinkAsync(string restaurantId, string socialLinkId)
+    public async Task<Result<bool>> DeleteSocialLinkAsync(Guid restaurantId, string socialLinkId)
     {
         try
         {

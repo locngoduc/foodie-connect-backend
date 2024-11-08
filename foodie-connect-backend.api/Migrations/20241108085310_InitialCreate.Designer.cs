@@ -14,8 +14,8 @@ using foodie_connect_backend.Data;
 namespace foodie_connect_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241107084207_Bumped max length")]
-    partial class Bumpedmaxlength
+    [Migration("20241108085310_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,11 +30,11 @@ namespace foodie_connect_backend.Migrations
 
             modelBuilder.Entity("DishDishCategory", b =>
                 {
-                    b.Property<string>("DishesId")
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("DishesId")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("CategoriesRestaurantId")
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("CategoriesRestaurantId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CategoriesCategoryName")
                         .HasColumnType("character varying(32)");
@@ -180,8 +180,8 @@ namespace foodie_connect_backend.Migrations
 
             modelBuilder.Entity("foodie_connect_backend.Data.Area", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("AdministrativeAreaLevel1")
                         .HasColumnType("text");
@@ -202,7 +202,7 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2024, 11, 7, 8, 42, 7, 231, DateTimeKind.Utc).AddTicks(383));
+                        .HasDefaultValue(new DateTime(2024, 11, 8, 8, 53, 10, 5, DateTimeKind.Utc).AddTicks(9603));
 
                     b.Property<string>("FormattedAddress")
                         .IsRequired()
@@ -254,7 +254,7 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2024, 11, 7, 8, 42, 7, 231, DateTimeKind.Utc).AddTicks(870));
+                        .HasDefaultValue(new DateTime(2024, 11, 8, 8, 53, 10, 6, DateTimeKind.Utc).AddTicks(134));
 
                     b.HasKey("Id");
 
@@ -263,9 +263,8 @@ namespace foodie_connect_backend.Migrations
 
             modelBuilder.Entity("foodie_connect_backend.Data.Dish", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -291,10 +290,8 @@ namespace foodie_connect_backend.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("RestaurantId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -311,9 +308,9 @@ namespace foodie_connect_backend.Migrations
 
             modelBuilder.Entity("foodie_connect_backend.Data.DishCategory", b =>
                 {
-                    b.Property<string>("RestaurantId")
+                    b.Property<Guid>("RestaurantId")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CategoryName")
                         .HasMaxLength(32)
@@ -322,6 +319,27 @@ namespace foodie_connect_backend.Migrations
                     b.HasKey("RestaurantId", "CategoryName");
 
                     b.ToTable("DishCategories");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.DishReview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DishId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DishId");
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("Reviews");
                 });
 
             modelBuilder.Entity("foodie_connect_backend.Data.Promotion", b =>
@@ -337,8 +355,8 @@ namespace foodie_connect_backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("DishId")
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("DishId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("timestamp with time zone");
@@ -351,8 +369,8 @@ namespace foodie_connect_backend.Migrations
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
-                    b.Property<string>("RestaurantId")
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Target")
                         .IsRequired()
@@ -373,13 +391,11 @@ namespace foodie_connect_backend.Migrations
 
             modelBuilder.Entity("foodie_connect_backend.Data.Restaurant", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
-                    b.Property<string>("AreaId")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("AreaId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("CloseTime")
                         .HasColumnType("integer");
@@ -435,50 +451,10 @@ namespace foodie_connect_backend.Migrations
                     b.ToTable("Restaurants");
                 });
 
-            modelBuilder.Entity("foodie_connect_backend.Data.Review", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DishId")
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RestaurantId")
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DishId");
-
-                    b.HasIndex("RestaurantId");
-
-                    b.ToTable("Reviews");
-                });
-
             modelBuilder.Entity("foodie_connect_backend.Data.Service", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -491,8 +467,8 @@ namespace foodie_connect_backend.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<string>("RestaurantId")
-                        .HasColumnType("character varying(128)");
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -502,6 +478,28 @@ namespace foodie_connect_backend.Migrations
                     b.HasIndex("RestaurantId");
 
                     b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("foodie_connect_backend.Data.SocialLink", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<int>("PlatformType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId");
+
+                    b.ToTable("SocialLinks");
                 });
 
             modelBuilder.Entity("foodie_connect_backend.Data.User", b =>
@@ -581,28 +579,6 @@ namespace foodie_connect_backend.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("foodie_connect_backend.Shared.Classes.SocialLink", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<int>("PlatformType")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RestaurantId")
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RestaurantId");
-
-                    b.ToTable("SocialLinks");
                 });
 
             modelBuilder.Entity("DishDishCategory", b =>
@@ -691,17 +667,32 @@ namespace foodie_connect_backend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("foodie_connect_backend.Data.DishReview", b =>
+                {
+                    b.HasOne("foodie_connect_backend.Data.Dish", null)
+                        .WithMany("Reviews")
+                        .HasForeignKey("DishId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("foodie_connect_backend.Data.Restaurant", null)
+                        .WithMany("Reviews")
+                        .HasForeignKey("RestaurantId");
+                });
+
             modelBuilder.Entity("foodie_connect_backend.Data.Promotion", b =>
                 {
                     b.HasOne("foodie_connect_backend.Data.Dish", "Dish")
                         .WithMany("Promotions")
                         .HasForeignKey("DishId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
                         .WithMany("Promotions")
                         .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Dish");
 
@@ -713,43 +704,30 @@ namespace foodie_connect_backend.Migrations
                     b.HasOne("foodie_connect_backend.Data.Area", "Area")
                         .WithMany("Restaurants")
                         .HasForeignKey("AreaId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.Navigation("Area");
-                });
-
-            modelBuilder.Entity("foodie_connect_backend.Data.Review", b =>
-                {
-                    b.HasOne("foodie_connect_backend.Data.Dish", "Dish")
-                        .WithMany("Reviews")
-                        .HasForeignKey("DishId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
-                        .WithMany("Reviews")
-                        .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.Navigation("Dish");
-
-                    b.Navigation("Restaurant");
                 });
 
             modelBuilder.Entity("foodie_connect_backend.Data.Service", b =>
                 {
                     b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
                         .WithMany("Services")
-                        .HasForeignKey("RestaurantId");
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Restaurant");
                 });
 
-            modelBuilder.Entity("foodie_connect_backend.Shared.Classes.SocialLink", b =>
+            modelBuilder.Entity("foodie_connect_backend.Data.SocialLink", b =>
                 {
                     b.HasOne("foodie_connect_backend.Data.Restaurant", "Restaurant")
                         .WithMany("SocialLinks")
                         .HasForeignKey("RestaurantId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Restaurant");
                 });

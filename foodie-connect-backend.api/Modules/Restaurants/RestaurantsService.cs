@@ -17,60 +17,65 @@ public class RestaurantsService(
     IGeoCoderService geoCoderService
 )
 {
-    public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
+public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
+{
+    await using var transaction = await dbContext.Database.BeginTransactionAsync();
+    try
     {
-        await using var transaction = await dbContext.Database.BeginTransactionAsync();
-        try
+        var coordinates = restaurant.LatitudeLongitude.Split(',');
+
+        if (coordinates.Length != 2 ||
+            !double.TryParse(coordinates[0], NumberStyles.Float,
+                CultureInfo.InvariantCulture, out var latitude) ||
+            !double.TryParse(coordinates[1], NumberStyles.Float,
+                CultureInfo.InvariantCulture, out var longitude))
+            return Result<RestaurantResponseDto>.Failure(RestaurantError.IncorrectCoordinates());
+
+        // Check if a restaurant with the same name already exists
+        var existingRestaurant = await dbContext.Restaurants.FirstOrDefaultAsync(r => r.Name.Equals(restaurant.Name));
+        if (existingRestaurant != null)
+            return Result<RestaurantResponseDto>.Failure(RestaurantError.DuplicateName(restaurant.Name));
+
+        var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
+
+        var newRestaurant = new Restaurant
         {
-            var coordinates = restaurant.LatitudeLongitude.Split(',');
+            Name = restaurant.Name,
+            Phone = restaurant.Phone,
+            OpenTime = restaurant.OpenTime,
+            CloseTime = restaurant.CloseTime,
+            Status = restaurant.Status,
+            HeadId = head.Id,
+            Location = locationPoint
+        };
 
-            if (coordinates.Length != 2 ||
-                !double.TryParse(coordinates[0], NumberStyles.Float,
-                    CultureInfo.InvariantCulture, out var latitude) ||
-                !double.TryParse(coordinates[1], NumberStyles.Float,
-                    CultureInfo.InvariantCulture, out var longitude))
-                return Result<RestaurantResponseDto>.Failure(RestaurantError.IncorrectCoordinates());
+        var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
+        if (resultArea.IsFailure)
+            return Result<RestaurantResponseDto>.Failure(
+                AppError.InternalError());
 
-            var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
+        await dbContext.Areas.AddAsync(resultArea.Value);
 
-            var newRestaurant = new Restaurant
-            {
-                Name = restaurant.Name,
-                Phone = restaurant.Phone,
-                OpenTime = restaurant.OpenTime,
-                CloseTime = restaurant.CloseTime,
-                Status = restaurant.Status,
-                HeadId = head.Id,
-                Location = locationPoint
-            };
+        newRestaurant.AreaId = resultArea.Value.Id;
 
-            var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
-            if (resultArea.IsFailure)
-                return Result<RestaurantResponseDto>.Failure(
-                    AppError.InternalError());
+        await dbContext.Restaurants.AddAsync(newRestaurant);
+        await dbContext.SaveChangesAsync();
 
-            await dbContext.Areas.AddAsync(resultArea.Value);
+        await transaction.CommitAsync();
 
-            newRestaurant.AreaId = resultArea.Value.Id;
-
-            await dbContext.Restaurants.AddAsync(newRestaurant);
-            await dbContext.SaveChangesAsync();
-
-            await transaction.CommitAsync();
-
-            var response = newRestaurant.ToResponseDto();
-            return Result<RestaurantResponseDto>.Success(response);
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            Console.WriteLine($"Error creating restaurant: {ex.Message}");
-            return Result<RestaurantResponseDto>.Failure(AppError.InternalError());
-        }
+        var response = newRestaurant.ToResponseDto();
+        return Result<RestaurantResponseDto>.Success(response);
     }
+    catch (Exception ex)
+    {
+        await transaction.RollbackAsync();
+        Console.WriteLine($"Error creating restaurant: {ex.Message}");
+        return Result<RestaurantResponseDto>.Failure(AppError.InternalError());
+    }
+}
 
 
-    public async Task<Result<Restaurant>> UpdateRestaurant(string restaurantId, CreateRestaurantDto restaurant)
+    public async Task<Result<Restaurant>> UpdateRestaurant(Guid restaurantId, CreateRestaurantDto restaurant)
     {
         try
         {
@@ -95,7 +100,7 @@ public class RestaurantsService(
         }
     }
 
-    public async Task<Result<RestaurantResponseDto>> GetRestaurantById(string id)
+    public async Task<Result<RestaurantResponseDto>> GetRestaurantById(Guid id)
     {
         var restaurant = await dbContext.Restaurants
             .Include(r => r.SocialLinks)
@@ -120,7 +125,7 @@ public class RestaurantsService(
         return Result<List<RestaurantResponseDto>>.Success(restaurants);
     }
 
-    private async Task<Result<bool>> UploadImage(string restaurantId, IFormFile file, string publicId,
+    private async Task<Result<bool>> UploadImage(Guid restaurantId, IFormFile file, string publicId,
         string? folder = null)
     {
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
@@ -153,7 +158,7 @@ public class RestaurantsService(
         }
     }
 
-    public async Task<Result<bool>> DeleteImage(string restaurantId, string imageId)
+    public async Task<Result<bool>> DeleteImage(Guid restaurantId, string imageId)
     {
         var restaurant = await dbContext.Restaurants
             .AsTracking()
@@ -180,17 +185,17 @@ public class RestaurantsService(
         }
     }
 
-    public Task<Result<bool>> UploadLogo(string restaurantId, IFormFile file)
+    public Task<Result<bool>> UploadLogo(Guid restaurantId, IFormFile file)
     {
         return UploadImage(restaurantId, file, "logo");
     }
 
-    public Task<Result<bool>> UploadBanner(string restaurantId, IFormFile file)
+    public Task<Result<bool>> UploadBanner(Guid restaurantId, IFormFile file)
     {
         return UploadImage(restaurantId, file, "banner");
     }
 
-    public async Task<Result<bool>> UploadImages(string restaurantId, ICollection<IFormFile> files)
+    public async Task<Result<bool>> UploadImages(Guid restaurantId, ICollection<IFormFile> files)
     {
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
         if (restaurant == null)
@@ -211,7 +216,7 @@ public class RestaurantsService(
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<DishCategory>> AddDishCategory(string restaurantId, string categoryName)
+    public async Task<Result<DishCategory>> AddDishCategory(Guid restaurantId, string categoryName)
     {
         var restaurant = await dbContext.Restaurants
             .Include(restaurant => restaurant.DishCategories)
@@ -231,7 +236,7 @@ public class RestaurantsService(
         return Result<DishCategory>.Success(newDishCategory);
     }
 
-    public async Task<Result<DishCategory>> DeleteDishCategory(string restaurantId, string categoryName)
+    public async Task<Result<DishCategory>> DeleteDishCategory(Guid restaurantId, string categoryName)
     {
         var restaurant = await dbContext.Restaurants
             .Include(restaurant => restaurant.DishCategories)
@@ -264,7 +269,7 @@ public class RestaurantsService(
         return Result<DishCategory>.Success(categoryToRemove);
     }
 
-    public async Task<Result<DishCategory[]>> GetDishCategories(string restaurantId)
+    public async Task<Result<DishCategory[]>> GetDishCategories(Guid restaurantId)
     {
         var restaurant = await dbContext.Restaurants
             .Include(restaurant => restaurant.DishCategories)
@@ -277,7 +282,7 @@ public class RestaurantsService(
         return Result<DishCategory[]>.Success(restaurant.DishCategories.ToArray());
     }
 
-    public async Task<Result<DishCategory>> RenameDishCategory(string restaurantId, string oldName, string newName)
+    public async Task<Result<DishCategory>> RenameDishCategory(Guid restaurantId, string oldName, string newName)
     {
         var restaurant = await dbContext.Restaurants
             .Include(restaurant => restaurant.DishCategories)

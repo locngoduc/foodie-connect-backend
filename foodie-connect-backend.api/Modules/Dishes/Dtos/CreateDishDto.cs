@@ -39,7 +39,7 @@ public abstract class CreateDishDto
     /// </summary>
     /// <example>550e8400-e29b-41d4-a716-446655440000</example>
     [Required(ErrorMessage = "Restaurant ID is required")]
-    public string RestaurantId { get; set; } = null!;
+    public Guid RestaurantId { get; set; }
 
     /// <summary>
     /// List of category IDs this dish belongs to

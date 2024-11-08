@@ -4,15 +4,14 @@ namespace foodie_connect_backend.Data;
 
 public sealed class Dish
 {
-    [MaxLength(128)]
-    public string Id { get; init; } = Guid.NewGuid().ToString();
+    public Guid Id { get; set; }
 
     [Required]
     [MinLength(3)]
     [MaxLength(32)]
     public string Name { get; init; } = null!;
 
-    public string ImageId { get; init; } = null!;
+    public string? ImageId { get; init; }
 
     [MaxLength(500)]
     public string Description { get; init; } = null!;
@@ -23,8 +22,7 @@ public sealed class Dish
 
     public DateTime UpdatedAt { get; init; } = DateTime.UtcNow;
 
-    [MaxLength(128)]
-    public string RestaurantId { get; init; } = null!;
+    public Guid RestaurantId { get; init; }
     
     public ICollection<DishCategory> Categories { get; init; } = new List<DishCategory>();
 
@@ -34,5 +32,5 @@ public sealed class Dish
 
     public Restaurant? Restaurant { get; init; }
 
-    public ICollection<Review> Reviews { get; init; } = new List<Review>();
+    public ICollection<DishReview> Reviews { get; init; } = new List<DishReview>();
 }

@@ -6,7 +6,7 @@ namespace foodie_connect_backend.Data;
 
 public class Area
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public Guid Id { get; set; }
 
         [Required]
         public string FormattedAddress { get; set; }

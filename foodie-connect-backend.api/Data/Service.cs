@@ -4,7 +4,7 @@ namespace foodie_connect_backend.Data;
 
 public sealed class Service
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public Guid Id { get; set; }
 
     [MaxLength(128)] public string Name { get; set; } = string.Empty;
 
@@ -14,7 +14,7 @@ public sealed class Service
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public string? RestaurantId { get; set; }
+    public Guid RestaurantId { get; set; }
 
     public Restaurant? Restaurant { get; set; }
 }
