@@ -17,26 +17,6 @@ public class RestaurantsService(
     IGeoCoderService geoCoderService
 )
 {
-    private static RestaurantResponseDto ToResponseDto(Restaurant restaurant)
-    {
-        return new RestaurantResponseDto
-        {
-            Id = restaurant.Id,
-            Name = restaurant.Name,
-            OpenTime = restaurant.OpenTime,
-            CloseTime = restaurant.CloseTime,
-            Status = restaurant.Status,
-            SocialLinks = restaurant.SocialLinks,
-            Phone = restaurant.Phone,
-            Images = restaurant.Images,
-            CreatedAt = restaurant.CreatedAt,
-            FormattedAddress = restaurant.Area?.FormattedAddress,
-            Latitude = restaurant.Location.Y,
-            Longitude = restaurant.Location.X,
-            HeadId = restaurant.HeadId
-        };
-    }
-
     public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync();
@@ -78,7 +58,7 @@ public class RestaurantsService(
 
             await transaction.CommitAsync();
 
-            var response = ToResponseDto(newRestaurant);
+            var response = newRestaurant.ToResponseDto();
             return Result<RestaurantResponseDto>.Success(response);
         }
         catch (Exception ex)
@@ -125,7 +105,7 @@ public class RestaurantsService(
         if (restaurant == null)
             return Result<RestaurantResponseDto>.Failure(RestaurantError.RestaurantNotExist(id));
 
-        var response = ToResponseDto(restaurant);
+        var response = restaurant.ToResponseDto();
         return Result<RestaurantResponseDto>.Success(response);
     }
 
@@ -134,7 +114,7 @@ public class RestaurantsService(
         var restaurants = await dbContext.Restaurants
             .Where(restaurant => restaurant.Location.Distance(center) <= radius)
             .Include(restaurant => restaurant.Area)
-            .Select(restaurant => ToResponseDto(restaurant))
+            .Select(restaurant => restaurant.ToResponseDto())
             .ToListAsync();
 
         return Result<List<RestaurantResponseDto>>.Success(restaurants);
