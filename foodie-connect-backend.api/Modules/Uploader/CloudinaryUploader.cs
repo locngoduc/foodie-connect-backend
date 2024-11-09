@@ -46,7 +46,7 @@ public class CloudinaryUploader : IUploaderService
         }
 
         var result = await _cloudinary.UploadAsync(uploadParams);
-        return Result<string>.Success(result.PublicId);
+        return Result<string>.Success($"{result.PublicId}.{result.Version}");
     }
 
     public async Task<Result<IList<string>>> UploadImagesAsync(IEnumerable<IFormFile> files,

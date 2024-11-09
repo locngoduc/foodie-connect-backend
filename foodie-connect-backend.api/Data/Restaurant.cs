@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Enums;
@@ -37,6 +38,7 @@ public sealed class Restaurant
 
     public ICollection<DishCategory> DishCategories { get; init; } = new List<DishCategory>();
 
+    [Column(TypeName="geography")]
     [Required] [JsonIgnore] public Point Location { get; init; } = null!;
 
     [JsonIgnore] public Area? Area { get; init; }

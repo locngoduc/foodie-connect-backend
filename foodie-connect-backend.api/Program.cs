@@ -1,7 +1,9 @@
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Modules.Dishes;
 using foodie_connect_backend.Modules.GeoCoder;
 using foodie_connect_backend.Modules.Heads;
 using foodie_connect_backend.Modules.Restaurants;
@@ -12,6 +14,7 @@ using foodie_connect_backend.Modules.Users;
 using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Policies;
+using foodie_connect_backend.Shared.Policies.Dish;
 using foodie_connect_backend.Shared.Policies.Restaurant;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -32,6 +35,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -77,6 +82,9 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RestaurantOwner", policy =>
         policy.Requirements.Add(new RestaurantOwnerRequirement()));
+    
+    options.AddPolicy("DishOwner", policy => 
+        policy.Requirements.Add(new DishOwnerRequirement()));
 });
 
 builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEmail = true; })
@@ -108,8 +116,10 @@ builder.Services.AddScoped<SessionsService>();
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<RestaurantsService>();
 builder.Services.AddScoped<SocialsService>();
+builder.Services.AddScoped<DishesService>();
 builder.Services.AddScoped<IAuthorizationHandler, RestaurantOwnerHandler>();
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, CustomAuthorizationMiddlewareResultHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, DishOwnerHandler>();
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationResponseTransformer>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

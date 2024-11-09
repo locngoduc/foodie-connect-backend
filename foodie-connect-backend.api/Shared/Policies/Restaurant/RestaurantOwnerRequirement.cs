@@ -18,58 +18,36 @@ public class RestaurantOwnerHandler(ApplicationDbContext dbContext) : Authorizat
         RestaurantOwnerRequirement requirement)
     {
         var user = context.User;
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (context.Resource is not HttpContext resource) return;
-        if (user.Identity == null || user.Identity.IsAuthenticated == false)
+        if (user.Identity == null || user.Identity.IsAuthenticated == false) return;
+
+        var parseSuccess = Guid.TryParse(resource.GetRouteValue("id")?.ToString(), out var restaurantId);
+        if (!parseSuccess)
         {
-            context.Fail(new AuthorizationFailureReason(this, SessionFailureReason.NotAuthenticated));
-            return;
+            var tryGetIdFromBody = await GetRestaurantId(resource);
+            if (tryGetIdFromBody.IsFailure)
+            {
+                context.Fail(new AuthorizationFailureReason(this, RestaurantError.RestaurantNotExistCode));
+                return;
+            }
+            restaurantId = tryGetIdFromBody.Value;
         }
-
-        var restaurantId = resource.GetRouteValue("id") as Guid?;
-
-        // If not in route, try to get from body
-        if (restaurantId == null)
-        {
-            var result = await GetRestaurantId(resource);
-            if (result.IsSuccess) restaurantId = result.Value;
-        }
-
-        if (restaurantId == null)
-        {
-            context.Fail(new AuthorizationFailureReason(this, RestaurantAuthorizationFailureReason.RestaurantNotFound));
-            return;
-        }
-
-        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userId)) return;
 
         var restaurantResult = await dbContext.Restaurants.FindAsync(restaurantId);
         if (restaurantResult == null)
         {
-            context.Fail(new AuthorizationFailureReason(this, RestaurantAuthorizationFailureReason.RestaurantNotFound));
+            context.Fail(new AuthorizationFailureReason(this, RestaurantError.RestaurantNotExistCode));
             return;
         }
-
-        if (restaurantResult.HeadId != userId)
-        {
-            context.Fail(new AuthorizationFailureReason(this, RestaurantAuthorizationFailureReason.NotOwner));
-            return;
-        }
+        if (restaurantResult.HeadId != userId) return;
         
         context.Succeed(requirement);
     }
 
     private static async Task<Result<Guid>> GetRestaurantId(HttpContext context)
     {
-        // First try to get from route
-        var routeId = context.GetRouteValue("id")?.ToString();
-        if (!string.IsNullOrEmpty(routeId))
-        {
-            return Result<Guid>.Success(Guid.Parse(routeId));
-        }
-
-        // If not in route, try to get from body
         try
         {
             context.Request.EnableBuffering();
@@ -85,9 +63,11 @@ public class RestaurantOwnerHandler(ApplicationDbContext dbContext) : Authorizat
             context.Request.Body.Position = 0;
 
             using var document = JsonDocument.Parse(body);
-            if (document.RootElement.TryGetProperty("restaurantId", out var idElement))
+            var property = document.RootElement.EnumerateObject()
+                .FirstOrDefault(prop => string.Compare(prop.Name, "restaurantId", StringComparison.OrdinalIgnoreCase) == 0);
+            if (property.Value.ValueKind != JsonValueKind.Undefined)
             {
-                return Result<Guid>.Success(Guid.Parse(idElement.GetString()!));
+                return Result<Guid>.Success(Guid.Parse(property.Value.ToString()));
             }
         }
         catch
@@ -95,6 +75,6 @@ public class RestaurantOwnerHandler(ApplicationDbContext dbContext) : Authorizat
             // If any error occurs during body reading, return empty string
         }
 
-        return Result<Guid>.Failure(AppError.None);
+        return Result<Guid>.Failure(AppError.MissingRequiredField("Restaurant Id"));
     }
 }

@@ -80,7 +80,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
         try
         {
             var result = await dbContext.Restaurants.FindAsync(restaurantId);
-            if (result == null) return Result<Restaurant>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+            if (result == null) return Result<Restaurant>.Failure(RestaurantError.RestaurantNotExist());
 
             var currRestaurant = result;
             currRestaurant.Name = restaurant.Name;
@@ -108,7 +108,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (restaurant == null)
-            return Result<RestaurantResponseDto>.Failure(RestaurantError.RestaurantNotExist(id));
+            return Result<RestaurantResponseDto>.Failure(RestaurantError.RestaurantNotExist());
 
         var response = restaurant.ToResponseDto();
         return Result<RestaurantResponseDto>.Success(response);
@@ -130,7 +130,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
     {
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
         if (restaurant is null)
-            return Result<bool>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+            return Result<bool>.Failure(RestaurantError.RestaurantNotExist());
 
         var imageOptions = new ImageFileOptions
         {
@@ -165,7 +165,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
             .FirstOrDefaultAsync(r => r.Id == restaurantId);
 
         if (restaurant == null)
-            return Result<bool>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+            return Result<bool>.Failure(RestaurantError.RestaurantNotExist());
 
         if (!restaurant.Images.Contains(imageId))
             return Result<bool>.Failure(RestaurantError.ImageNotExist(imageId));
@@ -175,7 +175,8 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
             restaurant.Images.Remove(imageId);
             await dbContext.SaveChangesAsync();
 
-            var deleteResult = await uploaderService.DeleteFileAsync(imageId);
+            var imageDetails = imageId.Split(".");
+            var deleteResult = await uploaderService.DeleteFileAsync(imageDetails[0]);
             return deleteResult.IsFailure ? Result<bool>.Failure(deleteResult.Error) : Result<bool>.Success(true);
         }
         catch (Exception ex)
@@ -199,7 +200,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
     {
         var restaurant = await dbContext.Restaurants.FindAsync(restaurantId);
         if (restaurant == null)
-            return Result<bool>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+            return Result<bool>.Failure(RestaurantError.RestaurantNotExist());
 
         var uploadTasks = files.Select(file => UploadImage(
             restaurantId,
@@ -224,7 +225,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
         
         // Checks
         if (restaurant == null) 
-            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist());
         if (restaurant.DishCategories.Any(x => x.CategoryName == categoryName)) 
             return Result<DishCategory>.Failure(RestaurantError.DishCategoryAlreadyExist(categoryName));
 
@@ -244,7 +245,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
     
         // Checks
         if (restaurant == null) 
-            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist());
         if (restaurant.DishCategories.All(x => x.CategoryName != categoryName)) 
             return Result<DishCategory>.Failure(RestaurantError.DishCategoryNotExist(categoryName));
     
@@ -277,7 +278,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
     
         // Checks
         if (restaurant == null) 
-            return Result<DishCategory[]>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+            return Result<DishCategory[]>.Failure(RestaurantError.RestaurantNotExist());
         
         return Result<DishCategory[]>.Success(restaurant.DishCategories.ToArray());
     }
@@ -290,7 +291,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
     
         // Checks
         if (restaurant == null) 
-            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist(restaurantId));
+            return Result<DishCategory>.Failure(RestaurantError.RestaurantNotExist());
         if (restaurant.DishCategories.All(x => x.CategoryName != oldName))
             return Result<DishCategory>.Failure(RestaurantError.DishCategoryNotExist(oldName));
         if (restaurant.DishCategories.Any(x => x.CategoryName == newName))

@@ -11,11 +11,11 @@ public abstract class RestaurantError
     public const string NotOwnerCode = "NOT_OWNER";
     public const string DuplicateNameCode = "DUPLICATE_NAME";
 
-    public static AppError RestaurantNotExist(Guid id)
+    public static AppError RestaurantNotExist()
     {
         return new AppError(
             RestaurantNotExistCode,
-            $"The restaurant with id '{id}' does not exist.");
+            $"The restaurant does not exist.");
     }
 
     public static AppError IncorrectCoordinates()

@@ -10,7 +10,7 @@ public class Promotion
 
     [Required] [MaxLength(128)] public string Target { get; set; } = null!;
 
-    [MaxLength(256)] public string BannerUrl { get; set; } = string.Empty;
+    [MaxLength(256)] public string? BannerUrl { get; set; } = string.Empty;
 
     public DateTime ExpiredAt { get; set; }
 

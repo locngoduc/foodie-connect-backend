@@ -14,7 +14,7 @@ public interface IUploaderService
     /// </summary>
     /// <param name="file">The file to upload</param>
     /// <param name="options">File upload configuration options</param>
-    /// <returns>The identifier of the uploaded file</returns>
+    /// <returns>The identifier and version number of the uploaded file in the format "{PublicID}.{VersionNumber}"</returns>
     Task<Result<string>> UploadImageAsync(IFormFile file, ImageFileOptions? options = null);
 
     /// <summary>
