@@ -168,7 +168,7 @@ public class UsersIntegrationTests(FoodieWebApplicationFactory<Program> factory)
             formData);
 
         // Assert
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -225,7 +225,7 @@ public class UsersIntegrationTests(FoodieWebApplicationFactory<Program> factory)
             content);
 
         // Assert
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -252,7 +252,7 @@ public class UsersIntegrationTests(FoodieWebApplicationFactory<Program> factory)
             content);
 
         // Assert
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -288,7 +288,7 @@ public class UsersIntegrationTests(FoodieWebApplicationFactory<Program> factory)
             new StringContent(""));
 
         // Assert
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]

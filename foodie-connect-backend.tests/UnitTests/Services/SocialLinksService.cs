@@ -37,7 +37,7 @@ public class SocialsServiceTests
     {
         // Arrange
         await ClearDatabase();
-        var restaurantId = "rest123";
+        var restaurantId = Guid.NewGuid();
         var restaurant = new Restaurant
         {
             Id = restaurantId,
@@ -70,7 +70,7 @@ public class SocialsServiceTests
     {
         // Arrange
         await ClearDatabase();
-        var restaurantId = "invalid";
+        var restaurantId = Guid.NewGuid();
     
         // Act
         var result = await _socialsService.GetRestaurantSocialLinksAsync(restaurantId);
@@ -85,19 +85,45 @@ public class SocialsServiceTests
     {
         // Arrange
         await ClearDatabase();
-        var restaurantId = "rest123";
         var restaurant = new Restaurant
         {
-            Id = restaurantId,
             Name = "Test Restaurant",
             Phone = "1234567890",
             HeadId = "head-user",
             SocialLinks = new List<SocialLink>(),
             Location = new Point(0,0)
         };
-    
+        
+        var area = new Area
+        {
+            FormattedAddress = "123 Gourmet St, Foodie City, FL 12345, USA",
+            StreetAddress = "123 Gourmet St",
+            Route = "Gourmet St",
+            Intersection = "Foodie Ave & Gourmet St",
+            PoliticalEntity = "Foodie County",
+            Country = "USA",
+            AdministrativeAreaLevel1 = "Florida",
+            AdministrativeAreaLevel2 = "Miami-Dade County",
+            AdministrativeAreaLevel3 = "Downtown Miami",
+            Locality = "Miami",
+            Sublocality = "Downtown",
+            Neighborhood = "Culinary District",
+            PostalCode = "12345",
+            PlusCode = "AB34+56",
+            NaturalFeature = "Miami River",
+            Airport = "Miami International Airport",
+            Park = "Foodie Park",
+            PointOfInterest = "Foodie Plaza",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Restaurants = new List<Restaurant>()
+        };
+
+        _dbContext.Areas.Add(area);
+        restaurant.AreaId = area.Id;
         _dbContext.Restaurants.Add(restaurant);
         await _dbContext.SaveChangesAsync();
+        
         _dbContext.ChangeTracker.Clear();
     
         var createDto = new CreateSocialDto
@@ -107,7 +133,7 @@ public class SocialsServiceTests
         };
     
         // Act
-        var result = await _socialsService.AddSocialLinkAsync(restaurantId, createDto);
+        var result = await _socialsService.AddSocialLinkAsync(restaurant.Id, createDto);
     
         // Assert
         Assert.True(result.IsSuccess);
@@ -116,7 +142,7 @@ public class SocialsServiceTests
         
         var savedRestaurant = await _dbContext.Restaurants
             .Include(r => r.SocialLinks)
-            .FirstAsync(r => r.Id == restaurantId);
+            .FirstAsync(r => r.Id == restaurant.Id);
         Assert.Single(savedRestaurant.SocialLinks);
         Assert.Equal(SocialPlatformType.Twitter, savedRestaurant.SocialLinks.First().PlatformType);
     }
@@ -126,7 +152,7 @@ public class SocialsServiceTests
     {
         // Arrange
         await ClearDatabase();
-        var restaurantId = "rest123";
+        var restaurantId = Guid.NewGuid();
         var restaurant = new Restaurant
         {
             Id = restaurantId,
@@ -162,7 +188,7 @@ public class SocialsServiceTests
     {
         // Arrange
         await ClearDatabase();
-        var restaurantId = "rest123";
+        var restaurantId = Guid.NewGuid();
         var socialLinkId = "link123";
         var restaurant = new Restaurant
         {
@@ -207,7 +233,7 @@ public class SocialsServiceTests
     {
         // Arrange
         await ClearDatabase();
-        var restaurantId = "rest123";
+        var restaurantId = Guid.NewGuid();
         var socialLinkId = "link123";
         var restaurant = new Restaurant
         {
@@ -243,7 +269,7 @@ public class SocialsServiceTests
     {
         // Arrange
         await ClearDatabase();
-        var restaurantId = "invalid";
+        var restaurantId = Guid.NewGuid();
         var socialLinkId = "link123";
     
         // Act
@@ -259,7 +285,7 @@ public class SocialsServiceTests
     {
         // Arrange
         await ClearDatabase();
-        var restaurantId = "rest123";
+        var restaurantId = Guid.NewGuid();
         var socialLinkId = "invalid";
         var restaurant = new Restaurant
         {

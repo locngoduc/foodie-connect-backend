@@ -56,7 +56,7 @@ public class SocialsService(ApplicationDbContext dbContext)
                 RestaurantId = restaurantId
             };
 
-            restaurant.SocialLinks.Add(socialLink);
+            dbContext.SocialLinks.Add(socialLink);
             await dbContext.SaveChangesAsync();
 
             var socialLinksResponseDto = new SocialLinkResponseDto

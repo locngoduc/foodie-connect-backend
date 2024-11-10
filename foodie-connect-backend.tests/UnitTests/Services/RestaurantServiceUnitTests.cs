@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NetTopologySuite.Geometries;
 using Point = NetTopologySuite.Geometries.Point;
+using Restaurant = foodie_connect_backend.Data.Restaurant;
 
 namespace food_connect_backend.tests.UnitTests.Services;
 
@@ -104,17 +105,45 @@ public class RestaurantsServiceTests
         // Arrange
         var restaurant = new Restaurant
         {
-            Id = "rest1",
             Name = "Test Restaurant",
             HeadId = "user1",
             Phone = "1234567890",
-            Location = new Point(new Coordinate(0,0))
+            Location = new Point(new Coordinate(0,0)),
+            SocialLinks = new List<SocialLink>(),
         };
-        await _dbContext.Restaurants.AddAsync(restaurant);
+
+        var area = new Area
+        {
+            FormattedAddress = "123 Gourmet St, Foodie City, FL 12345, USA",
+            StreetAddress = "123 Gourmet St",
+            Route = "Gourmet St",
+            Intersection = "Foodie Ave & Gourmet St",
+            PoliticalEntity = "Foodie County",
+            Country = "USA",
+            AdministrativeAreaLevel1 = "Florida",
+            AdministrativeAreaLevel2 = "Miami-Dade County",
+            AdministrativeAreaLevel3 = "Downtown Miami",
+            Locality = "Miami",
+            Sublocality = "Downtown",
+            Neighborhood = "Culinary District",
+            PostalCode = "12345",
+            PlusCode = "AB34+56",
+            NaturalFeature = "Miami River",
+            Airport = "Miami International Airport",
+            Park = "Foodie Park",
+            PointOfInterest = "Foodie Plaza",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Restaurants = new List<Restaurant>()
+        };
+        
+        _dbContext.Areas.Add(area);
+        restaurant.AreaId = area.Id;
+        _dbContext.Restaurants.Add(restaurant);
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var result = await _service.GetRestaurantById("rest1");
+        var result = await _service.GetRestaurantById(restaurant.Id);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -127,7 +156,7 @@ public class RestaurantsServiceTests
     public async Task GetRestaurantById_NonExistentId_ReturnsFailure()
     {
         // Act
-        var result = await _service.GetRestaurantById("nonexistent");
+        var result = await _service.GetRestaurantById(Guid.NewGuid());
 
         // Assert
         Assert.True(result.IsFailure);
@@ -138,7 +167,7 @@ public class RestaurantsServiceTests
     public async Task UploadLogo_ValidFile_ReturnsSuccess()
     {
         // Arrange
-        var restaurantId = "rest1";
+        var restaurantId = Guid.NewGuid();
         var restaurant = new Restaurant
         {
             Id = restaurantId,
@@ -175,7 +204,7 @@ public class RestaurantsServiceTests
     public async Task DeleteImage_ExistingImage_ReturnsSuccess()
     {
         // Arrange
-        var restaurantId = "rest1";
+        var restaurantId = Guid.NewGuid();
         var imageId = "image1";
         var restaurant = new Restaurant
         {
@@ -207,7 +236,7 @@ public class RestaurantsServiceTests
     public async Task UploadImages_MultipleValidFiles_ReturnsSuccess()
     {
         // Arrange
-        var restaurantId = "rest1";
+        var restaurantId = Guid.NewGuid();
         var restaurant = new Restaurant
         {
             Id = restaurantId,
@@ -252,7 +281,7 @@ public class RestaurantsServiceTests
     public async Task UploadBanner_InvalidFileType_ReturnsFailure()
     {
         // Arrange
-        var restaurantId = "rest1";
+        var restaurantId = Guid.NewGuid();
         var restaurant = new Restaurant
         {
             Id = restaurantId,
@@ -286,7 +315,7 @@ public class RestaurantsServiceTests
     public async Task UploadBanner_ExceedFileSize_ReturnsFailure()
     {
         // Arrange
-        var restaurantId = "rest1";
+        var restaurantId = Guid.NewGuid();
         var restaurant = new Restaurant
         {
             Id = restaurantId,
@@ -320,7 +349,7 @@ public class RestaurantsServiceTests
     public async Task UploadLogo_InvalidFileType_ReturnsFailure()
     {
         // Arrange
-        var restaurantId = "rest1";
+        var restaurantId = Guid.NewGuid();
         var restaurant = new Restaurant
         {
             Id = restaurantId,
@@ -354,7 +383,7 @@ public class RestaurantsServiceTests
     public async Task UploadLogo_ExceedFileSize_ReturnsFailure()
     {
         // Arrange
-        var restaurantId = "rest1";
+        var restaurantId = Guid.NewGuid();
         var restaurant = new Restaurant
         {
             Id = restaurantId,
