@@ -3,6 +3,7 @@ using System.Text.Json;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Policies.Dish;
+using foodie_connect_backend.Shared.Policies.EmailConfirmed;
 using foodie_connect_backend.Shared.Policies.Restaurant;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
@@ -30,9 +31,39 @@ public class AuthorizationResponseTransformer : IAuthorizationMiddlewareResultHa
         {
             var failureReason = authorizeResult.AuthorizationFailure?.FailureReasons
                 .FirstOrDefault()?.Message;
+            var failedRequirements = authorizeResult.AuthorizationFailure?.FailedRequirements;
 
             var response = new AuthorizationResponse 
                 { StatusCode = StatusCodes.Status403Forbidden, Error = AuthError.NotAuthorized() };
+
+            if (failedRequirements != null)
+            {
+                var authorizationRequirements = failedRequirements.ToList();
+                if (authorizationRequirements.Any(x => x is EmailConfirmedRequirement))
+                {
+                    response = new AuthorizationResponse
+                    {
+                        StatusCode = StatusCodes.Status403Forbidden,
+                        Error = AuthError.EmailNotVerified()
+                    };
+                }
+                else if (authorizationRequirements.Any(x => x is DishOwnerRequirement))
+                {
+                    response = new AuthorizationResponse
+                    {
+                        StatusCode = StatusCodes.Status403Forbidden,
+                        Error = DishError.NotRestaurantOwner()
+                    };
+                }
+                else if (authorizationRequirements.Any(x => x is RestaurantOwnerRequirement))
+                {
+                    response = new AuthorizationResponse
+                    {
+                        StatusCode = StatusCodes.Status403Forbidden,
+                        Error = RestaurantError.NotOwner()
+                    };
+                }
+            }
 
             if (failureReason is not null)
             {

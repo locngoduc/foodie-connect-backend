@@ -26,7 +26,6 @@ public class UsersService(
         };
         
         var result = await userManager.CreateAsync(newUser, user.Password);
-        await userManager.AddToRoleAsync(newUser, "User");
         
         if (!result.Succeeded)
         {
@@ -42,6 +41,8 @@ public class UsersService(
                 _ => Result<User>.Failure(AppError.UnexpectedError(result.Errors.First().Description))
             };
         }
+        
+        await userManager.AddToRoleAsync(newUser, "User");
         
         // Send verification email
         // This introduces tight-coupling between Heads and Verification service

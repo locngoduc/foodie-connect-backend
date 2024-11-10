@@ -15,6 +15,7 @@ using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Policies;
 using foodie_connect_backend.Shared.Policies.Dish;
+using foodie_connect_backend.Shared.Policies.EmailConfirmed;
 using foodie_connect_backend.Shared.Policies.Restaurant;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -57,8 +58,8 @@ builder.Services.AddAuthentication()
     .AddCookie(IdentityConstants.ApplicationScheme, options =>
     {
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.None;
-        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = builder.Configuration["ENVIRONMENT"] == "production" ? CookieSecurePolicy.Always : CookieSecurePolicy.None;
+        options.Cookie.SameSite = builder.Configuration["ENVIRONMENT"] == "production" ? SameSiteMode.None : SameSiteMode.Lax;;
         options.Cookie.Name = "access_token";
         options.ExpireTimeSpan = TimeSpan.FromDays(14);
         options.Events = new CookieAuthenticationEvents
@@ -85,6 +86,9 @@ builder.Services.AddAuthorization(options =>
     
     options.AddPolicy("DishOwner", policy => 
         policy.Requirements.Add(new DishOwnerRequirement()));
+    
+    options.AddPolicy("EmailVerified", policy =>
+        policy.Requirements.Add(new EmailConfirmedRequirement()));
 });
 
 builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEmail = true; })
@@ -119,6 +123,7 @@ builder.Services.AddScoped<SocialsService>();
 builder.Services.AddScoped<DishesService>();
 builder.Services.AddScoped<IAuthorizationHandler, RestaurantOwnerHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, DishOwnerHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedHandler>();
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationResponseTransformer>();
 
 // Configure CORS
@@ -145,7 +150,6 @@ using (var scope = app.Services.CreateScope())
             await roleManager.CreateAsync(new IdentityRole(role));
 }
 
-AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

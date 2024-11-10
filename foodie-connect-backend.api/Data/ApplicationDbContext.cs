@@ -4,16 +4,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace foodie_connect_backend.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User>(options)
+public class ApplicationDbContext : IdentityDbContext<User>
 {
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+        AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+    }
+
     public DbSet<Area> Areas { get; init; } = null!;
     public DbSet<Restaurant> Restaurants { get; init; } = null!;
     public DbSet<Dish> Dishes { get; init; } = null!;
+    public DbSet<DishReview> DishReviews { get; init; } = null!;
     public DbSet<Promotion> Promotions { get; init; } = null!;
     public DbSet<Service> Services { get; init; } = null!;
     public DbSet<DishReview> Reviews { get; init; } = null!;
     public DbSet<DishCategory> DishCategories { get; init; } = null!;
     public DbSet<SocialLink> SocialLinks { get; init; } = null!;
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

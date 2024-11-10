@@ -7,6 +7,8 @@ public abstract class DishError
     public const string RestaurantNotFoundCode = "RESTAURANT_NOT_FOUND";
     public const string NotRestaurantOwnerCode = "NOT_RESTAURANT_OWNER";
     public const string NameAlreadyExistsCode = "NAME_ALREADY_EXISTS";
+    public const string AlreadyReviewedCode = "ALREADY_REVIEWED";
+    public const string ReviewNotFoundCode = "REVIEW_NOT_FOUND";
 
     public static AppError DishNotFound()
     {
@@ -25,11 +27,21 @@ public abstract class DishError
 
     public static AppError NotRestaurantOwner()
     {
-        return new AppError(NotRestaurantOwnerCode, "You must be the restaurant owner to perform this action.");
+        return new AppError(NotRestaurantOwnerCode, "You must be the restaurant owner to perform this action");
     }
 
     public static AppError NameAlreadyExists(string name)
     {
-        return new AppError(NameAlreadyExistsCode, $"The name '{name}' already exists.");
+        return new AppError(NameAlreadyExistsCode, $"The name '{name}' already exists");
+    }
+
+    public static AppError AlreadyReviewed()
+    {
+        return new AppError(AlreadyReviewedCode, $"You already reviewed this dish");
+    }
+
+    public static AppError ReviewNotFound()
+    {
+        return new AppError(ReviewNotFoundCode, $"This review does not exist");
     }
 }

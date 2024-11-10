@@ -10,6 +10,7 @@ public abstract class RestaurantError
     public const string DishCategoryNotExistCode = "DISH_CATEGORY_NOT_EXIST";
     public const string NotOwnerCode = "NOT_OWNER";
     public const string DuplicateNameCode = "DUPLICATE_NAME";
+    public const string UnsupportedQueryCode = "UNSUPPORTED_QUERY";
 
     public static AppError RestaurantNotExist()
     {
@@ -22,7 +23,7 @@ public abstract class RestaurantError
     {
         return new AppError(
             IncorrectCoordinatesCode,
-            "These coordinates are invalid.");
+            "These coordinates are invalid. Expecting coordinates in format: 'longitude,latitude'");
     }
 
     public static AppError ImageNotExist(string id)
@@ -53,11 +54,11 @@ public abstract class RestaurantError
             $"The category name '{categoryName}' does not exist.");
     }
 
-    public static AppError NotOwner(Guid restaurantId)
+    public static AppError NotOwner()
     {
         return new AppError(
             NotOwnerCode,
-            $"You are not the owner of this restaurant ({restaurantId})");
+            $"You are not the owner of this restaurant");
     }
 
     public static AppError DuplicateName(string restaurantName)
@@ -65,5 +66,12 @@ public abstract class RestaurantError
         return new AppError(
             DuplicateNameCode,
             $"The restaurant name '{restaurantName}' already exist.");
+    }
+
+    public static AppError UnsupportedQuery()
+    {
+        return new AppError(
+            UnsupportedQueryCode,
+            "At least one query parameter is required.");
     }
 }

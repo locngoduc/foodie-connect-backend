@@ -17,7 +17,7 @@ public static class DishesMapper
             ImageId = dish.ImageId,
             Price = dish.Price,
             Categories = dish.Categories.Select(x => x.CategoryName).ToArray(),
-            ScoreOverview = score ?? new DishScoreResponseDto()
+            ScoreOverview = score ?? new DishScoreResponseDto(),
         };
     }
 }

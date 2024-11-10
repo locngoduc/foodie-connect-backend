@@ -1,5 +1,6 @@
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Dishes.Dtos;
+using foodie_connect_backend.Modules.DishReviews.Dtos;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
@@ -156,5 +157,97 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
     
         await dbContext.SaveChangesAsync();
         return Result<Dish>.Success(dish);
+    }
+
+    public async Task<Result<DishReview>> AddReview(Guid dishId, CreateDishReviewDto dto, string reviewerId)
+    {
+        var dish = await dbContext.Dishes
+            .Include(dish => dish.Reviews)
+            .FirstOrDefaultAsync(dish => dish.Id == dishId);
+        if (dish is null) return Result<DishReview>.Failure(DishError.DishNotFound());
+        
+        // User can only add one review per dish
+        var timesReviewed = dish.Reviews.Count(review => review.UserId == reviewerId);
+        if (timesReviewed != 0) return Result<DishReview>.Failure(DishError.AlreadyReviewed());
+
+        // Add review to database
+        var review = new DishReview
+        {
+            DishId = dish.Id,
+            UserId = reviewerId,
+            Rating = dto.Rating,
+            Content = dto.Content,
+        };
+        
+        dbContext.DishReviews.Add(review);
+        await dbContext.SaveChangesAsync();
+        
+        var addedReview = await dbContext.DishReviews
+            .Include(dishReview => dishReview.User)
+            .FirstOrDefaultAsync(dishReview => dishReview.Id == review.Id);
+        
+        return Result<DishReview>.Success(addedReview!);
+    }
+
+    public async Task<Result<DishReview>> GetPersonalDishReview(string reviewerId, Guid dishId)
+    {
+        var review = await dbContext.DishReviews
+            .Include(dishReview => dishReview.User)
+            .FirstOrDefaultAsync(dishReview => dishReview.UserId == reviewerId);
+        
+        if (review is null) return Result<DishReview>.Failure(DishError.ReviewNotFound());
+        return Result<DishReview>.Success(review);
+    }
+    
+
+    public async Task<DishScoreResponseDto> CalculateDishScoreAsync(Guid dishId)
+    {
+        var scores = await CalculateDishScoresAsync(new[] { dishId });
+        return scores.GetValueOrDefault(dishId, new DishScoreResponseDto());
+    }
+
+    public async Task<Dictionary<Guid, DishScoreResponseDto>> CalculateDishScoresAsync(IEnumerable<Guid> dishIds)
+    {
+        var dishIdsList = dishIds.ToList();
+        
+        // Get all reviews for the requested dishes in a single query
+        var reviewGroups = await dbContext.Set<DishReview>()
+            .Where(r => dishIdsList.Contains(r.DishId))
+            .GroupBy(r => r.DishId)
+            .Select(g => new
+            {
+                DishId = g.Key,
+                FiveStars = g.Count(r => r.Rating == 5),
+                FourStars = g.Count(r => r.Rating == 4),
+                ThreeStars = g.Count(r => r.Rating == 3),
+                TwoStars = g.Count(r => r.Rating == 2),
+                OneStar = g.Count(r => r.Rating == 1),
+                AverageRating = g.Average(r => r.Rating)
+            })
+            .ToDictionaryAsync(g => g.DishId);
+
+        // Create response dictionary including dishes with no reviews
+        var result = new Dictionary<Guid, DishScoreResponseDto>();
+        foreach (var dishId in dishIdsList)
+        {
+            if (reviewGroups.TryGetValue(dishId, out var group))
+            {
+                result[dishId] = new DishScoreResponseDto
+                {
+                    FiveStars = group.FiveStars,
+                    FourStars = group.FourStars,
+                    ThreeStars = group.ThreeStars,
+                    TwoStars = group.TwoStars,
+                    OneStar = group.OneStar,
+                    AverageRating = group.AverageRating
+                };
+            }
+            else
+            {
+                result[dishId] = new DishScoreResponseDto();
+            }
+        }
+
+        return result;
     }
 }

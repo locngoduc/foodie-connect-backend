@@ -57,26 +57,25 @@ public class RestaurantsController(
     }
 
 
-
     /// <summary>
-    /// Gets restaurants within a specified radius of a location
+    /// Retrieves restaurants within a specified radius of a location
     /// </summary>
-    /// <param name="latitude">Latitude of the center point (-90 to 90)</param>
-    /// <param name="longitude">Longitude of the center point (-180 to 180)</param>
-    /// <param name="radius">Search radius in meters (default: 5000)</param>
-    /// <returns>List of restaurants within the specified radius</returns>
+    /// <param name="query">Query parameters for filtering restaurants</param>
+    /// <returns>A list of restaurants matching the specified criteria</returns>
+    /// <response code="200">Returns the list of restaurants within the specified radius</response>
+    /// <response code="400">
+    /// Bad request
+    /// - INCORRECT_COORDINATES: The provided origin string does not follow the specified format
+    /// - UNSUPPORTED_QUERY: API does not support querying restaurants in a limitless scope
+    /// </response>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<RestaurantResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IEnumerable<RestaurantResponseDto>>> GetRestaurants(
-        [FromQuery] double latitude,
-        [FromQuery] double longitude,
-        [FromQuery] double radius = 5000)
+        [FromQuery] GetRestaurantsQuery query)
     {
-        var center = new Point(longitude, latitude) { SRID = 4326 };
-    
-        var result = await restaurantsService.GetRestaurantsInRadius(center, radius);
-    
+        var result = await restaurantsService.GetRestaurantsQuery(query);
+
         if (!result.IsSuccess)
             return BadRequest(result.Error);
         

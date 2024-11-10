@@ -114,15 +114,48 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
         return Result<RestaurantResponseDto>.Success(response);
     }
 
-    public async Task<Result<List<RestaurantResponseDto>>> GetRestaurantsInRadius(Point center, double radius)
+    public async Task<Result<List<RestaurantResponseDto>>> GetRestaurantsQuery(GetRestaurantsQuery queryDetails)
     {
-        var restaurants = await dbContext.Restaurants
-            .Where(restaurant => restaurant.Location.Distance(center) <= radius)
-            .Include(restaurant => restaurant.Area)
-            .Select(restaurant => restaurant.ToResponseDto())
-            .ToListAsync();
+        if (queryDetails.Origin is null && queryDetails.OwnerId is null) 
+            return Result<List<RestaurantResponseDto>>.Failure(RestaurantError.UnsupportedQuery());
+        
+        try
+        {
+            var query = dbContext.Restaurants.AsQueryable();
 
-        return Result<List<RestaurantResponseDto>>.Success(restaurants);
+            if (queryDetails.OwnerId is not null)
+            {
+                query = query.Where(r => r.HeadId == queryDetails.OwnerId);
+            }
+
+            if (!string.IsNullOrEmpty(queryDetails.Origin) && queryDetails.Radius.HasValue)
+            {
+                // Parse origin coordinates from "longitude,latitude" format
+                var coords = queryDetails.Origin.Split(',').Select(s => s.Trim()).ToArray();
+                if (coords.Length != 2 || 
+                    !double.TryParse(coords[0], out var longitude) ||
+                    !double.TryParse(coords[1], out var latitude))
+                {
+                    return Result<List<RestaurantResponseDto>>.Failure(
+                        RestaurantError.IncorrectCoordinates());
+                }
+
+                var center = new Point(longitude, latitude) { SRID = 4326 };
+                var radius = queryDetails.Radius ?? 500;
+                
+                query = query.Where(r => r.Location.Distance(center) <= radius);
+            }
+
+            var restaurants = await query
+                .Select(r => r.ToResponseDto())
+                .ToListAsync();
+
+            return Result<List<RestaurantResponseDto>>.Success(restaurants);
+        }
+        catch (Exception ex)
+        {
+            return Result<List<RestaurantResponseDto>>.Failure(AppError.InternalError());
+        }
     }
 
     private async Task<Result<bool>> UploadImage(Guid restaurantId, IFormFile file, string publicId,
