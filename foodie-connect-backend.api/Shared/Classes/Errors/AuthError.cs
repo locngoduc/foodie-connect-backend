@@ -3,7 +3,7 @@ namespace foodie_connect_backend.Shared.Classes.Errors;
 public abstract class AuthError
 {
     private const string NotAuthenticatedCode = "NOT_AUTHENTICATED";
-    private const string NotAuthorizedCode = "NOT_AUTHORIZED";
+    public const string NotAuthorizedCode = "NOT_AUTHORIZED";
     public const string EmailNotVerifiedCode = "EMAIL_NOT_VERIFIED";
     public const string InvalidCredentialsCode = "INVALID_CREDENTIALS";
     

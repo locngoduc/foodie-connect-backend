@@ -158,46 +158,6 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         await dbContext.SaveChangesAsync();
         return Result<Dish>.Success(dish);
     }
-
-    public async Task<Result<DishReview>> AddReview(Guid dishId, CreateDishReviewDto dto, string reviewerId)
-    {
-        var dish = await dbContext.Dishes
-            .Include(dish => dish.Reviews)
-            .FirstOrDefaultAsync(dish => dish.Id == dishId);
-        if (dish is null) return Result<DishReview>.Failure(DishError.DishNotFound());
-        
-        // User can only add one review per dish
-        var timesReviewed = dish.Reviews.Count(review => review.UserId == reviewerId);
-        if (timesReviewed != 0) return Result<DishReview>.Failure(DishError.AlreadyReviewed());
-
-        // Add review to database
-        var review = new DishReview
-        {
-            DishId = dish.Id,
-            UserId = reviewerId,
-            Rating = dto.Rating,
-            Content = dto.Content,
-        };
-        
-        dbContext.DishReviews.Add(review);
-        await dbContext.SaveChangesAsync();
-        
-        var addedReview = await dbContext.DishReviews
-            .Include(dishReview => dishReview.User)
-            .FirstOrDefaultAsync(dishReview => dishReview.Id == review.Id);
-        
-        return Result<DishReview>.Success(addedReview!);
-    }
-
-    public async Task<Result<DishReview>> GetPersonalDishReview(string reviewerId, Guid dishId)
-    {
-        var review = await dbContext.DishReviews
-            .Include(dishReview => dishReview.User)
-            .FirstOrDefaultAsync(dishReview => dishReview.UserId == reviewerId);
-        
-        if (review is null) return Result<DishReview>.Failure(DishError.ReviewNotFound());
-        return Result<DishReview>.Success(review);
-    }
     
 
     public async Task<DishScoreResponseDto> CalculateDishScoreAsync(Guid dishId)
