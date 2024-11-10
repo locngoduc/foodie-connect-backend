@@ -5,15 +5,6 @@ namespace foodie_connect_backend.Modules.Restaurants.Mappers;
 
 public static class RestaurantMapper
 {
-    public static DishCategoryResponseDto ToResponseDto(this DishCategory dishCategory)
-    {
-        return new DishCategoryResponseDto
-        {
-            RestaurantId = dishCategory.RestaurantId,
-            CategoryName = dishCategory.CategoryName,
-        };
-    }
-    
     public static RestaurantResponseDto ToResponseDto(this Restaurant restaurant)
     {
         return new RestaurantResponseDto
