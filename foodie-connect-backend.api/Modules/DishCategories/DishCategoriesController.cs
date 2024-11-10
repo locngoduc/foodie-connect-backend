@@ -1,3 +1,4 @@
+using foodie_connect_backend.Modules.DishCategories.Dtos;
 using foodie_connect_backend.Modules.DishCategories.Mapper;
 using foodie_connect_backend.Modules.Restaurants.Dtos;
 using foodie_connect_backend.Shared.Classes.Errors;

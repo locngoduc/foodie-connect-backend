@@ -1,4 +1,5 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Modules.DishCategories.Dtos;
 using foodie_connect_backend.Modules.Restaurants.Dtos;
 
 namespace foodie_connect_backend.Modules.DishCategories.Mapper;

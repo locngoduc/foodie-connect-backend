@@ -170,6 +170,9 @@ app.MapControllers();
 
 app.Run();
 
-public partial class Program
+namespace foodie_connect_backend
 {
+    public partial class Program
+    {
+    }
 }

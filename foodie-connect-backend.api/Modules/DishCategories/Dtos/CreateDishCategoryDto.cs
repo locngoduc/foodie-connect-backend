@@ -1,4 +1,4 @@
-namespace foodie_connect_backend.Modules.Restaurants.Dtos;
+namespace foodie_connect_backend.Modules.DishCategories.Dtos;
 
 public class CreateDishCategoryDto
 {
