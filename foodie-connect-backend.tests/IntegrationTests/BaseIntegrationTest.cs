@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using foodie_connect_backend;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Sessions.Dtos;
 using foodie_connect_backend.Shared.Enums;

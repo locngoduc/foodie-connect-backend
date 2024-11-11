@@ -147,6 +147,7 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
             }
 
             var restaurants = await query
+                .Include(r => r.Area)
                 .Select(r => r.ToResponseDto())
                 .ToListAsync();
 

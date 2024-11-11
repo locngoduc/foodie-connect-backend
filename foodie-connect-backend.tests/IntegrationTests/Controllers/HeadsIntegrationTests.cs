@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Castle.Core.Configuration;
+using foodie_connect_backend;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Users.Dtos;
 using foodie_connect_backend.Shared.Dtos;
