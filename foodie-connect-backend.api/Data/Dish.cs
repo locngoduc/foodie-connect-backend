@@ -31,7 +31,7 @@ public sealed class Dish
 
     public bool IsDeleted { get; init; }
 
-    public ICollection<Promotion> Promotions { get; init; } = new List<Promotion>();
+    public ICollection<PromotionDetail> PromotionDetails { get; set; } = new List<PromotionDetail>();
     
     public ICollection<DishReview> Reviews { get; init; } = new List<DishReview>();
 }

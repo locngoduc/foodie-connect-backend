@@ -4,13 +4,10 @@ namespace foodie_connect_backend.Modules.Promotions.Dtos;
 
 public record CreatePromotionDto
 {
-    [Required] public string Name { get; set; }
-
-    [Required] public string Target { get; set; }
-
-    [Required] public DateTime ExpiredAt { get; set; }
-
-    [Required] public Guid DishId { get; set; }
-
-    [Required] public Guid RestaurantId { get; set; }
+    [MaxLength(128)] public string Name { get; set; } = null!;
+    [MaxLength(2048)] public string Description { get; set; } = null!;
+    public ICollection<string> Targets { get; set; } = new List<string>();
+    public ICollection<CreatePromotionDetailsDto> PromotionDetails { get; set; } = new List<CreatePromotionDetailsDto>();
+    public DateTime BeginsAt { get; set; }
+    public DateTime EndsAt { get; set; }
 }
