@@ -19,85 +19,122 @@ public class RestaurantsService(
 )
 {
     public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
-{
-    await using var transaction = await dbContext.Database.BeginTransactionAsync();
-    try
     {
-        var coordinates = restaurant.LatitudeLongitude.Split(',');
-
-        if (coordinates.Length != 2 ||
-            !double.TryParse(coordinates[0], NumberStyles.Float,
-                CultureInfo.InvariantCulture, out var latitude) ||
-            !double.TryParse(coordinates[1], NumberStyles.Float,
-                CultureInfo.InvariantCulture, out var longitude))
-            return Result<RestaurantResponseDto>.Failure(RestaurantError.IncorrectCoordinates());
-
-        // Check if a restaurant with the same name already exists
-        var existingRestaurant = await dbContext.Restaurants.FirstOrDefaultAsync(r => r.Name.Equals(restaurant.Name));
-        if (existingRestaurant != null)
-            return Result<RestaurantResponseDto>.Failure(RestaurantError.DuplicateName(restaurant.Name));
-
-        var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
-
-        var newRestaurant = new Restaurant
-        {
-            Name = restaurant.Name,
-            Phone = restaurant.Phone,
-            OpenTime = restaurant.OpenTime,
-            CloseTime = restaurant.CloseTime,
-            Status = restaurant.Status,
-            HeadId = head.Id,
-            Location = locationPoint
-        };
-
-        var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
-        if (resultArea.IsFailure)
-            return Result<RestaurantResponseDto>.Failure(
-                AppError.InternalError());
-
-        await dbContext.Areas.AddAsync(resultArea.Value);
-
-        newRestaurant.AreaId = resultArea.Value.Id;
-
-        await dbContext.Restaurants.AddAsync(newRestaurant);
-        await dbContext.SaveChangesAsync();
-
-        await transaction.CommitAsync();
-
-        var response = newRestaurant.ToResponseDto(new ScoreResponseDto());
-        return Result<RestaurantResponseDto>.Success(response);
-    }
-    catch (Exception ex)
-    {
-        await transaction.RollbackAsync();
-        Console.WriteLine($"Error creating restaurant: {ex.Message}");
-        return Result<RestaurantResponseDto>.Failure(AppError.InternalError());
-    }
-}
-
-
-    public async Task<Result<Restaurant>> UpdateRestaurant(Guid restaurantId, CreateRestaurantDto restaurant)
-    {
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
         try
         {
-            var result = await dbContext.Restaurants.FindAsync(restaurantId);
-            if (result == null) return Result<Restaurant>.Failure(RestaurantError.RestaurantNotExist());
+            var coordinates = restaurant.LongitudeLatitude.Split(',');
 
-            var currRestaurant = result;
-            currRestaurant.Name = restaurant.Name;
-            currRestaurant.Phone = restaurant.Phone;
-            currRestaurant.OpenTime = restaurant.OpenTime;
-            currRestaurant.CloseTime = restaurant.CloseTime;
-            currRestaurant.Status = restaurant.Status;
+            if (coordinates.Length != 2 ||
+                !double.TryParse(coordinates[0], NumberStyles.Float,
+                    CultureInfo.InvariantCulture, out var longitude) ||
+                !double.TryParse(coordinates[1], NumberStyles.Float,
+                    CultureInfo.InvariantCulture, out var latitude))
+                return Result<RestaurantResponseDto>.Failure(RestaurantError.IncorrectCoordinates());
 
-            await dbContext.Restaurants.AddAsync(currRestaurant);
+            // Check if a restaurant with the same name already exists
+            var existingRestaurant = await dbContext.Restaurants.FirstOrDefaultAsync(r => r.Name.Equals(restaurant.Name));
+            if (existingRestaurant != null)
+                return Result<RestaurantResponseDto>.Failure(RestaurantError.DuplicateName(restaurant.Name));
+
+            var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
+
+            var newRestaurant = new Restaurant
+            {
+                Name = restaurant.Name,
+                Phone = restaurant.Phone,
+                OpenTime = restaurant.OpenTime,
+                CloseTime = restaurant.CloseTime,
+                Status = restaurant.Status,
+                HeadId = head.Id,
+                Location = locationPoint
+            };
+
+            var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
+            if (resultArea.IsFailure)
+                return Result<RestaurantResponseDto>.Failure(
+                    AppError.InternalError());
+
+            await dbContext.Areas.AddAsync(resultArea.Value);
+
+            newRestaurant.AreaId = resultArea.Value.Id;
+
+            await dbContext.Restaurants.AddAsync(newRestaurant);
             await dbContext.SaveChangesAsync();
-            return Result<Restaurant>.Success(currRestaurant);
+
+            await transaction.CommitAsync();
+
+            var response = newRestaurant.ToResponseDto(new ScoreResponseDto());
+            return Result<RestaurantResponseDto>.Success(response);
         }
         catch (Exception ex)
         {
+            await transaction.RollbackAsync();
+            Console.WriteLine($"Error creating restaurant: {ex.Message}");
+            return Result<RestaurantResponseDto>.Failure(AppError.InternalError());
+        }
+    }
+
+
+    public async Task<Result<RestaurantResponseDto>> UpdateRestaurant(Guid restaurantId, CreateRestaurantDto restaurant)
+    {
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
+        try
+        {
+            var existingRestaurant = await dbContext.Restaurants.FindAsync(restaurantId);
+            if (existingRestaurant == null) 
+                return Result<RestaurantResponseDto>.Failure(RestaurantError.RestaurantNotExist());
+
+            // Check if the new name conflicts with another restaurant (excluding current restaurant)
+            var nameExists = await dbContext.Restaurants
+                .AnyAsync(r => r.Name.Equals(restaurant.Name) && r.Id != restaurantId);
+            if (nameExists)
+                return Result<RestaurantResponseDto>.Failure(RestaurantError.DuplicateName(restaurant.Name));
+
+            // Handle coordinates update if provided
+            if (!string.IsNullOrEmpty(restaurant.LongitudeLatitude))
+            {
+                var coordinates = restaurant.LongitudeLatitude.Split(',');
+
+                if (coordinates.Length != 2 ||
+                    !double.TryParse(coordinates[0], NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out var longitude) ||
+                    !double.TryParse(coordinates[1], NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out var latitude))
+                    return Result<RestaurantResponseDto>.Failure(RestaurantError.IncorrectCoordinates());
+
+                var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
+                existingRestaurant.Location = locationPoint;
+
+                // Update area information
+                var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
+                if (resultArea.IsFailure)
+                    return Result<RestaurantResponseDto>.Failure(AppError.InternalError());
+
+                await dbContext.Areas.AddAsync(resultArea.Value);
+                existingRestaurant.AreaId = resultArea.Value.Id;
+            }
+
+            // Update other properties
+            existingRestaurant.Name = restaurant.Name;
+            existingRestaurant.Phone = restaurant.Phone;
+            existingRestaurant.OpenTime = restaurant.OpenTime;
+            existingRestaurant.CloseTime = restaurant.CloseTime;
+            existingRestaurant.Status = restaurant.Status;
+
+            dbContext.Restaurants.Update(existingRestaurant);
+            await dbContext.SaveChangesAsync();
+            
+            await transaction.CommitAsync();
+
+            var response = existingRestaurant.ToResponseDto(new ScoreResponseDto());
+            return Result<RestaurantResponseDto>.Success(response);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
             Console.WriteLine($"Error updating restaurant: {ex.Message}");
-            return Result<Restaurant>.Failure(AppError.InternalError());
+            return Result<RestaurantResponseDto>.Failure(AppError.InternalError());
         }
     }
 

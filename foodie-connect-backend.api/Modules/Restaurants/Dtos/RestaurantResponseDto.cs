@@ -9,8 +9,8 @@ public record RestaurantResponseDto()
 {
     public Guid Id { get; set; }
     public string Name { get; set; }
-    public int OpenTime { get; set; }
-    public int CloseTime { get; set; }
+    public TimeOnly OpenTime { get; set; }
+    public TimeOnly CloseTime { get; set; }
     public RestaurantStatus Status { get; set; }
     public ICollection<SocialLink> SocialLinks { get; set; }
     public string Phone { get; set; }

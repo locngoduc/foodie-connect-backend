@@ -13,9 +13,9 @@ public sealed class Restaurant
 
     [Required] [MaxLength(128)] public string Name { get; set; } = null!;
 
-    [Required] public int OpenTime { get; set; }
+    [Required] public TimeOnly OpenTime { get; set; }
 
-    [Required] public int CloseTime { get; set; }
+    [Required] public TimeOnly CloseTime { get; set; }
 
     public RestaurantStatus Status { get; set; } = RestaurantStatus.Open;
 
@@ -39,7 +39,7 @@ public sealed class Restaurant
     public ICollection<DishCategory> DishCategories { get; init; } = new List<DishCategory>();
 
     [Column(TypeName="geography")]
-    [Required] [JsonIgnore] public Point Location { get; init; } = null!;
+    [Required] [JsonIgnore] public Point Location { get; set; } = null!;
 
     [JsonIgnore] public Area? Area { get; init; }
 

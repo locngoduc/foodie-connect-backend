@@ -42,7 +42,7 @@ public class RestaurantsController(
                 _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
             };
 
-        return CreatedAtAction(nameof(GetRestaurant), new { id = result.Value.Id }, result.Value);
+        return CreatedAtAction(nameof(GetRestaurant), new { restaurantId = result.Value.Id }, result.Value);
     }
 
     [HttpGet("{restaurantId:guid}")]
@@ -79,6 +79,64 @@ public class RestaurantsController(
         if (!result.IsSuccess)
             return BadRequest(result.Error);
         
+        return Ok(result.Value);
+    }
+
+
+    /// <summary>
+    /// Updates an existing restaurant's information
+    /// </summary>
+    /// <param name="restaurantId">The unique identifier of the restaurant to update</param>
+    /// <param name="restaurant">The updated restaurant information</param>
+    /// <returns>The updated restaurant information</returns>
+    /// <response code="200">Returns the updated restaurant information</response>
+    /// <response code="400">
+    /// Bad request
+    /// - INCORRECT_COORDINATES: The provided coordinates string does not follow the format 'longitude,latitude'
+    /// - DUPLICATE_NAME: A restaurant with the provided name already exists
+    /// </response>
+    /// <response code="401">
+    /// User is not authenticated
+    /// - NOT_AUTHENTICATED: Only authenticated users can perform this action
+    /// </response>
+    /// <response code="403">
+    /// User is not authorized
+    /// - NOT_OWNER: Only the owner of a restaurant can update it
+    /// </response>
+    /// <response code="404">
+    /// Not found
+    /// - RESTAURANT_NOT_EXIST: The restaurant with the specified ID does not exist
+    /// </response>
+    /// <response code="500">
+    /// Internal server error
+    /// - An unexpected error occurred while processing the request
+    /// </response>
+    [HttpPut("{restaurantId:guid}")]
+    [Authorize(Policy = "RestaurantOwner")]
+    [ProducesResponseType(typeof(RestaurantResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<RestaurantResponseDto>> UpdateRestaurant(
+        [FromRoute] Guid restaurantId,
+        [FromBody] CreateRestaurantDto restaurant)
+    {
+        var result = await restaurantsService.UpdateRestaurant(restaurantId, restaurant);
+
+        if (!result.IsSuccess)
+        {
+            // Map specific error types to appropriate HTTP status codes
+            return result.Error.Code switch
+            {
+                RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
+                RestaurantError.IncorrectCoordinatesCode => BadRequest(result.Error),
+                RestaurantError.DuplicateNameCode => BadRequest(result.Error),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+            };
+        }
+    
         return Ok(result.Value);
     }
 
