@@ -17,6 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
     public DbSet<Dish> Dishes { get; init; } = null!;
     public DbSet<DishReview> DishReviews { get; init; } = null!;
     public DbSet<Promotion> Promotions { get; init; } = null!;
+    public DbSet<PromotionDetail> PromotionDetails { get; init; } = null!;
     public DbSet<Service> Services { get; init; } = null!;
     public DbSet<DishReview> Reviews { get; init; } = null!;
     public DbSet<DishCategory> DishCategories { get; init; } = null!;

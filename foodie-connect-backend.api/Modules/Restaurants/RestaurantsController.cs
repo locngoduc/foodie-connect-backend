@@ -45,13 +45,13 @@ public class RestaurantsController(
         return CreatedAtAction(nameof(GetRestaurant), new { id = result.Value.Id }, result.Value);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("{restaurantId:guid}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<RestaurantResponseDto>> GetRestaurant(Guid id)
+    public async Task<ActionResult<RestaurantResponseDto>> GetRestaurant(Guid restaurantId)
     {
-        var result = await restaurantsService.GetRestaurantById(id);
+        var result = await restaurantsService.GetRestaurantById(restaurantId);
         if (result.IsFailure) return NotFound(result.Error);
         return Ok(result.Value);
     }
@@ -82,12 +82,11 @@ public class RestaurantsController(
         return Ok(result.Value);
     }
 
-    
 
     /// <summary>
-    ///     Update the restaurant's logo
+    /// Update the restaurant's logo
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="restaurantId"></param>
     /// <param name="file"></param>
     /// <returns></returns>
     /// <response code="200">Successfully updated the restaurant's logo</response>
@@ -108,16 +107,16 @@ public class RestaurantsController(
     /// User is not authorized
     /// - RESTAURANT_NOT_EXIST: This restaurant does not exist
     /// </response>
-    [HttpPut("{id:guid}/logo")]
+    [HttpPut("{restaurantId:guid}/logo")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Authorize(Policy = "RestaurantOwner")]
-    public async Task<ActionResult<GenericResponse>> UpdateLogo(Guid id, IFormFile file)
+    public async Task<ActionResult<GenericResponse>> UpdateLogo(Guid restaurantId, IFormFile file)
     {
-        var result = await restaurantsService.UploadLogo(id, file);
+        var result = await restaurantsService.UploadLogo(restaurantId, file);
         if (result.IsFailure)
         {
             return result.Error.Code switch
@@ -133,11 +132,10 @@ public class RestaurantsController(
     }
 
 
-    
     /// <summary>
-    ///     Update the restaurant's banner
+    /// Update the restaurant's banner
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="restaurantId"></param>
     /// <param name="file"></param>
     /// <returns></returns>
     /// <response code="200">Successfully updated the restaurant's banner</response>
@@ -158,16 +156,16 @@ public class RestaurantsController(
     /// User is not authorized
     /// - RESTAURANT_NOT_EXIST: This restaurant does not exist
     /// </response>
-    [HttpPut("{id:guid}/banner")]
+    [HttpPut("{restaurantId:guid}/banner")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [Authorize(Policy = "RestaurantOwner")]
-    public async Task<ActionResult<GenericResponse>> UpdateBanner(Guid id, IFormFile file)
+    public async Task<ActionResult<GenericResponse>> UpdateBanner(Guid restaurantId, IFormFile file)
     {
-        var result = await restaurantsService.UploadBanner(id, file);
+        var result = await restaurantsService.UploadBanner(restaurantId, file);
         if (result.IsFailure)
         {
             return result.Error.Code switch
@@ -183,11 +181,10 @@ public class RestaurantsController(
     }
 
 
-    
     /// <summary>
-    ///     Adds additional images to the restaurant's gallery
+    /// Adds additional images to the restaurant's gallery
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="restaurantId"></param>
     /// <param name="files"></param>
     /// <returns></returns>
     /// <response code="200">Successfully uploaded new images to gallery</response>
@@ -209,16 +206,16 @@ public class RestaurantsController(
     /// User is not authorized
     /// - RESTAURANT_NOT_EXIST: This restaurant does not exist
     /// </response>
-    [HttpPost("{id:guid}/images")]
+    [HttpPost("{restaurantId:guid}/images")]
     [Authorize(Policy = "RestaurantOwner")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<GenericResponse>> UploadImages(Guid id, IFormFile[] files)
+    public async Task<ActionResult<GenericResponse>> UploadImages(Guid restaurantId, IFormFile[] files)
     {
-        var result = await restaurantsService.UploadImages(id, files);
+        var result = await restaurantsService.UploadImages(restaurantId, files);
         if (result.IsFailure)
         {
             return result.Error.Code switch
@@ -235,11 +232,10 @@ public class RestaurantsController(
     }
 
 
-    
     /// <summary>
-    ///     Delete an image from the restaurant's gallery
+    /// Delete an image from the restaurant's gallery
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="restaurantId"></param>
     /// <param name="imageId"></param>
     /// <returns></returns>
     /// <response code="200">Successfully deleted image from gallery</response>
@@ -253,16 +249,16 @@ public class RestaurantsController(
     /// - NOT_OWNER: Only the owner of a restaurant can update it
     /// </response>
     /// <response code="500">An unexpected error occured. Recheck if image still exist.</response>
-    [HttpDelete("{id:guid}/images/{*imageId}")]
+    [HttpDelete("{restaurantId:guid}/images/{*imageId}")]
     [ProducesResponseType(typeof(GenericResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [Authorize(Policy = "RestaurantOwner")]
-    public async Task<ActionResult<GenericResponse>> DeleteImage(Guid id, string imageId)
+    public async Task<ActionResult<GenericResponse>> DeleteImage(Guid restaurantId, string imageId)
     {
-        var result = await restaurantsService.DeleteImage(id, imageId);
+        var result = await restaurantsService.DeleteImage(restaurantId, imageId);
         if (!result.IsFailure) return Ok(new GenericResponse { Message = "Image deleted successfully" });
         
         return result.Error.Code switch

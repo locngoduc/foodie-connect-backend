@@ -17,7 +17,7 @@ public class RestaurantsService(
     IGeoCoderService geoCoderService
 )
 {
-public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
+    public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaurantDto restaurant, User head)
 {
     await using var transaction = await dbContext.Database.BeginTransactionAsync();
     try
@@ -173,6 +173,25 @@ public async Task<Result<RestaurantResponseDto>> CreateRestaurant(CreateRestaura
                 ? $"foodie/restaurants/{restaurantId}/{folder}"
                 : $"foodie/restaurants/{restaurantId}/"
         };
+
+        if (publicId is "logo" or "banner")
+        {
+            switch (publicId)
+            {
+                case "logo":
+                {
+                    var restaurantLogo = restaurant.Images.FirstOrDefault(i => i.Contains("logo"));
+                    if (restaurantLogo != null) await DeleteImage(restaurantId, restaurantLogo);
+                    break;
+                }
+                case "banner":
+                {
+                    var restaurantBanner = restaurant.Images.FirstOrDefault(i => i.Contains("banner"));
+                    if (restaurantBanner != null) await DeleteImage(restaurantId, restaurantBanner);
+                    break;
+                }
+            }
+        }
 
         var uploadResult = await uploaderService.UploadImageAsync(file, imageOptions);
         if (uploadResult.IsFailure)

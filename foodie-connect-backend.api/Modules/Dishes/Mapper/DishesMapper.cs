@@ -1,6 +1,7 @@
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Dishes.Dtos;
 using foodie_connect_backend.Modules.DishReviews.Dtos;
+using foodie_connect_backend.Modules.Promotions.Mapper;
 
 namespace foodie_connect_backend.Modules.Dishes.Mapper;
 
@@ -18,6 +19,9 @@ public static class DishesMapper
             Price = dish.Price,
             Categories = dish.Categories.Select(x => x.CategoryName).ToArray(),
             ScoreOverview = score ?? new DishScoreResponseDto(),
+            Promotions = dish.PromotionDetails.Count > 0 ? 
+                dish.PromotionDetails.Select(promotionDetails => promotionDetails.ToFullResponseDto()).ToList() 
+                : []
         };
     }
 }

@@ -7,7 +7,7 @@ namespace foodie_connect_backend.Modules.DishCategories;
 
 public class DishCategoriesService(ApplicationDbContext dbContext)
 {
-        public async Task<Result<DishCategory>> AddDishCategory(Guid restaurantId, string categoryName)
+    public async Task<Result<DishCategory>> AddDishCategory(Guid restaurantId, string categoryName)
     {
         var restaurant = await dbContext.Restaurants
             .Include(restaurant => restaurant.DishCategories)

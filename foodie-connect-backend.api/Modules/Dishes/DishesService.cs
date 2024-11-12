@@ -68,7 +68,10 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
     {
         var restaurant = await dbContext.Restaurants
             .Include(restaurant => restaurant.Dishes)
-            .ThenInclude(dish => dish.Categories)
+                .ThenInclude(dish => dish.Categories)
+            .Include(restaurant => restaurant.Dishes)
+                .ThenInclude(dish => dish.PromotionDetails)
+                .ThenInclude(detail => detail.Promotion)
             .FirstOrDefaultAsync(x => x.Id == query.RestaurantId);
         if (restaurant == null) return Result<List<Dish>>.Failure(DishError.RestaurantNotFound());
         
@@ -127,6 +130,8 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
     {
         var dish = await dbContext.Dishes
             .Include(d => d.Categories)
+            .Include(d => d.PromotionDetails)
+                .ThenInclude(d => d.Promotion)
             .FirstOrDefaultAsync(d => d.Id == dishId);
         
         if (dish is null) 

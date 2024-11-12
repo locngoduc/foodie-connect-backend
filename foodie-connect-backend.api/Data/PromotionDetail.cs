@@ -7,7 +7,6 @@ public class PromotionDetail
 {
     public Promotion Promotion { get; set; } = null!;
     public Guid PromotionId { get; set; }
-    public Dish Dish { get; set; } = null!;
     public Guid DishId { get; set; }
     public decimal PromotionalPrice { get; set; }
 }

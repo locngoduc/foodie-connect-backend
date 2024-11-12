@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace foodie_connect_backend.Modules.DishCategories
 {
-    [Route("v1/restaurants/{restaurantId:guid}/categories/")]
+    [Route("v1/restaurants/{restaurantId:guid}/categories")]
     [ApiController]
     public class DishCategoriesController(DishCategoriesService dishCategoriesService) : ControllerBase
     {
@@ -23,15 +23,15 @@ namespace foodie_connect_backend.Modules.DishCategories
         /// - RESTAURANT_NOT_EXIST: The provided ID does not correspond to any restaurant
         /// </response>
         [HttpGet]
-    [ProducesResponseType(typeof(DishCategoryResponseDto[]), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DishCategoryResponseDto[]>> GetCategories(Guid restaurantId)
-    {
-        var result = await dishCategoriesService.GetDishCategories(restaurantId);
-        if (result.IsFailure) return NotFound(result.Error);
-        
-        return Ok(result.Value.Select(x => x.ToResponseDto()));
-    }
+        [ProducesResponseType(typeof(DishCategoryResponseDto[]), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<DishCategoryResponseDto[]>> GetCategories(Guid restaurantId)
+        {
+            var result = await dishCategoriesService.GetDishCategories(restaurantId);
+            if (result.IsFailure) return NotFound(result.Error);
+            
+            return Ok(result.Value.Select(x => x.ToResponseDto()));
+        }
 
 
         /// <summary>
@@ -59,26 +59,27 @@ namespace foodie_connect_backend.Modules.DishCategories
         /// - DISH_CATEGORY_ALREADY_EXIST: This category name already exists
         /// </response>
         [HttpPost]
-    [Authorize(Policy = "RestaurantOwner")]
-    [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<DishCategoryResponseDto>> AddDishCategory(CreateDishCategoryDto dto, Guid restaurantId)
-    {
-        var result = await dishCategoriesService.AddDishCategory(restaurantId, dto.CategoryName);
-        if (result.IsFailure)
-            return result.Error.Code switch
-            {
-                RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
-                RestaurantError.DishCategoryAlreadyExistCode => Conflict(result.Error),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
-            };
+        [Authorize(Policy = "RestaurantOwner")]
+        [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<DishCategoryResponseDto>> AddDishCategory(Guid restaurantId, CreateDishCategoryDto dto)
+        {
+            Console.WriteLine(restaurantId.ToString());
+            var result = await dishCategoriesService.AddDishCategory(restaurantId, dto.CategoryName);
+            if (result.IsFailure)
+                return result.Error.Code switch
+                {
+                    RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
+                    RestaurantError.DishCategoryAlreadyExistCode => Conflict(result.Error),
+                    _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+                };
 
-        return Ok(result.Value.ToResponseDto());
-    }
+            return Ok(result.Value.ToResponseDto());
+        }
 
 
         /// <summary>
@@ -103,25 +104,25 @@ namespace foodie_connect_backend.Modules.DishCategories
         /// - DISH_CATEGORY_NOT_EXIST: The supplied category name does not exist in this restaurant
         /// </response>
         [HttpDelete("{categoryName}")]
-    [Authorize(Policy = "RestaurantOwner")]
-    [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<DishCategoryResponseDto>> DeleteDishCategory(Guid restaurantId, string categoryName)
-    {
-        var result = await dishCategoriesService.DeleteDishCategory(restaurantId, categoryName);
-        if (result.IsFailure)
-            return result.Error.Code switch
-            {
-                RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
-                RestaurantError.DishCategoryNotExistCode => NotFound(result.Error),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
-            };
+        [Authorize(Policy = "RestaurantOwner")]
+        [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<DishCategoryResponseDto>> DeleteDishCategory(Guid restaurantId, string categoryName)
+        {
+            var result = await dishCategoriesService.DeleteDishCategory(restaurantId, categoryName);
+            if (result.IsFailure)
+                return result.Error.Code switch
+                {
+                    RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
+                    RestaurantError.DishCategoryNotExistCode => NotFound(result.Error),
+                    _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+                };
 
-        return Ok(result.Value.ToResponseDto());
-    }
+            return Ok(result.Value.ToResponseDto());
+        }
 
         /// <summary>
         /// Rename a category in the restaurant menu
@@ -150,26 +151,26 @@ namespace foodie_connect_backend.Modules.DishCategories
         /// - DISH_CATEGORY_ALREADY_EXIST: The new category name conflicts with an existing category
         /// </response>
         [HttpPut("{categoryName}")]
-    [Authorize(Policy = "RestaurantOwner")]
-    [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<DishCategoryResponseDto>> RenameDishCategory(Guid restaurantId, string categoryName, RenameDishCategoryDto dto)
-    {
-        var result = await dishCategoriesService.RenameDishCategory(restaurantId, categoryName, dto.NewName);
-        if (result.IsFailure)
-            return result.Error.Code switch
-            {
-                RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
-                RestaurantError.DishCategoryNotExistCode => NotFound(result.Error),
-                RestaurantError.DishCategoryAlreadyExistCode => Conflict(result.Error),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
-            };
+        [Authorize(Policy = "RestaurantOwner")]
+        [ProducesResponseType(typeof(DishCategoryResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<DishCategoryResponseDto>> RenameDishCategory(Guid restaurantId, string categoryName, RenameDishCategoryDto dto)
+        {
+            var result = await dishCategoriesService.RenameDishCategory(restaurantId, categoryName, dto.NewName);
+            if (result.IsFailure)
+                return result.Error.Code switch
+                {
+                    RestaurantError.RestaurantNotExistCode => NotFound(result.Error),
+                    RestaurantError.DishCategoryNotExistCode => NotFound(result.Error),
+                    RestaurantError.DishCategoryAlreadyExistCode => Conflict(result.Error),
+                    _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+                };
 
-        return Ok(result.Value.ToResponseDto());
-    }
+            return Ok(result.Value.ToResponseDto());
+        }
     }
 }

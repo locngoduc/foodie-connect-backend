@@ -23,7 +23,7 @@ public class RestaurantOwnerHandler(ApplicationDbContext dbContext) : Authorizat
         if (context.Resource is not HttpContext resource) return;
         if (user.Identity == null || user.Identity.IsAuthenticated == false) return;
 
-        var parseSuccess = Guid.TryParse(resource.GetRouteValue("id")?.ToString(), out var restaurantId);
+        var parseSuccess = Guid.TryParse(resource.GetRouteValue("restaurantId")?.ToString(), out var restaurantId);
         if (!parseSuccess)
         {
             var tryGetIdFromBody = await GetRestaurantId(resource);

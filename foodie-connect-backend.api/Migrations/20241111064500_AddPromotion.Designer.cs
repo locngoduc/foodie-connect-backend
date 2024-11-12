@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using foodie_connect_backend.Data;
 namespace foodie_connect_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241111064500_AddPromotion")]
+    partial class AddPromotion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -409,7 +412,7 @@ namespace foodie_connect_backend.Migrations
 
                     b.HasIndex("DishId");
 
-                    b.ToTable("PromotionDetails");
+                    b.ToTable("PromotionDetail");
                 });
 
             modelBuilder.Entity("foodie_connect_backend.Data.Restaurant", b =>
@@ -720,17 +723,21 @@ namespace foodie_connect_backend.Migrations
 
             modelBuilder.Entity("foodie_connect_backend.Data.PromotionDetail", b =>
                 {
-                    b.HasOne("foodie_connect_backend.Data.Dish", null)
+                    b.HasOne("foodie_connect_backend.Data.Dish", "Dish")
                         .WithMany("PromotionDetails")
                         .HasForeignKey("DishId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("foodie_connect_backend.Data.Promotion", null)
+                    b.HasOne("foodie_connect_backend.Data.Promotion", "Promotion")
                         .WithMany("PromotionDetails")
                         .HasForeignKey("PromotionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Dish");
+
+                    b.Navigation("Promotion");
                 });
 
             modelBuilder.Entity("foodie_connect_backend.Data.Restaurant", b =>
