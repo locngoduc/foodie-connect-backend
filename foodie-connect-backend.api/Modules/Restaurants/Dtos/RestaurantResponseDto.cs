@@ -1,5 +1,6 @@
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Shared.Classes;
+using foodie_connect_backend.Shared.Dtos;
 using foodie_connect_backend.Shared.Enums;
 
 namespace foodie_connect_backend.Modules.Restaurants.Dtos;
@@ -19,4 +20,5 @@ public record RestaurantResponseDto()
     public double Longitude { get; set; }   
     public string HeadId { get; set; }
     public DateTime CreatedAt { get; set; }
+    public ScoreResponseDto ScoreOverview { get; set; } = null!;
 }

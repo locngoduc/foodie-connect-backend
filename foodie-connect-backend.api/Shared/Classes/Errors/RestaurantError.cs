@@ -11,6 +11,8 @@ public abstract class RestaurantError
     public const string NotOwnerCode = "NOT_OWNER";
     public const string DuplicateNameCode = "DUPLICATE_NAME";
     public const string UnsupportedQueryCode = "UNSUPPORTED_QUERY";
+    public const string AlreadyReviewedCode = "ALREADY_REVIEWED";
+    public const string ReviewNotExistCode = "REVIEW_NOT_EXIST";
 
     public static AppError RestaurantNotExist()
     {
@@ -73,5 +75,19 @@ public abstract class RestaurantError
         return new AppError(
             UnsupportedQueryCode,
             "At least one query parameter is required.");
+    }
+    
+    public static AppError AlreadyReviewed()
+    {
+        return new AppError(
+            AlreadyReviewedCode,
+            "You have already reviewed this restaurant.");
+    }
+    
+    public static AppError ReviewNotExist()
+    {
+        return new AppError(
+            ReviewNotExistCode,
+            "The review does not exist.");
     }
 }

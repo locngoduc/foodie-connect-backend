@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using foodie_connect_backend.Modules.DishReviews.Dtos;
 using foodie_connect_backend.Modules.Promotions.Dtos;
+using foodie_connect_backend.Shared.Dtos;
 
 namespace foodie_connect_backend.Modules.Dishes.Dtos;
 
@@ -59,7 +60,7 @@ public class DishResponseDto
     /// Overview of all review scores for this dish
     /// </summary>
     [Required]
-    public DishScoreResponseDto ScoreOverview { get; init; } = null!;
+    public ScoreResponseDto ScoreOverview { get; init; } = null!;
 
     /// <summary>
     /// A list of promotions currently available for this dish

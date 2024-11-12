@@ -14,6 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
 
     public DbSet<Area> Areas { get; init; } = null!;
     public DbSet<Restaurant> Restaurants { get; init; } = null!;
+    public DbSet<RestaurantReview> RestaurantReviews { get; init; } = null!;
     public DbSet<Dish> Dishes { get; init; } = null!;
     public DbSet<DishReview> DishReviews { get; init; } = null!;
     public DbSet<Promotion> Promotions { get; init; } = null!;

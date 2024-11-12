@@ -4,6 +4,7 @@ using foodie_connect_backend.Modules.DishReviews.Dtos;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
+using foodie_connect_backend.Shared.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace foodie_connect_backend.Modules.Dishes;
@@ -42,7 +43,9 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
 
     public async Task<Result<Dish>> GetDishById(Guid id)
     {
-        var dish = await dbContext.Dishes.FindAsync(id);
+        var dish = await dbContext.Dishes
+            .Include(dish => dish.Categories)
+            .FirstOrDefaultAsync(x => x.Id == id);
         if (dish is null) return Result<Dish>.Failure(DishError.DishNotFound());
         
         return Result<Dish>.Success(dish);
@@ -165,13 +168,13 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
     }
     
 
-    public async Task<DishScoreResponseDto> CalculateDishScoreAsync(Guid dishId)
+    public async Task<ScoreResponseDto> CalculateDishScoreAsync(Guid dishId)
     {
         var scores = await CalculateDishScoresAsync(new[] { dishId });
-        return scores.GetValueOrDefault(dishId, new DishScoreResponseDto());
+        return scores.GetValueOrDefault(dishId, new ScoreResponseDto());
     }
 
-    public async Task<Dictionary<Guid, DishScoreResponseDto>> CalculateDishScoresAsync(IEnumerable<Guid> dishIds)
+    public async Task<Dictionary<Guid, ScoreResponseDto>> CalculateDishScoresAsync(IEnumerable<Guid> dishIds)
     {
         var dishIdsList = dishIds.ToList();
         
@@ -192,12 +195,12 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
             .ToDictionaryAsync(g => g.DishId);
 
         // Create response dictionary including dishes with no reviews
-        var result = new Dictionary<Guid, DishScoreResponseDto>();
+        var result = new Dictionary<Guid, ScoreResponseDto>();
         foreach (var dishId in dishIdsList)
         {
             if (reviewGroups.TryGetValue(dishId, out var group))
             {
-                result[dishId] = new DishScoreResponseDto
+                result[dishId] = new ScoreResponseDto
                 {
                     FiveStars = group.FiveStars,
                     FourStars = group.FourStars,
@@ -209,7 +212,7 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
             }
             else
             {
-                result[dishId] = new DishScoreResponseDto();
+                result[dishId] = new ScoreResponseDto();
             }
         }
 

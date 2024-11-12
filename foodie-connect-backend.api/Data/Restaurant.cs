@@ -43,9 +43,9 @@ public sealed class Restaurant
 
     [JsonIgnore] public Area? Area { get; init; }
 
-    [JsonIgnore] public ICollection<Dish> Dishes { get; init; } = new List<Dish>();
+    public ICollection<Dish> Dishes { get; init; } = new List<Dish>();
 
-    [JsonIgnore] public ICollection<DishReview> Reviews { get; init; } = new List<DishReview>();
+    public ICollection<RestaurantReview> Reviews { get; init; } = new List<RestaurantReview>();
 
     [JsonIgnore] public ICollection<Promotion> Promotions { get; init; } = new List<Promotion>();
 

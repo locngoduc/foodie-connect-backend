@@ -88,7 +88,7 @@ namespace foodie_connect_backend.Modules.Dishes
 
             // Map the results
             var dishes = result.Value.Select(dish => 
-                    dish.ToResponseDto(scores.GetValueOrDefault(dish.Id, new DishScoreResponseDto())))
+                    dish.ToResponseDto(scores.GetValueOrDefault(dish.Id, new ScoreResponseDto())))
                 .ToList();
 
             return Ok(dishes);

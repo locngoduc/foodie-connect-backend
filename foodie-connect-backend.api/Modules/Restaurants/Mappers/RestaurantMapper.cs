@@ -1,11 +1,12 @@
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Restaurants.Dtos;
+using foodie_connect_backend.Shared.Dtos;
 
 namespace foodie_connect_backend.Modules.Restaurants.Mappers;
 
 public static class RestaurantMapper
 {
-    public static RestaurantResponseDto ToResponseDto(this Restaurant restaurant)
+    public static RestaurantResponseDto ToResponseDto(this Restaurant restaurant, ScoreResponseDto score)
     {
         return new RestaurantResponseDto
         {
@@ -21,7 +22,8 @@ public static class RestaurantMapper
             FormattedAddress = restaurant.Area?.FormattedAddress,
             Latitude = restaurant.Location.Y,
             Longitude = restaurant.Location.X,
-            HeadId = restaurant.HeadId
+            HeadId = restaurant.HeadId,
+            ScoreOverview = score
         };
     }
 }

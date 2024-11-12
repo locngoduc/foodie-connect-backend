@@ -6,6 +6,7 @@ using foodie_connect_backend.Modules.Restaurants.Mappers;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
+using foodie_connect_backend.Shared.Dtos;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 
@@ -63,7 +64,7 @@ public class RestaurantsService(
 
         await transaction.CommitAsync();
 
-        var response = newRestaurant.ToResponseDto();
+        var response = newRestaurant.ToResponseDto(new ScoreResponseDto());
         return Result<RestaurantResponseDto>.Success(response);
     }
     catch (Exception ex)
@@ -110,7 +111,9 @@ public class RestaurantsService(
         if (restaurant == null)
             return Result<RestaurantResponseDto>.Failure(RestaurantError.RestaurantNotExist());
 
-        var response = restaurant.ToResponseDto();
+        var score = await CalculateRestaurantId(id);
+        
+        var response = restaurant.ToResponseDto(score);
         return Result<RestaurantResponseDto>.Success(response);
     }
 
@@ -118,7 +121,7 @@ public class RestaurantsService(
     {
         if (queryDetails.Origin is null && queryDetails.OwnerId is null) 
             return Result<List<RestaurantResponseDto>>.Failure(RestaurantError.UnsupportedQuery());
-        
+    
         try
         {
             var query = dbContext.Restaurants.AsQueryable();
@@ -142,16 +145,23 @@ public class RestaurantsService(
 
                 var center = new Point(longitude, latitude) { SRID = 4326 };
                 var radius = queryDetails.Radius ?? 500;
-                
+            
                 query = query.Where(r => r.Location.Distance(center) <= radius);
             }
 
             var restaurants = await query
                 .Include(r => r.Area)
-                .Select(r => r.ToResponseDto())
-                .ToListAsync();
+                .ToListAsync();  // Execute the query first
 
-            return Result<List<RestaurantResponseDto>>.Success(restaurants);
+            // Then perform the async mapping
+            var restaurantDtos = new List<RestaurantResponseDto>();
+            foreach (var restaurant in restaurants)
+            {
+                var id = await CalculateRestaurantId(restaurant.Id);
+                restaurantDtos.Add(restaurant.ToResponseDto(id));
+            }
+
+            return Result<List<RestaurantResponseDto>>.Success(restaurantDtos);
         }
         catch (Exception ex)
         {
@@ -268,5 +278,56 @@ public class RestaurantsService(
             return Result<bool>.Failure(RestaurantError.RestaurantUploadPartialError());
 
         return Result<bool>.Success(true);
+    }
+    
+    public async Task<ScoreResponseDto> CalculateRestaurantId(Guid restaurantId)
+    {
+        var scores = await CalculateRestaurantScoresAsync(new[] { restaurantId });
+        return scores.GetValueOrDefault(restaurantId, new ScoreResponseDto());
+    }
+
+    public async Task<Dictionary<Guid, ScoreResponseDto>> CalculateRestaurantScoresAsync(IEnumerable<Guid> restaurantIds)
+    {
+        var restaurantIdsList = restaurantIds.ToList();
+        
+        // Get all reviews for the requested dishes in a single query
+        var reviewGroups = await dbContext.Set<RestaurantReview>()
+            .Where(r => restaurantIdsList.Contains(r.RestaurantId))
+            .GroupBy(r => r.RestaurantId)
+            .Select(g => new
+            {
+                DishId = g.Key,
+                FiveStars = g.Count(r => r.Rating == 5),
+                FourStars = g.Count(r => r.Rating == 4),
+                ThreeStars = g.Count(r => r.Rating == 3),
+                TwoStars = g.Count(r => r.Rating == 2),
+                OneStar = g.Count(r => r.Rating == 1),
+                AverageRating = g.Average(r => r.Rating)
+            })
+            .ToDictionaryAsync(g => g.DishId);
+
+        // Create response dictionary including dishes with no reviews
+        var result = new Dictionary<Guid, ScoreResponseDto>();
+        foreach (var dishId in restaurantIdsList)
+        {
+            if (reviewGroups.TryGetValue(dishId, out var group))
+            {
+                result[dishId] = new ScoreResponseDto
+                {
+                    FiveStars = group.FiveStars,
+                    FourStars = group.FourStars,
+                    ThreeStars = group.ThreeStars,
+                    TwoStars = group.TwoStars,
+                    OneStar = group.OneStar,
+                    AverageRating = group.AverageRating
+                };
+            }
+            else
+            {
+                result[dishId] = new ScoreResponseDto();
+            }
+        }
+
+        return result;
     }
 }

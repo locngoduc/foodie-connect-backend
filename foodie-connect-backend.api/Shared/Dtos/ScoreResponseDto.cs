@@ -1,6 +1,6 @@
-namespace foodie_connect_backend.Modules.DishReviews.Dtos;
+namespace foodie_connect_backend.Shared.Dtos;
 
-public class DishScoreResponseDto
+public class ScoreResponseDto
 {
     public double AverageRating { get; set; } = 0;
     public int FiveStars { get; set; } = 0;
