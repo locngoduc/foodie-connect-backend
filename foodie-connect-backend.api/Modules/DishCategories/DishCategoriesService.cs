@@ -90,7 +90,7 @@ public class DishCategoriesService(ApplicationDbContext dbContext)
         
         var newCategory = new DishCategory { CategoryName = newName, RestaurantId = restaurantId};
         var oldCategory = restaurant.DishCategories.Single(x => x.CategoryName == oldName);
-        
+        dbContext.DishCategories.Add(newCategory);
         // Update dishes with old category to include new category
         var dishesWithOldCategory = await dbContext.Dishes
             .Include(dish => dish.Categories)

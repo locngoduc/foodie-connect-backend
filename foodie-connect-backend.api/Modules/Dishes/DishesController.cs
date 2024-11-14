@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Dishes.Dtos;
+using foodie_connect_backend.Modules.Dishes.Hub;
 using foodie_connect_backend.Modules.Dishes.Mapper;
 using foodie_connect_backend.Modules.DishReviews.Dtos;
 using foodie_connect_backend.Modules.DishReviews.Mapper;
@@ -14,7 +15,7 @@ namespace foodie_connect_backend.Modules.Dishes
     [Route("v1/dishes")]
     [ApiController]
     [Produces("application/json")]
-    public class DishesController(DishesService dishesService) : ControllerBase
+    public class DishesController(DishesService dishesService, ActiveDishViewersService dishViewersService) : ControllerBase
     {
         /// <summary>
         /// Add a dish to a restaurant's menu
@@ -248,6 +249,21 @@ namespace foodie_connect_backend.Modules.Dishes
                 };
             
             return Ok(new GenericResponse { Message = "Dish image updated successfully" });
+        }
+        
+        
+        
+        /// <summary>
+        /// Get current viewer count for a dish
+        /// </summary>
+        /// <param name="dishId">The ID of the dish</param>
+        /// <returns>Number of current viewers</returns>
+        [HttpGet("{dishId:guid}/viewers/count")]
+        [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+        public ActionResult<int> GetDishViewerCount(Guid dishId)
+        {
+            var viewerCount = dishViewersService.GetCurrentViewers(dishId);
+            return Ok(viewerCount);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Text.Json.Serialization;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.DishCategories;
 using foodie_connect_backend.Modules.Dishes;
+using foodie_connect_backend.Modules.Dishes.Hub;
 using foodie_connect_backend.Modules.DishReviews;
 using foodie_connect_backend.Modules.GeoCoder;
 using foodie_connect_backend.Modules.Heads;
@@ -51,6 +52,7 @@ builder.Services.AddSwaggerGen(options =>
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     options.IncludeXmlComments(xmlPath);
+    options.AddSignalRSwaggerGen();
 
     // Add examples support
     options.ExampleFilters();
@@ -107,6 +109,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         x => x.UseNetTopologySuite()
     ));
 
+// SignalR
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<ActiveDishViewersService>();
 
 builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
     .AddMailtrapSender(
@@ -171,6 +176,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<DishViewersHub>("/dishViewersHub");
 
 app.Run();
 
