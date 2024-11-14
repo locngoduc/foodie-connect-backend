@@ -87,8 +87,24 @@ public class DishCategoriesService(ApplicationDbContext dbContext)
         if (restaurant.DishCategories.Any(x => x.CategoryName == newName))
             return Result<DishCategory>.Failure(RestaurantError.DishCategoryAlreadyExist(newName));
         
-        // Rename the category
-        restaurant.DishCategories.Single(x => x.CategoryName == oldName).CategoryName = newName;
+        
+        var newCategory = new DishCategory { CategoryName = newName, RestaurantId = restaurantId};
+        var oldCategory = restaurant.DishCategories.Single(x => x.CategoryName == oldName);
+        
+        // Update dishes with old category to include new category
+        var dishesWithOldCategory = await dbContext.Dishes
+            .Include(dish => dish.Categories)
+            .Where(dish => dish.Categories.Any(dishCategory => dishCategory.CategoryName == oldName))
+            .ToListAsync();
+
+        foreach (var dish in dishesWithOldCategory)
+        {
+            dish.Categories.Add(newCategory);
+            dish.Categories.Remove(oldCategory);
+        }
+        
+        // Delete old category
+        dbContext.DishCategories.Remove(oldCategory);
         await dbContext.SaveChangesAsync();
         
         return Result<DishCategory>.Success(restaurant.DishCategories.Single(x => x.CategoryName == newName));

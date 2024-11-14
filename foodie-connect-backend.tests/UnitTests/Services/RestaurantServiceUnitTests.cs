@@ -55,9 +55,9 @@ public class RestaurantsServiceTests
         {
             Name = "Test Restaurant",
             Phone = "+1234567890",
-            OpenTime = 8,
-            CloseTime = 22,
-            LatitudeLongitude = "0,0",
+            OpenTime = TimeOnly.MinValue,
+            CloseTime = TimeOnly.MaxValue,
+            LongitudeLatitude = "0,0",
             Status = RestaurantStatus.Open
         };
 
