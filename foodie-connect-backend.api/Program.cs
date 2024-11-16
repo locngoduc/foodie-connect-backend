@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Extensions;
+using foodie_connect_backend.Extensions.DI;
 using foodie_connect_backend.Modules.DishCategories;
 using foodie_connect_backend.Modules.Dishes;
 using foodie_connect_backend.Modules.Dishes.Hub;
@@ -59,49 +61,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddSwaggerExamplesFromAssemblies(Assembly.GetExecutingAssembly());
 
-// Identity Server
-builder.Services.AddAuthentication()
-    .AddCookie(IdentityConstants.ApplicationScheme, options =>
-    {
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = builder.Configuration["ENVIRONMENT"] == "production" ? CookieSecurePolicy.Always : CookieSecurePolicy.None;
-        options.Cookie.SameSite = builder.Configuration["ENVIRONMENT"] == "production" ? SameSiteMode.None : SameSiteMode.Lax;;
-        options.Cookie.Name = "access_token";
-        options.ExpireTimeSpan = TimeSpan.FromDays(14);
-        options.Events = new CookieAuthenticationEvents
-        {
-            OnRedirectToLogin = context =>
-            {
-                context.Response.StatusCode = 401;
-                context.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(AuthError.NotAuthenticated().ToJson()));
-                return Task.CompletedTask;
-            },
-            OnRedirectToAccessDenied = context =>
-            {
-                context.Response.StatusCode = 403;
-                context.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(AuthError.NotAuthorized().ToJson()));
-                return Task.CompletedTask;
-            }
-        };
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("RestaurantOwner", policy =>
-        policy.Requirements.Add(new RestaurantOwnerRequirement()));
-    
-    options.AddPolicy("DishOwner", policy => 
-        policy.Requirements.Add(new DishOwnerRequirement()));
-    
-    options.AddPolicy("EmailVerified", policy =>
-        policy.Requirements.Add(new EmailConfirmedRequirement()));
-});
-
-builder.Services.AddIdentityCore<User>(options => { options.User.RequireUniqueEmail = true; })
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddApiEndpoints();
-
 // Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(
@@ -109,35 +68,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         x => x.UseNetTopologySuite()
     ));
 
-// SignalR
+// Register services
+builder.Services.AddThirdPartyDependencies();
 builder.Services.AddSignalR();
-builder.Services.AddSingleton<ActiveDishViewersService>();
-
-builder.Services.AddFluentEmail("verify@account.foodie.town", "Verify your email address")
-    .AddMailtrapSender(
-        builder.Configuration["MAILTRAP_USERNAME"],
-        builder.Configuration["MAILTRAP_PASSWORD"],
-        builder.Configuration["MAILTRAP_HOST"],
-        int.TryParse(builder.Configuration["MAILTRAP_PORT"], out var port) ? port : null);
-
-builder.Services.AddScoped<IGeoCoderService, ReverseGeoCoder>(_ =>
-    new ReverseGeoCoder(builder.Configuration["GOOGLE_APIKEY"]!));
-builder.Services.AddScoped<IUploaderService, CloudinaryUploader>();
-builder.Services.AddScoped<HeadsService>();
-builder.Services.AddScoped<UsersService>();
-builder.Services.AddScoped<SessionsService>();
-builder.Services.AddScoped<VerificationService>();
-builder.Services.AddScoped<RestaurantsService>();
-builder.Services.AddScoped<SocialsService>();
-builder.Services.AddScoped<DishesService>();
-builder.Services.AddScoped<DishReviewsService>();
-builder.Services.AddScoped<DishCategoriesService>();
-builder.Services.AddScoped<PromotionsService>();
-builder.Services.AddScoped<RestaurantReviewsService>();
-builder.Services.AddScoped<IAuthorizationHandler, RestaurantOwnerHandler>();
-builder.Services.AddScoped<IAuthorizationHandler, DishOwnerHandler>();
-builder.Services.AddScoped<IAuthorizationHandler, EmailConfirmedHandler>();
-builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AuthorizationResponseTransformer>();
+builder.Services.AddAuthenticationServices();
+builder.Services.AddAuthorizationHandlers();
+builder.Services.AddRestaurantServices();
+builder.Services.AddDishServices();
 
 // Configure CORS
 builder.Services.AddCors(options =>
@@ -153,7 +90,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Create roles
+// Seed roles if not exist
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
