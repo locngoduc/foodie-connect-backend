@@ -51,7 +51,7 @@ namespace foodie_connect_backend.Modules.Promotions
                     _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
                 };
 
-            return CreatedAtAction(nameof(GetPromotion), new { promotionId = result.Value.Id }, result.Value.ToResponseDto());
+            return CreatedAtAction(nameof(GetPromotion), new { promotionId = result.Value.Id, restaurantId = result.Value.RestaurantId }, result.Value.ToResponseDto());
         }
         
         
