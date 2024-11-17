@@ -45,6 +45,7 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
     {
         var dish = await dbContext.Dishes
             .Include(dish => dish.Categories)
+            .Include(dish => dish.PromotionDetails)
             .FirstOrDefaultAsync(x => x.Id == id);
         if (dish is null) return Result<Dish>.Failure(DishError.DishNotFound());
         
