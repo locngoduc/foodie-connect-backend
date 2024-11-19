@@ -8,4 +8,6 @@ public class PromotionDetailsFullResponseDto
     public string? BannerId { get; set; }
     public IList<string> Targets { get; set; } = null!;
     public decimal PromotionalPrice { get; set; }
+    public DateTime BeginsAt { get; set; }
+    public DateTime EndsAt { get; set; }
 }

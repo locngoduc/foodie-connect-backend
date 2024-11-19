@@ -39,7 +39,9 @@ public static class PromotionMapper
             Description = promotionDetail.Promotion.Description,
             BannerId = promotionDetail.Promotion.BannerId,
             Targets = promotionDetail.Promotion.Targets,
-            PromotionalPrice = promotionDetail.PromotionalPrice
+            PromotionalPrice = promotionDetail.PromotionalPrice,
+            BeginsAt = promotionDetail.Promotion.BeginsAt,
+            EndsAt = promotionDetail.Promotion.EndsAt
         };
     }
 }

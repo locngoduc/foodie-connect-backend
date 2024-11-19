@@ -29,6 +29,8 @@ public static class RegisterAuthenticationServices
                 options.Cookie.SecurePolicy = configuration["ENVIRONMENT"] == "production" ? CookieSecurePolicy.Always : CookieSecurePolicy.None;
                 options.Cookie.SameSite = configuration["ENVIRONMENT"] == "production" ? SameSiteMode.None : SameSiteMode.Lax;;
                 options.Cookie.Name = "access_token";
+                options.Cookie.IsEssential = true;
+                options.Cookie.Domain = ".foodie.town";
                 options.ExpireTimeSpan = TimeSpan.FromDays(14);
                 options.Events = new CookieAuthenticationEvents
                 {

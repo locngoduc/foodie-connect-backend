@@ -81,7 +81,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy", corsBuilder =>
     {
-        corsBuilder.WithOrigins(builder.Configuration["FRONTEND_URL"]!)
+        corsBuilder.WithOrigins(builder.Configuration["FRONTEND_URL"]!.Split(","))
             .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();
