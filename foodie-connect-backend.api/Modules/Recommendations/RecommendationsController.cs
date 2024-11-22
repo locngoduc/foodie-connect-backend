@@ -2,6 +2,7 @@ using foodie_connect_backend.Data;
 using foodie_connect_backend.Extensions.DI;
 using foodie_connect_backend.Modules.Dishes;
 using foodie_connect_backend.Modules.Dishes.Dtos;
+using foodie_connect_backend.Modules.Dishes.Mapper;
 using foodie_connect_backend.Modules.Restaurants;
 using foodie_connect_backend.Modules.Restaurants.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -37,7 +38,7 @@ public class RecommendationsController(RecommendationService recommendationServi
     [HttpGet("/dishes")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<IEnumerable<RestaurantResponseDto>>> GetRecommendedDishes(
+    public async Task<ActionResult<IEnumerable<DishResponseDto>>> GetRecommendedDishes(
         string userId, int n
     )
     {
@@ -45,12 +46,14 @@ public class RecommendationsController(RecommendationService recommendationServi
         if (!dishIdsResult.IsSuccess)
             return BadRequest(dishIdsResult.Error);
 
-        var result = new List<Dish>();
+        var result = new List<DishResponseDto>();
         foreach (var id in dishIdsResult.Value)
         {
             var itemResult = await dishesService.GetDishById(new Guid(id));
+            var score = await dishesService.CalculateDishScoreAsync(new Guid(id));
+            
             if(itemResult.IsSuccess)
-                result.Add(itemResult.Value);
+                result.Add(itemResult.Value.ToResponseDto(score));
         }
         
         return Ok(result);
