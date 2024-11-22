@@ -34,6 +34,7 @@ public class FoodieWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
         builder.UseConfiguration(configuration);
         
         Environment.SetEnvironmentVariable("CLOUDINARY_URL", configuration["CLOUDINARY_URL"]);
+        Environment.SetEnvironmentVariable("RECOMMENDER_URL", configuration["RECOMMENDER_URL"]);
         Console.WriteLine($"CLOUDINARY_URL: {configuration["CLOUDINARY_URL"]}");
         
         builder.ConfigureTestServices(services =>

@@ -12,6 +12,7 @@ services:
       MAILTRAP_PORT: ${MAILTRAP_PORT}
       CLOUDINARY_URL: ${CLOUDINARY_URL}
       GOOGLE_APIKEY: ${GOOGLE_APIKEY}
+      RECOMMENDER_URL: ${RECOMMENDER_URL}
       ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       FRONTEND_URL: ${FRONTEND_URL}
     ports:

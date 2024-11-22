@@ -23,5 +23,7 @@ public static class RegisterThirdPartyDependencies
         
         // Cloudinary CDN uploader
         services.AddScoped<IUploaderService, CloudinaryUploader>();
+
+        services.AddScoped<RecommendationService>(_=>new RecommendationService(configuration["RECOMMENDER_URL"]!));
     }
 }

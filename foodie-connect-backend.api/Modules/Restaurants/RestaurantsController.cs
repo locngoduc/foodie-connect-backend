@@ -56,7 +56,6 @@ public class RestaurantsController(
         return Ok(result.Value);
     }
 
-
     /// <summary>
     /// Retrieves restaurants within a specified radius of a location
     /// </summary>
