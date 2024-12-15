@@ -13,27 +13,30 @@ public class VerificationService(UserManager<User> userManager, IFluentEmail flu
         var user = await userManager.FindByIdAsync(userId);
         if (user == null) return Result<bool>.Failure(VerificationError.UserNotFound(userId));
         if (user.EmailConfirmed) return Result<bool>.Failure(VerificationError.EmailAlreadyConfirmed());
-        
+
         // Send verification email
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        string htmlTemplate = await File.ReadAllTextAsync("Modules/Verification/Templates/VerificationEmailTemplate.html");
+        htmlTemplate = htmlTemplate
+            .Replace("{token}", token);
         var email = await fluentEmail
             .To(user.Email)
             .SetFrom("verify@account.foodie.town", "The Foodie team")
             .Subject("Verify your foodie town account")
-            .Body($"Your verification token: {token}")
+            .Body(htmlTemplate, true)
             .SendAsync();
-        
+
         return Result<bool>.Success(true);
     }
-    
+
     public async Task<Result<bool>> ConfirmEmail(string userId, string token)
     {
         var user = await userManager.FindByIdAsync(userId);
         if (user == null) return Result<bool>.Failure(VerificationError.UserNotFound(userId));
-        
+
         var result = await userManager.ConfirmEmailAsync(user, token);
         if (!result.Succeeded) return Result<bool>.Failure(VerificationError.EmailVerificationTokenInvalid());
-        
+
         return Result<bool>.Success(result.Succeeded);
     }
 }
