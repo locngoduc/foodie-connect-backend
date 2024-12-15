@@ -16,7 +16,7 @@ public class VerificationService(UserManager<User> userManager, IFluentEmail flu
 
         // Send verification email
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        string htmlTemplate = await File.ReadAllTextAsync("./Templates/EmailVerification.html");
+        string htmlTemplate = await File.ReadAllTextAsync("./foodie-connect-backend.api/Modules/Verification/Templates/EmailVerification.html");
         htmlTemplate = htmlTemplate
             .Replace("{token}", token);
         var email = await fluentEmail
