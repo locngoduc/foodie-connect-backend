@@ -26,4 +26,6 @@ RUN dotnet publish "./foodie-connect-backend.api.csproj" -c $BUILD_CONFIGURATION
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+# Explicitly copy the email template
+COPY ["foodie-connect-backend.api/Modules/Verification/Templates/VerificationEmailTemplate.html", "Modules/Verification/Templates/VerificationEmailTemplate.html"]
 ENTRYPOINT ["dotnet", "foodie-connect-backend.api.dll"]

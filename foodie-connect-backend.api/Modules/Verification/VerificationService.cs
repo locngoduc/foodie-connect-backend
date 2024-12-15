@@ -16,7 +16,7 @@ public class VerificationService(UserManager<User> userManager, IFluentEmail flu
 
         // Send verification email
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        string htmlTemplate = await File.ReadAllTextAsync("Modules/Verification/Templates/VerificationEmailTemplate.html");
+        var htmlTemplate = await File.ReadAllTextAsync("Modules/Verification/Templates/VerificationEmailTemplate.html");
         htmlTemplate = htmlTemplate
             .Replace("{token}", token);
         var email = await fluentEmail
