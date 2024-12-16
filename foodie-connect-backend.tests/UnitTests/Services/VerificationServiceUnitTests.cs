@@ -1,6 +1,7 @@
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Extensions.DI.EmailTemplateReader;
 using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes.Errors;
 using Microsoft.AspNetCore.Identity;
@@ -12,6 +13,7 @@ public class VerificationServiceTests
 {
     private readonly Mock<UserManager<User>> _mockUserManager;
     private readonly Mock<IFluentEmail> _mockFluentEmail;
+    private readonly Mock<IEmailTemplateReader> _mockTemplateReader;
     private readonly VerificationService _service;
 
     public VerificationServiceTests()
@@ -19,7 +21,11 @@ public class VerificationServiceTests
         _mockUserManager = new Mock<UserManager<User>>(
             Mock.Of<IUserStore<User>>(), null, null, null, null, null, null, null, null);
         _mockFluentEmail = new Mock<IFluentEmail>();
-        _service = new VerificationService(_mockUserManager.Object, _mockFluentEmail.Object);
+        _mockTemplateReader = new Mock<IEmailTemplateReader>();
+        _service = new VerificationService(
+            _mockUserManager.Object, 
+            _mockFluentEmail.Object,
+            _mockTemplateReader.Object);
     }
 
     [Fact]
@@ -60,15 +66,22 @@ public class VerificationServiceTests
         var userId = "user1";
         var user = new User { Id = userId, Email = "user@example.com", EmailConfirmed = false };
         var token = "email_token";
+        var htmlTemplate = "Verification Email Template with {token} placeholder";
+        
         _mockUserManager.Setup(m => m.FindByIdAsync(userId)).ReturnsAsync(user);
         _mockUserManager.Setup(m => m.GenerateEmailConfirmationTokenAsync(user)).ReturnsAsync(token);
+        
+        _mockTemplateReader
+            .Setup(t => t.ReadTemplateAsync("VerificationEmailTemplate.html"))
+            .ReturnsAsync(htmlTemplate);
+        
         _mockFluentEmail.Setup(f => f.To(user.Email))
             .Returns(_mockFluentEmail.Object);
         _mockFluentEmail.Setup(f => f.SetFrom(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(_mockFluentEmail.Object);
         _mockFluentEmail.Setup(f => f.Subject(It.IsAny<string>()))
             .Returns(_mockFluentEmail.Object);
-        _mockFluentEmail.Setup(f => f.Body(It.IsAny<string>(), default))
+        _mockFluentEmail.Setup(f => f.Body(It.Is<string>(body => body.Contains(token)), true))
             .Returns(_mockFluentEmail.Object);
         _mockFluentEmail.Setup(f => f.SendAsync(default))
             .ReturnsAsync(new SendResponse { ErrorMessages = null });
@@ -79,6 +92,7 @@ public class VerificationServiceTests
         // Assert
         Assert.True(result.IsSuccess);
         _mockUserManager.Verify(m => m.GenerateEmailConfirmationTokenAsync(user), Times.Once);
+        _mockTemplateReader.Verify(t => t.ReadTemplateAsync("VerificationEmailTemplate.html"), Times.Once);
         _mockFluentEmail.Verify(f => f.SendAsync(default), Times.Once);
     }
 

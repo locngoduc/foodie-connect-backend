@@ -1,12 +1,13 @@
 using FluentEmail.Core;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Extensions.DI.EmailTemplateReader;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
 using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Modules.Verification;
 
-public class VerificationService(UserManager<User> userManager, IFluentEmail fluentEmail)
+public class VerificationService(UserManager<User> userManager, IFluentEmail fluentEmail, IEmailTemplateReader templateReader)
 {
     public async Task<Result<bool>> SendConfirmationEmail(string userId)
     {
@@ -16,7 +17,7 @@ public class VerificationService(UserManager<User> userManager, IFluentEmail flu
 
         // Send verification email
         var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
-        var htmlTemplate = await File.ReadAllTextAsync("Modules/Verification/Templates/VerificationEmailTemplate.html");
+        var htmlTemplate = await templateReader.ReadTemplateAsync("VerificationEmailTemplate.html");
         htmlTemplate = htmlTemplate
             .Replace("{token}", token);
         var email = await fluentEmail

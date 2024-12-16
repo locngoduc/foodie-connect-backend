@@ -1,6 +1,7 @@
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Extensions.DI.EmailTemplateReader;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Modules.Users;
 using foodie_connect_backend.Modules.Users.Dtos;
@@ -19,6 +20,7 @@ public class UsersServiceUnitTests
     private readonly Mock<UserManager<User>> _mockUserManager;
     private readonly Mock<IUploaderService> _mockUploaderService;
     private readonly Mock<SignInManager<User>> _mockSignInManager;
+    private readonly Mock<IEmailTemplateReader> _mockTemplateReader;
     private readonly UsersService _usersService;
     private readonly Mock<IFluentEmail> _mockEmailService;
 
@@ -31,7 +33,8 @@ public class UsersServiceUnitTests
             
         _mockEmailService = new Mock<IFluentEmail>();
         _mockUploaderService = new Mock<IUploaderService>();
-        var mockVerificationService = new VerificationService(_mockUserManager.Object, _mockEmailService.Object);
+        _mockTemplateReader = new Mock<IEmailTemplateReader>();
+        var mockVerificationService = new VerificationService(_mockUserManager.Object, _mockEmailService.Object, _mockTemplateReader.Object);
         
         var contextAccessor = new Mock<IHttpContextAccessor>();
         var claimsFactory = new Mock<IUserClaimsPrincipalFactory<User>>();

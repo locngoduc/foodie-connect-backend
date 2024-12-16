@@ -1,5 +1,6 @@
 using System.Text;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Extensions.DI.EmailTemplateReader;
 using foodie_connect_backend.Modules.Heads;
 using foodie_connect_backend.Modules.Sessions;
 using foodie_connect_backend.Modules.Users;
@@ -16,7 +17,9 @@ public static class RegisterAuthenticationServices
     public static void AddAuthenticationServices(this IServiceCollection services)
     {
         var configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
-        
+
+        services.AddSingleton<IEmailTemplateReader, FileEmailTemplateReader>();
+
         services.AddScoped<HeadsService>();
         services.AddScoped<UsersService>();
         services.AddScoped<SessionsService>();
@@ -30,7 +33,6 @@ public static class RegisterAuthenticationServices
                 options.Cookie.SameSite = configuration["ENVIRONMENT"] == "production" ? SameSiteMode.None : SameSiteMode.Lax;;
                 options.Cookie.Name = "access_token";
                 options.Cookie.IsEssential = true;
-                options.Cookie.Domain = ".foodie.town";
                 options.ExpireTimeSpan = TimeSpan.FromDays(14);
                 options.Events = new CookieAuthenticationEvents
                 {
