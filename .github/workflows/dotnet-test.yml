@@ -21,19 +21,19 @@ jobs:
           dotnet-version: 8.0.x
       
       # Setup secrets for testing
-      - name: Setup Test Secrets
-        run: |
-          # Create a secrets file for testing
-          mkdir -p ${{ github.workspace }}/secrets
-          echo '{
-            "MAILTRAP_USERNAME": "${{ secrets.MAILTRAP_USERNAME }}",
-            "MAILTRAP_PORT": "${{ secrets.MAILTRAP_PORT }}",
-            "MAILTRAP_PASSWORD": "${{ secrets.MAILTRAP_PASSWORD }}",
-            "MAILTRAP_HOST": "${{ secrets.MAILTRAP_HOST }}",
-            "FRONTEND_URL": "${{ secrets.FRONTEND_URL }}",
-            "CLOUDINARY_URL": "${{ secrets.CLOUDINARY_URL }}",
-            "GOOGLE_APIKEY": "${{ secrets.GOOGLE_APIKEY }}"
-          }' > ${{ github.workspace }}/secrets/testsecrets.json
+      # - name: Setup Test Secrets
+      #   run: |
+      #     # # Create a secrets file for testing
+      #     # mkdir -p ${{ github.workspace }}/secrets
+      #     # echo '{
+      #     #   "MAILTRAP_USERNAME": "${{ secrets.MAILTRAP_USERNAME }}",
+      #     #   "MAILTRAP_PORT": "${{ secrets.MAILTRAP_PORT }}",
+      #     #   "MAILTRAP_PASSWORD": "${{ secrets.MAILTRAP_PASSWORD }}",
+      #     #   "MAILTRAP_HOST": "${{ secrets.MAILTRAP_HOST }}",
+      #     #   "FRONTEND_URL": "${{ secrets.FRONTEND_URL }}",
+      #     #   "CLOUDINARY_URL": "${{ secrets.CLOUDINARY_URL }}",
+      #     #   "GOOGLE_APIKEY": "${{ secrets.GOOGLE_APIKEY }}"
+      #     # }' > ${{ github.workspace }}/secrets/testsecrets.json
       
       # Restore dependencies
       - name: Restore dependencies
@@ -48,4 +48,11 @@ jobs:
         env:
           DOTNET_ENVIRONMENT: Testing
           SECRETS_PATH: ${{ github.workspace }}/secrets/testsecrets.json
+          MAILTRAP_USERNAME: ${{ secrets.MAILTRAP_USERNAME }}
+          MAILTRAP_PORT: ${{ secrets.MAILTRAP_PORT }}
+          MAILTRAP_PASSWORD: ${{ secrets.MAILTRAP_PASSWORD }}
+          MAILTRAP_HOST: ${{ secrets.MAILTRAP_HOST }}
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+          CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+          GOOGLE_APIKEY: ${{ secrets.GOOGLE_APIKEY }}
         run: dotnet test foodie-connect-backend.sln --no-build --verbosity normal --configuration Release
