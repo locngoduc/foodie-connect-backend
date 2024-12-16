@@ -11,23 +11,41 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    # Checkout the repository
-    - uses: actions/checkout@v4
-    
-    # Setup .NET Core SDK
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-    
-    # Restore dependencies
-    - name: Restore dependencies
-      run: dotnet restore foodie-connect-backend.sln
-    
-    # Build the solution
-    - name: Build
-      run: dotnet build foodie-connect-backend.sln --no-restore --configuration Release
-    
-    # Run unit tests
-    - name: Run tests
-      run: dotnet test foodie-connect-backend.sln --no-build --verbosity normal --configuration Release
+      # Checkout the repository
+      - uses: actions/checkout@v4
+      
+      # Setup .NET Core SDK
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      
+      # Setup secrets for testing
+      - name: Setup Test Secrets
+        run: |
+          # Create a secrets file for testing
+          mkdir -p ${{ github.workspace }}/secrets
+          echo '{
+            "MAILTRAP_USERNAME": "${{ secrets.MAILTRAP_USERNAME }}",
+            "MAILTRAP_PORT": "${{ secrets.MAILTRAP_PORT }}",
+            "MAILTRAP_PASSWORD": "${{ secrets.MAILTRAP_PASSWORD }}",
+            "MAILTRAP_HOST": "${{ secrets.MAILTRAP_HOST }}",
+            "FRONTEND_URL": "${{ secrets.FRONTEND_URL }}",
+            "CLOUDINARY_URL": "${{ secrets.CLOUDINARY_URL }}",
+            "GOOGLE_APIKEY": "${{ secrets.GOOGLE_APIKEY }}"
+          }' > ${{ github.workspace }}/secrets/testsecrets.json
+      
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore foodie-connect-backend.sln
+      
+      # Build the solution
+      - name: Build
+        run: dotnet build foodie-connect-backend.sln --no-restore --configuration Release
+      
+      # Run unit tests with secret injection
+      - name: Run tests
+        env:
+          DOTNET_ENVIRONMENT: Testing
+          SECRETS_PATH: ${{ github.workspace }}/secrets/testsecrets.json
+        run: dotnet test foodie-connect-backend.sln --no-build --verbosity normal --configuration Release
