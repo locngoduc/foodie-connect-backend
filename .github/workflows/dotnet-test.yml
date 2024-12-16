@@ -1,0 +1,33 @@
+name: .NET Core Test
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    # Checkout the repository
+    - uses: actions/checkout@v4
+    
+    # Setup .NET Core SDK
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    
+    # Restore dependencies
+    - name: Restore dependencies
+      run: dotnet restore foodie-connect-backend.sln
+    
+    # Build the solution
+    - name: Build
+      run: dotnet build foodie-connect-backend.sln --no-restore --configuration Release
+    
+    # Run unit tests
+    - name: Run tests
+      run: dotnet test foodie-connect-backend.sln --no-build --verbosity normal --configuration Release
