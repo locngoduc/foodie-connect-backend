@@ -9,6 +9,10 @@
 
 Backend service for the FoodSpot Management System, a comprehensive platform for restaurant discovery and management in Vietnam.
 
+![image](https://github.com/user-attachments/assets/09af7be6-1737-4ee3-ba50-de2d7e239e2a)
+![image](https://github.com/user-attachments/assets/8d55d2d3-86c2-479b-bc41-d31f146e3d43)
+
+
 ## 📑 Table of Contents
 - [Related Repositories](#-related-repositories)
 - [Features](#-features)
@@ -23,8 +27,8 @@ Backend service for the FoodSpot Management System, a comprehensive platform for
 
 ## 📚 Related Repositories
 
-- **Frontend Application**: [FoodSpot-Frontend](https://github.com/yourusername/foodspot-frontend)
-- **Recommendation Service**: [FoodSpot-Recommendation](https://github.com/yourusername/foodspot-recommendation)
+- **Frontend Application**: [FoodSpot-Frontend](https://github.com/NTDKhoa04/foodie-connect-frontend)
+- **Recommendation Service**: [FoodSpot-Recommendation](https://github.com/VaderNgo/foodie-recommendation-system)
 
 ## 🌟 Features
 
