@@ -143,6 +143,7 @@ public class RestaurantsService(
         var restaurant = await dbContext.Restaurants
             .Include(r => r.SocialLinks)
             .Include(r => r.Area)
+            .Include(r=>r.Services)
             .FirstOrDefaultAsync(r => r.Id == id);
 
         if (restaurant == null)
