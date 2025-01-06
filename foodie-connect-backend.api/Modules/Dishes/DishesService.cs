@@ -69,16 +69,20 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         return Result<bool>.Success(true);
     }
 
-    public async Task<Result<List<Dish>>> QueryDishes(GetDishesQuery query)
+    public async Task<Result<IEnumerable<Dish>>> QueryDishes(GetDishesQuery query)
     {
-        var restaurant = await dbContext.Restaurants
-            .Include(restaurant => restaurant.Dishes)
+        Restaurant restaurant = new Restaurant();
+        if (query.RestaurantId is not null)
+        {
+            restaurant = await dbContext.Restaurants
+                .Include(restaurant => restaurant.Dishes)
                 .ThenInclude(dish => dish.Categories)
-            .Include(restaurant => restaurant.Dishes)
+                .Include(restaurant => restaurant.Dishes)
                 .ThenInclude(dish => dish.PromotionDetails)
                 .ThenInclude(detail => detail.Promotion)
-            .FirstOrDefaultAsync(x => x.Id == query.RestaurantId);
-        if (restaurant == null) return Result<List<Dish>>.Failure(DishError.RestaurantNotFound());
+                .FirstOrDefaultAsync(x => x.Id == query.RestaurantId);
+            if (restaurant == null) return Result<IEnumerable<Dish>>.Failure(DishError.RestaurantNotFound());
+        }
         
         var parsedCategories = query.Categories?
             .Split(",")
@@ -86,7 +90,15 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
             .Where(category => !string.IsNullOrWhiteSpace(category))
             .ToList();
 
-        var dishes = restaurant.Dishes.ToList();
+        IEnumerable<Dish> dishes = new List<Dish>();
+        if (query.RestaurantId is not null) dishes = restaurant.Dishes.ToList();
+        else dishes = dbContext.Dishes.ToList();
+        
+        //apply name filter
+        if (query.Name is not null)
+        {
+            dishes = dishes.Where(d => d.Name.ToLower().Contains(query.Name.ToLower()));
+        }
 
         // Apply category filter
         if (parsedCategories != null && parsedCategories.Count != 0)
@@ -104,7 +116,7 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         if (query.MaxPrice != null)
             dishes = dishes.Where(dish => dish.Price <= query.MaxPrice).ToList();
 
-        return Result<List<Dish>>.Success(dishes);
+        return Result<IEnumerable<Dish>>.Success(dishes);
     }
 
     public async Task<Result<string>> SetDishImage(Guid dishId, IFormFile file)

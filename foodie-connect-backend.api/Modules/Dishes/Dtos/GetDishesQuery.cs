@@ -6,10 +6,11 @@ namespace foodie_connect_backend.Modules.Dishes.Dtos;
 
 public class GetDishesQuery
 {
-    [Required(ErrorMessage = "Restaurant ID is required")]
-    public Guid RestaurantId { get; set; }
+    public Guid? RestaurantId { get; set; }
     
     public string? Categories { get; set; }
+    
+    public string? Name { get; set; }
 
     public decimal? MinPrice { get; set; } = null;
 

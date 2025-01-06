@@ -164,6 +164,11 @@ public class RestaurantsService(
         {
             var query = dbContext.Restaurants.AsQueryable();
 
+            if (queryDetails.Name is not null)
+            {
+                query = query.Where(r => r.Name.ToLower().Contains(queryDetails.Name.ToLower()));
+            }
+
             if (queryDetails.OwnerId is not null)
             {
                 query = query.Where(r => r.HeadId == queryDetails.OwnerId);
@@ -189,6 +194,7 @@ public class RestaurantsService(
 
             var restaurants = await query
                 .Include(r => r.Area)
+                .Include(r=>r.Services)
                 .ToListAsync();  // Execute the query first
 
             // Then perform the async mapping

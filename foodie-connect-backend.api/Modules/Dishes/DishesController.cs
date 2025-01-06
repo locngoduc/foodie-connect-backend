@@ -77,7 +77,7 @@ namespace foodie_connect_backend.Modules.Dishes
        [ProducesResponseType(typeof(IEnumerable<DishResponseDto>), StatusCodes.Status200OK)]
        [ProducesResponseType(StatusCodes.Status400BadRequest)]
        [ProducesResponseType(StatusCodes.Status404NotFound)]
-       public async Task<ActionResult<List<DishResponseDto>>> GetDishes([FromQuery] GetDishesQuery query)
+       public async Task<ActionResult<IEnumerable<DishResponseDto>>> GetDishes([FromQuery] GetDishesQuery query)
        {
            var result = await dishesService.QueryDishes(query);
            if (result.IsFailure)
