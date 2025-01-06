@@ -19,4 +19,9 @@ public class GetRestaurantsQuery
     /// Filter restaurants by owner ID
     /// </summary>
     public string? OwnerId { get; init; }
+    
+    /// <summary>
+    /// Filter restaurants by name
+    /// </summary>
+    public string? Name { get; init; }
 }
