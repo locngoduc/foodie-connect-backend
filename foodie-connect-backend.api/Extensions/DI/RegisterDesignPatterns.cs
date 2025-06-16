@@ -88,15 +88,23 @@ public static class RegisterDesignPatterns
         // Register the base loggable service
         services.AddScoped<BaseLoggableService>();
 
-        // Register the decorated payment service as the primary ILoggableService
-        // This demonstrates both Adapter and Decorator patterns working together
+        // Register decorated payment service for PaymentController
         services.AddScoped<ILoggableService>(provider =>
         {
             var paymentService = provider.GetRequiredService<PaymentService>();
             var logger = provider.GetRequiredService<ILogger<LoggingServiceDecorator>>();
             
-            // Wrap the payment service (which uses Adapter pattern) with logging decorator
             return new LoggingServiceDecorator(paymentService, logger);
+        });
+
+        // Register decorated notification service for NotificationController
+        services.AddScoped<IDecoratedNotificationService>(provider =>
+        {
+            var notificationService = provider.GetRequiredService<NotificationService>();
+            var logger = provider.GetRequiredService<ILogger<LoggingServiceDecorator>>();
+            
+            var decorator = new LoggingServiceDecorator(notificationService, logger);
+            return new DecoratedNotificationService(decorator);
         });
     }
 } 

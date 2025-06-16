@@ -10,9 +10,9 @@ namespace foodie_connect_backend.Modules.Notifications;
 [Produces("application/json")]
 public class NotificationController : ControllerBase
 {
-    private readonly ILoggableService _notificationService;
+    private readonly IDecoratedNotificationService _notificationService;
 
-    public NotificationController(ILoggableService notificationService)
+    public NotificationController(IDecoratedNotificationService notificationService)
     {
         _notificationService = notificationService;
     }
