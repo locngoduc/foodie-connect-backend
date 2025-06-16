@@ -10,4 +10,9 @@ public interface ILoggableService
 {
     Task<Result<T>> ExecuteWithResultAsync<T>(Func<Task<Result<T>>> operation, string operationName);
     Task ExecuteAsync(Func<Task> operation, string operationName);
+    
+    /// <summary>
+    /// Gets the underlying decorated service (useful for unwrapping decorators)
+    /// </summary>
+    object DecoratedService { get; }
 } 

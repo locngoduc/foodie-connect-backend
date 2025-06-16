@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 .env
 .idea/.idea.foodie-connect-backend/Docker/docker-compose.generated.override.yml
+
+DESIGN_PATTERNS_ANALYSIS.md
+PATTERN_INTEGRATION_TEST.md

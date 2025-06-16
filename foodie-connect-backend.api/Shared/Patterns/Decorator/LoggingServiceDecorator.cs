@@ -7,7 +7,7 @@ namespace foodie_connect_backend.Shared.Patterns.Decorator;
 /// Concrete decorator that adds logging functionality to services
 /// Implements the Decorator pattern
 /// </summary>
-public class LoggingServiceDecorator : ILoggableService, IServiceDecorator<ILoggableService>
+public class LoggingServiceDecorator : ILoggableService
 {
     private readonly ILoggableService _decoratedService;
     private readonly ILogger<LoggingServiceDecorator> _logger;
@@ -18,7 +18,10 @@ public class LoggingServiceDecorator : ILoggableService, IServiceDecorator<ILogg
         _logger = logger;
     }
 
-    public ILoggableService DecoratedService => _decoratedService;
+    /// <summary>
+    /// Gets the underlying decorated service
+    /// </summary>
+    public object DecoratedService => _decoratedService;
 
     public async Task<Result<T>> ExecuteWithResultAsync<T>(Func<Task<Result<T>>> operation, string operationName)
     {

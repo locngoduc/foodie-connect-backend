@@ -18,4 +18,9 @@ public class BaseLoggableService : ILoggableService
         // Base implementation just executes the operation without any decoration
         await operation();
     }
+
+    /// <summary>
+    /// For base services, the decorated service is itself
+    /// </summary>
+    public virtual object DecoratedService => this;
 } 
