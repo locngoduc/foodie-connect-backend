@@ -1,5 +1,7 @@
 using FluentEmail.Core;
 using foodie_connect_backend.Modules.Notifications;
+using foodie_connect_backend.Modules.Payments;
+using foodie_connect_backend.Shared.Patterns.Adapter;
 using foodie_connect_backend.Shared.Patterns.Decorator;
 using foodie_connect_backend.Shared.Patterns.Factory;
 
@@ -11,7 +13,7 @@ namespace foodie_connect_backend.Extensions.DI;
 public static class RegisterDesignPatterns
 {
     /// <summary>
-    /// Registers Factory Method and Decorator patterns in the DI container
+    /// Registers Factory Method, Decorator, and Adapter patterns in the DI container
     /// </summary>
     /// <param name="services">Service collection</param>
     public static void AddDesignPatterns(this IServiceCollection services)
@@ -19,7 +21,10 @@ public static class RegisterDesignPatterns
         // Register Factory Method Pattern components
         RegisterFactoryMethodPattern(services);
         
-        // Register Decorator Pattern components
+        // Register Adapter Pattern components
+        RegisterAdapterPattern(services);
+        
+        // Register Decorator Pattern components (after other services)
         RegisterDecoratorPattern(services);
     }
 
@@ -48,19 +53,50 @@ public static class RegisterDesignPatterns
         services.AddScoped<NotificationService>();
     }
 
+    private static void RegisterAdapterPattern(IServiceCollection services)
+    {
+        // Register legacy payment services (Adaptees)
+        services.AddScoped<LegacyStripeService>();
+        services.AddScoped<LegacyPayPalService>();
+        services.AddScoped<LegacySquareService>();
+
+        // Register payment gateway adapters
+        services.AddScoped<StripePaymentAdapter>(provider =>
+        {
+            var stripeService = provider.GetRequiredService<LegacyStripeService>();
+            return new StripePaymentAdapter(stripeService);
+        });
+
+        services.AddScoped<PayPalPaymentAdapter>(provider =>
+        {
+            var payPalService = provider.GetRequiredService<LegacyPayPalService>();
+            return new PayPalPaymentAdapter(payPalService);
+        });
+
+        services.AddScoped<SquarePaymentAdapter>(provider =>
+        {
+            var squareService = provider.GetRequiredService<LegacySquareService>();
+            return new SquarePaymentAdapter(squareService);
+        });
+
+        // Register the payment service that uses adapters
+        services.AddScoped<PaymentService>();
+    }
+
     private static void RegisterDecoratorPattern(IServiceCollection services)
     {
         // Register the base loggable service
         services.AddScoped<BaseLoggableService>();
 
-        // Register the decorated service using the Decorator pattern
+        // Register the decorated payment service as the primary ILoggableService
+        // This demonstrates both Adapter and Decorator patterns working together
         services.AddScoped<ILoggableService>(provider =>
         {
-            var notificationService = provider.GetRequiredService<NotificationService>();
+            var paymentService = provider.GetRequiredService<PaymentService>();
             var logger = provider.GetRequiredService<ILogger<LoggingServiceDecorator>>();
             
-            // Wrap the notification service with logging decorator
-            return new LoggingServiceDecorator(notificationService, logger);
+            // Wrap the payment service (which uses Adapter pattern) with logging decorator
+            return new LoggingServiceDecorator(paymentService, logger);
         });
     }
 } 
