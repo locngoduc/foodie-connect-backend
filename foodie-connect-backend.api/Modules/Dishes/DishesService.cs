@@ -1,5 +1,6 @@
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Dishes.Dtos;
+using foodie_connect_backend.Modules.Dishes.Strategies;
 using foodie_connect_backend.Modules.DishReviews.Dtos;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Shared.Classes;
@@ -116,7 +117,28 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         if (query.MaxPrice != null)
             dishes = dishes.Where(dish => dish.Price <= query.MaxPrice).ToList();
 
+        // Apply sorting
+        if (!string.IsNullOrEmpty(query.SortBy))
+        {
+            var scores = await CalculateDishScoresAsync(dishes.Select(d => d.Id));
+            var sortContext = CreateSortContext(query.SortBy, query.SortAscending, scores);
+            dishes = sortContext.Sort(dishes);
+        }
+
         return Result<IEnumerable<Dish>>.Success(dishes);
+    }
+
+    private DishSortContext CreateSortContext(string sortBy, bool ascending, Dictionary<Guid, ScoreResponseDto> scores)
+    {
+        IDishSortStrategy strategy = sortBy.ToLower() switch
+        {
+            "price" => new PriceSortStrategy(ascending),
+            "rating" => new RatingSortStrategy(scores, ascending),
+            "name" => new NameSortStrategy(ascending),
+            _ => new NameSortStrategy(ascending) // Default to name sorting
+        };
+
+        return new DishSortContext(strategy);
     }
 
     public async Task<Result<string>> SetDishImage(Guid dishId, IFormFile file)
