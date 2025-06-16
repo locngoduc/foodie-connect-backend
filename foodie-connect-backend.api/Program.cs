@@ -76,6 +76,9 @@ builder.Services.AddAuthorizationHandlers();
 builder.Services.AddRestaurantServices();
 builder.Services.AddDishServices();
 
+// Register custom design patterns (Factory Method and Decorator)
+builder.Services.AddDesignPatterns();
+
 // Configure CORS
 builder.Services.AddCors(options =>
 {
