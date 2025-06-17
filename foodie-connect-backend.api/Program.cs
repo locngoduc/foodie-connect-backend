@@ -20,6 +20,7 @@ using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Modules.Users;
 using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes.Errors;
+using foodie_connect_backend.Shared.Converters;
 using foodie_connect_backend.Shared.Policies;
 using foodie_connect_backend.Shared.Policies.Dish;
 using foodie_connect_backend.Shared.Policies.EmailConfirmed;
@@ -40,7 +41,7 @@ builder.Services.AddControllers()
     })
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(new EnumOrStructJsonConverterFactory());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.NumberHandling = JsonNumberHandling.AllowNamedFloatingPointLiterals;
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
