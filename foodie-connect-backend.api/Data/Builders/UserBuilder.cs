@@ -6,7 +6,6 @@ namespace foodie_connect_backend.Data.Builders;
 
 public class UserBuilder
 {
-    private string _id = null!;
     private string _displayName = null!;
     private string? _avatarId = string.Empty;
     private string? _phoneNumber;
@@ -14,7 +13,6 @@ public class UserBuilder
     private DateTime _updatedAt = DateTime.UtcNow;
     private string _userName = null!;
     private string _email = null!;
-    public UserBuilder WithId(string id) { _id = id; return this; }
     public UserBuilder WithDisplayName(string name) { _displayName = name; return this; }
     public UserBuilder WithAvatarId(string? avatarId) { _avatarId = avatarId; return this; }
     public UserBuilder WithPhoneNumber(string? phoneNumber) { _phoneNumber = phoneNumber; return this; }
@@ -24,7 +22,6 @@ public class UserBuilder
     public UserBuilder WithEmail(string email) { _email = email; return this; }
     public User Build() => new User
     {
-        Id = _id,
         DisplayName = _displayName,
         AvatarId = _avatarId,
         PhoneNumber = _phoneNumber,

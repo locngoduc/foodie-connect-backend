@@ -6,7 +6,6 @@ namespace foodie_connect_backend.Data.Builders;
 
 public class DishReviewBuilder
 {
-    private Guid _id;
     private Guid _dishId;
     private User _user = null!;
     private string _userId = null!;
@@ -14,7 +13,6 @@ public class DishReviewBuilder
     private string _content = null!;
     private DateTime _createdAt = DateTime.Now;
     private DateTime _updatedAt = DateTime.Now;
-    public DishReviewBuilder WithId(Guid id) { _id = id; return this; }
     public DishReviewBuilder WithDishId(Guid dishId) { _dishId = dishId; return this; }
     public DishReviewBuilder WithUser(User user) { _user = user; return this; }
     public DishReviewBuilder WithUserId(string userId) { _userId = userId; return this; }
@@ -24,7 +22,6 @@ public class DishReviewBuilder
     public DishReviewBuilder WithUpdatedAt(DateTime updatedAt) { _updatedAt = updatedAt; return this; }
     public DishReview Build() => new DishReview
     {
-        Id = _id,
         DishId = _dishId,
         User = _user,
         UserId = _userId,

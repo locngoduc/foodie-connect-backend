@@ -6,7 +6,6 @@ namespace foodie_connect_backend.Data.Builders;
 
 public class ServiceBuilder
 {
-    private Guid _id;
     private string _name = string.Empty;
     private bool _isDeleted = false;
     private DateTime _createdDate = DateTime.UtcNow;
@@ -14,7 +13,6 @@ public class ServiceBuilder
     private Guid _restaurantId;
     private Restaurant? _restaurant;
 
-    public ServiceBuilder WithId(Guid id) { _id = id; return this; }
     public ServiceBuilder WithName(string name) { _name = name; return this; }
     public ServiceBuilder WithIsDeleted(bool isDeleted) { _isDeleted = isDeleted; return this; }
     public ServiceBuilder WithCreatedDate(DateTime createdDate) { _createdDate = createdDate; return this; }
@@ -23,7 +21,6 @@ public class ServiceBuilder
     public ServiceBuilder WithRestaurant(Restaurant? restaurant) { _restaurant = restaurant; return this; }
     public Service Build() => new Service
     {
-        Id = _id,
         Name = _name,
         IsDeleted = _isDeleted,
         CreatedDate = _createdDate,

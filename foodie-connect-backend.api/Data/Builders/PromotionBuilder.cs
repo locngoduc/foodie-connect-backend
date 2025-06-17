@@ -7,7 +7,6 @@ namespace foodie_connect_backend.Data.Builders;
 
 public class PromotionBuilder
 {
-    private Guid _id;
     private Guid _restaurantId;
     private string _name = null!;
     private string? _bannerId;
@@ -17,7 +16,6 @@ public class PromotionBuilder
     private DateTime _beginsAt;
     private DateTime _endsAt;
 
-    public PromotionBuilder WithId(Guid id) { _id = id; return this; }
     public PromotionBuilder WithRestaurantId(Guid restaurantId) { _restaurantId = restaurantId; return this; }
     public PromotionBuilder WithName(string name) { _name = name; return this; }
     public PromotionBuilder WithBannerId(string? bannerId) { _bannerId = bannerId; return this; }
@@ -28,7 +26,6 @@ public class PromotionBuilder
     public PromotionBuilder WithEndsAt(DateTime endsAt) { _endsAt = endsAt; return this; }
     public Promotion Build() => new Promotion
     {
-        Id = _id,
         RestaurantId = _restaurantId,
         Name = _name,
         BannerId = _bannerId,

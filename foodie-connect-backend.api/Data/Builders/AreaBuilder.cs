@@ -6,7 +6,6 @@ namespace foodie_connect_backend.Data.Builders;
 
 public class AreaBuilder
 {
-    private Guid _id;
     private string _formattedAddress = null!;
     private string? _streetAddress;
     private string? _route;
@@ -21,7 +20,6 @@ public class AreaBuilder
     private string? _neighborhood;
     private string? _premise;
     private string? _subpremise;
-    public AreaBuilder WithId(Guid id) { _id = id; return this; }
     public AreaBuilder WithFormattedAddress(string address) { _formattedAddress = address; return this; }
     public AreaBuilder WithStreetAddress(string? street) { _streetAddress = street; return this; }
     public AreaBuilder WithRoute(string? route) { _route = route; return this; }
@@ -38,7 +36,6 @@ public class AreaBuilder
     public AreaBuilder WithSubpremise(string? val) { _subpremise = val; return this; }
     public Area Build() => new Area
     {
-        Id = _id,
         FormattedAddress = _formattedAddress,
         StreetAddress = _streetAddress,
         Route = _route,

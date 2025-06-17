@@ -7,7 +7,6 @@ namespace foodie_connect_backend.Data.Builders;
 
 public class DishBuilder: IBuilder<Dish>
 {
-    private Guid _id;
     private string _name = null!;
     private string? _imageId;
     private string _description = null!;
@@ -21,7 +20,6 @@ public class DishBuilder: IBuilder<Dish>
     private ICollection<PromotionDetail> _promotionDetails = new List<PromotionDetail>();
     private ICollection<DishReview> _reviews = new List<DishReview>();
 
-    public DishBuilder WithId(Guid id) { _id = id; return this; }
     public DishBuilder WithName(string name) { _name = name; return this; }
     public DishBuilder WithImageId(string? imageId) { _imageId = imageId; return this; }
     public DishBuilder WithDescription(string description) { _description = description; return this; }
@@ -36,7 +34,6 @@ public class DishBuilder: IBuilder<Dish>
     public DishBuilder WithReviews(ICollection<DishReview> reviews) { _reviews = reviews; return this; }
     public Dish Build() => new Dish
     {
-        Id = _id,
         Name = _name,
         ImageId = _imageId,
         Description = _description,
