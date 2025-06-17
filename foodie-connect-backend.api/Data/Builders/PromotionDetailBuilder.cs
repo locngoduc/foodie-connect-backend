@@ -4,13 +4,22 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class PromotionDetailBuilder: IBuilder<PromotionDetail>
+public class PromotionDetailBuilder
 {
-    private readonly PromotionDetail _detail = new();
+    private Promotion _promotion = null!;
+    private Guid _promotionId;
+    private Guid _dishId;
+    private decimal _promotionalPrice;
 
-    public PromotionDetailBuilder WithPromotion(Promotion promotion) { _detail.Promotion = promotion; return this; }
-    public PromotionDetailBuilder WithPromotionId(Guid id) { _detail.PromotionId = id; return this; }
-    public PromotionDetailBuilder WithDishId(Guid id) { _detail.DishId = id; return this; }
-    public PromotionDetailBuilder WithPromotionalPrice(decimal price) { _detail.PromotionalPrice = price; return this; }
-    public PromotionDetail Build() => _detail;
+    public PromotionDetailBuilder WithPromotion(Promotion promotion) { _promotion = promotion; return this; }
+    public PromotionDetailBuilder WithPromotionId(Guid id) { _promotionId = id; return this; }
+    public PromotionDetailBuilder WithDishId(Guid id) { _dishId = id; return this; }
+    public PromotionDetailBuilder WithPromotionalPrice(decimal price) { _promotionalPrice = price; return this; }
+    public PromotionDetail Build() => new PromotionDetail
+    {
+        Promotion = _promotion,
+        PromotionId = _promotionId,
+        DishId = _dishId,
+        PromotionalPrice = _promotionalPrice
+    };
 }

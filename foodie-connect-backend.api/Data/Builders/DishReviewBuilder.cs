@@ -4,17 +4,33 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class DishReviewBuilder: IBuilder<DishReview>
+public class DishReviewBuilder
 {
-    private readonly DishReview _review = new();
-
-    public DishReviewBuilder WithId(Guid id) { _review.Id = id; return this; }
-    public DishReviewBuilder WithDishId(Guid dishId) { _review.DishId = dishId; return this; }
-    public DishReviewBuilder WithUser(User user) { _review.User = user; return this; }
-    public DishReviewBuilder WithUserId(string userId) { _review.UserId = userId; return this; }
-    public DishReviewBuilder WithRating(int rating) { _review.Rating = rating; return this; }
-    public DishReviewBuilder WithContent(string content) { _review.Content = content; return this; }
-    public DishReviewBuilder WithCreatedAt(DateTime createdAt) { _review.CreatedAt = createdAt; return this; }
-    public DishReviewBuilder WithUpdatedAt(DateTime updatedAt) { _review.UpdatedAt = updatedAt; return this; }
-    public DishReview Build() => _review;
+    private Guid _id;
+    private Guid _dishId;
+    private User _user = null!;
+    private string _userId = null!;
+    private int _rating = 1;
+    private string _content = null!;
+    private DateTime _createdAt = DateTime.Now;
+    private DateTime _updatedAt = DateTime.Now;
+    public DishReviewBuilder WithId(Guid id) { _id = id; return this; }
+    public DishReviewBuilder WithDishId(Guid dishId) { _dishId = dishId; return this; }
+    public DishReviewBuilder WithUser(User user) { _user = user; return this; }
+    public DishReviewBuilder WithUserId(string userId) { _userId = userId; return this; }
+    public DishReviewBuilder WithRating(int rating) { _rating = rating; return this; }
+    public DishReviewBuilder WithContent(string content) { _content = content; return this; }
+    public DishReviewBuilder WithCreatedAt(DateTime createdAt) { _createdAt = createdAt; return this; }
+    public DishReviewBuilder WithUpdatedAt(DateTime updatedAt) { _updatedAt = updatedAt; return this; }
+    public DishReview Build() => new DishReview
+    {
+        Id = _id,
+        DishId = _dishId,
+        User = _user,
+        UserId = _userId,
+        Rating = _rating,
+        Content = _content,
+        CreatedAt = _createdAt,
+        UpdatedAt = _updatedAt
+    };
 }

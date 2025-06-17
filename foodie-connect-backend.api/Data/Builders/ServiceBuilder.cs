@@ -4,16 +4,31 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class ServiceBuilder: IBuilder<Service>
+public class ServiceBuilder
 {
-    private readonly Service _service = new();
+    private Guid _id;
+    private string _name = string.Empty;
+    private bool _isDeleted = false;
+    private DateTime _createdDate = DateTime.UtcNow;
+    private DateTime _updatedAt = DateTime.UtcNow;
+    private Guid _restaurantId;
+    private Restaurant? _restaurant;
 
-    public ServiceBuilder WithId(Guid id) { _service.Id = id; return this; }
-    public ServiceBuilder WithName(string name) { _service.Name = name; return this; }
-    public ServiceBuilder WithIsDeleted(bool isDeleted) { _service.IsDeleted = isDeleted; return this; }
-    public ServiceBuilder WithCreatedDate(DateTime createdDate) { _service.CreatedDate = createdDate; return this; }
-    public ServiceBuilder WithUpdatedAt(DateTime updatedAt) { _service.UpdatedAt = updatedAt; return this; }
-    public ServiceBuilder WithRestaurantId(Guid restaurantId) { _service.RestaurantId = restaurantId; return this; }
-    public ServiceBuilder WithRestaurant(Restaurant? restaurant) { _service.Restaurant = restaurant; return this; }
-    public Service Build() => _service;
+    public ServiceBuilder WithId(Guid id) { _id = id; return this; }
+    public ServiceBuilder WithName(string name) { _name = name; return this; }
+    public ServiceBuilder WithIsDeleted(bool isDeleted) { _isDeleted = isDeleted; return this; }
+    public ServiceBuilder WithCreatedDate(DateTime createdDate) { _createdDate = createdDate; return this; }
+    public ServiceBuilder WithUpdatedAt(DateTime updatedAt) { _updatedAt = updatedAt; return this; }
+    public ServiceBuilder WithRestaurantId(Guid restaurantId) { _restaurantId = restaurantId; return this; }
+    public ServiceBuilder WithRestaurant(Restaurant? restaurant) { _restaurant = restaurant; return this; }
+    public Service Build() => new Service
+    {
+        Id = _id,
+        Name = _name,
+        IsDeleted = _isDeleted,
+        CreatedDate = _createdDate,
+        UpdatedAt = _updatedAt,
+        RestaurantId = _restaurantId,
+        Restaurant = _restaurant
+    };
 }
