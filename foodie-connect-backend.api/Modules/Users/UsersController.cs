@@ -226,4 +226,86 @@ namespace foodie_connect_backend.Modules.Users
             return Ok(new GenericResponse { Message = "Upgraded user to head successfully" });
         }
     }
+
+    [Route("v2/users")]
+    [ApiController]
+    [Produces("application/json")]
+    public class UserControllerV2(UsersService usersService) : ControllerBase
+    {
+        /// <summary>
+        /// Creates a new user account
+        /// </summary>
+        /// <param name="user">User creation data transfer object</param>
+        /// <returns>The newly created user account</returns>
+        /// <response code="201">Returns the newly created user account</response>
+        /// <response code="400">
+        /// Request body does not meet specified requirements
+        /// - PASSWORD_NOT_VALID: Password does not meet requirements: at least 1x uppercase letter, 1x number, and 1x special character 
+        /// </response>
+        /// <response code="409">
+        /// Conflict with existing data
+        /// - USERNAME_ALREADY_EXISTS: The requested username is already taken
+        /// - EMAIL_ALREADY_EXISTS: The requested email is already registered
+        /// </response>
+        /// <response code="500">
+        /// Internal server error
+        /// - INTERNAL_ERROR: An unexpected internal error occurred
+        /// - UNEXPECTED_ERROR: An unexpected error occurred
+        /// </response>
+        [HttpPost]
+        [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<User>> CreateUser(CreateUserDto user)
+        {
+            var result = await usersService.CreateUser_V2(user);
+            if (result.IsFailure)
+            {
+                return result.Error.Code switch
+                {
+                    UserError.DuplicateUsernameCode => Conflict(result.Error),
+                    UserError.DuplicateEmailCode => Conflict(result.Error),
+                    UserError.PasswordNotValidCode => BadRequest(result.Error),
+                    _ => StatusCode(StatusCodes.Status500InternalServerError, result.Error)
+                };
+            }
+
+            var responseDto = new UserResponseDto()
+            {
+                Id = result.Value.Id,
+                UserName = result.Value.UserName!,
+                DisplayName = result.Value.DisplayName,
+            };
+
+            return CreatedAtAction(nameof(GetUser), new { id = result.Value.Id }, responseDto);
+        }
+        
+        /// <summary>
+        /// Query basic information about a USER account
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Information about the USER account without sensitive information</returns>
+        /// <response code="200">Returns the USER account information</response>
+        /// <response code="404">
+        /// Cannot find the queried user
+        /// - USER_NOT_FOUND: User does not exist or is of different type (USER or HEAD)
+        /// </response>
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(UserResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<User>> GetUser(string id)
+        {
+            var result = await usersService.GetUserById(id);
+            if (result.IsFailure) return NotFound(result.Error);
+
+            var responseDto = new UserResponseDto()
+            {
+                Id = result.Value.Id,
+                UserName = result.Value.UserName!,
+                DisplayName = result.Value.DisplayName,
+                Avatar = result.Value.AvatarId,
+            };
+            return Ok(responseDto);
+        }
+    }
 }

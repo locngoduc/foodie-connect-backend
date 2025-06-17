@@ -1,5 +1,7 @@
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Modules.Uploader;
+using foodie_connect_backend.Modules.Users.DesignPattern;
+using foodie_connect_backend.Modules.Users.DesignPattern.Interface;
 using foodie_connect_backend.Modules.Users.Dtos;
 using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes;
@@ -154,5 +156,12 @@ public class UsersService(
             
             return Result<bool>.Failure(AppError.InternalError());
         }
+    }
+
+    public async Task<Result<User>> CreateUser_V2(CreateUserDto createUserDto)
+    {
+        ICreateUserCommand createUserCommand = new CreateUserCommand(createUserDto, userManager, verificationService);
+        var result = await createUserCommand.execute();
+        return result;
     }
 }
