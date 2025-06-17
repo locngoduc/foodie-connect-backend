@@ -1,9 +1,10 @@
 using System;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class DishReviewBuilder
+public class DishReviewBuilder: IBuilder<DishReview>
 {
     private readonly DishReview _review = new();
 

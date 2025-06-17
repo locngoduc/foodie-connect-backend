@@ -1,9 +1,10 @@
 using System;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class AreaBuilder
+public class AreaBuilder: IBuilder<Area>
 {
     private readonly Area _area = new();
 

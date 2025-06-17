@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Shared.Enums;
+using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class RestaurantBuilder
+public class RestaurantBuilder: IBuilder<Restaurant>
 {
     private Guid _id;
     private string _name = null!;

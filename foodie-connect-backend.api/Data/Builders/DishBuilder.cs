@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class DishBuilder
+public class DishBuilder: IBuilder<Dish>
 {
     private Guid _id;
     private string _name = null!;

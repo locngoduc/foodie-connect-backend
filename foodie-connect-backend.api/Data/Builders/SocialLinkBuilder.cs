@@ -1,10 +1,11 @@
 using System;
 using foodie_connect_backend.Data;
 using foodie_connect_backend.Shared.Enums;
+using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class SocialLinkBuilder
+public class SocialLinkBuilder: IBuilder<SocialLink>
 {
     private string _id = Guid.NewGuid().ToString();
     private Guid _restaurantId;

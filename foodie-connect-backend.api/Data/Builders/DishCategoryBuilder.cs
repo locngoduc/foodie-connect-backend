@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class DishCategoryBuilder
+public class DishCategoryBuilder: IBuilder<DishCategory>
 {
     private readonly DishCategory _category = new();
 
