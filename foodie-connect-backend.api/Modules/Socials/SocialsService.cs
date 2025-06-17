@@ -1,4 +1,5 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Data.Builders;
 using foodie_connect_backend.Modules.Socials.Dtos;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
@@ -48,13 +49,12 @@ public class SocialsService(ApplicationDbContext dbContext)
 
             if (restaurant.SocialLinks.Any(sl => sl.PlatformType == dto.PlatformType))
                 return Result<SocialLinkResponseDto>.Failure(SocialError.SocialAlreadyExists(dto.PlatformType.ToString()));
-
-            var socialLink = new SocialLink
-            {
-                PlatformType = dto.PlatformType,
-                Url = dto.Url,
-                RestaurantId = restaurantId
-            };
+            
+            var socialLink = new SocialLinkBuilder()
+                .WithPlatformType(dto.PlatformType)
+                .WithUrl(dto.Url)
+                .WithRestaurantId(restaurantId)
+                .Build();
 
             dbContext.SocialLinks.Add(socialLink);
             await dbContext.SaveChangesAsync();

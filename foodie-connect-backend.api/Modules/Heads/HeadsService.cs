@@ -1,4 +1,5 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Data.Builders;
 using foodie_connect_backend.Modules.Heads.Dtos;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Modules.Verification;
@@ -16,13 +17,12 @@ public class HeadsService(
 {
     public async Task<Result<User>> CreateHead(CreateHeadDto head)
     {
-        var newHead = new User
-        {
-            DisplayName = head.DisplayName,
-            PhoneNumber = head.PhoneNumber,
-            UserName = head.UserName,
-            Email = head.Email
-        };
+        var newHead = new UserBuilder()
+            .WithDisplayName(head.DisplayName)
+            .WithPhoneNumber(head.PhoneNumber)
+            .WithUserName(head.UserName)
+            .WithEmail(head.Email)
+            .Build();
 
         var result = await userManager.CreateAsync(newHead, head.Password);
         

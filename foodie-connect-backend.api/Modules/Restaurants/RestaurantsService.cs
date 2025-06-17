@@ -1,5 +1,6 @@
 using System.Globalization;
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Data.Builders;
 using foodie_connect_backend.Modules.GeoCoder;
 using foodie_connect_backend.Modules.Restaurants.Dtos;
 using foodie_connect_backend.Modules.Restaurants.Mappers;
@@ -39,16 +40,15 @@ public class RestaurantsService(
 
             var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
 
-            var newRestaurant = new Restaurant
-            {
-                Name = restaurant.Name,
-                Phone = restaurant.Phone,
-                OpenTime = restaurant.OpenTime,
-                CloseTime = restaurant.CloseTime,
-                Status = restaurant.Status,
-                HeadId = head.Id,
-                Location = locationPoint
-            };
+            var newRestaurant = new RestaurantBuilder()
+                .WithName(restaurant.Name)
+                .WithPhone(restaurant.Phone)
+                .WithOpenTime(restaurant.OpenTime)
+                .WithCloseTime(restaurant.CloseTime)
+                .WithStatus(restaurant.Status)
+                .WithHeadId(head.Id)
+                .WithLocation(locationPoint)
+                .Build();
 
             var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
             if (resultArea.IsFailure)

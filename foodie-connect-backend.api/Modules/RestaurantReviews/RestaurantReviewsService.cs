@@ -1,4 +1,5 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Data.Builders;
 using foodie_connect_backend.Modules.RestaurantReviews.Dtos;
 using foodie_connect_backend.Modules.RestaurantReviews.Mapper;
 using foodie_connect_backend.Shared.Classes;
@@ -19,13 +20,12 @@ public class RestaurantReviewsService(ApplicationDbContext dbContext)
             return Result<RestaurantReview>.Failure(RestaurantError.AlreadyReviewed());
         
         // Add review
-        var review = new RestaurantReview
-        {
-            RestaurantId = restaurantId,
-            UserId = reviewerId,
-            Rating = dto.Rating,
-            Content = dto.Content,
-        };
+        var review = new RestaurantReviewBuilder()
+            .WithRestaurantId(restaurantId)
+            .WithUserId(reviewerId)
+            .WithRating(dto.Rating)
+            .WithContent(dto.Content)
+            .Build();
         
         dbContext.RestaurantReviews.Add(review);
         await dbContext.SaveChangesAsync();

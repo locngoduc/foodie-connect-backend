@@ -1,4 +1,5 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Data.Builders;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,10 @@ public class DishCategoriesService(ApplicationDbContext dbContext)
             return Result<DishCategory>.Failure(RestaurantError.DishCategoryAlreadyExist(categoryName));
 
         // Adds dish category to restaurant
-        var newDishCategory = new DishCategory { CategoryName = categoryName };
+        var newDishCategory = new DishCategoryBuilder()
+            .WithCategoryName(categoryName)
+            .Build();
+        
         restaurant.DishCategories.Add(newDishCategory);
         await dbContext.SaveChangesAsync();
         

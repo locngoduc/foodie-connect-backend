@@ -1,4 +1,5 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Data.Builders;
 using foodie_connect_backend.Modules.Dishes.Dtos;
 using foodie_connect_backend.Modules.Dishes.Strategies;
 using foodie_connect_backend.Modules.DishReviews.Dtos;
@@ -19,13 +20,12 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         if (isNameTaken != 0) 
             return Result<Dish>.Failure(DishError.NameAlreadyExists(dto.Name));
 
-        var dish = new Dish
-        {
-            Name = dto.Name,
-            Description = dto.Description,
-            Price = dto.Price,
-            RestaurantId = dto.RestaurantId,
-        };
+        var dish = new DishBuilder()
+            .WithName(dto.Name)
+            .WithDescription(dto.Description)
+            .WithPrice(dto.Price)
+            .WithRestaurantId(dto.RestaurantId)
+            .Build();
         
         var availableCategories = await dbContext.DishCategories
             .Where(x => x.RestaurantId == dto.RestaurantId)

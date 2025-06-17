@@ -1,4 +1,5 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Data.Builders;
 using foodie_connect_backend.Modules.Promotions.Dtos;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Shared.Classes;
@@ -21,15 +22,14 @@ public class PromotionsService(ApplicationDbContext dbContext, IUploaderService 
         }
         
         // Add promotion to DB
-        var promotion = new Promotion
-        {
-            RestaurantId = restaurantId,
-            Name = dto.Name,
-            Description = dto.Description,
-            Targets = dto.Targets,
-            BeginsAt = dto.BeginsAt,
-            EndsAt = dto.EndsAt
-        };
+        var promotion = new PromotionBuilder()
+            .WithRestaurantId(restaurantId)
+            .WithName(dto.Name)
+            .WithDescription(dto.Description)
+            .WithTargets(dto.Targets)
+            .WithBeginsAt(dto.BeginsAt)
+            .WithEndsAt(dto.EndsAt)
+            .Build();
 
         await dbContext.Promotions.AddAsync(promotion);
         await dbContext.SaveChangesAsync();
