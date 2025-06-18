@@ -4,7 +4,7 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class RestaurantReviewBuilder
+public class RestaurantReviewBuilder:  IBuilder<RestaurantReview>
 {
     private Guid _restaurantId;
     private User _user = null!;

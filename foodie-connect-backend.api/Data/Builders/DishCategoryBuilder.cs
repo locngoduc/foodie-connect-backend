@@ -5,7 +5,7 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class DishCategoryBuilder
+public class DishCategoryBuilder: IBuilder<DishCategory>
 {
     private Guid _restaurantId;
     private string _categoryName = null!;

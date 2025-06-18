@@ -4,7 +4,7 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class ServiceBuilder
+public class ServiceBuilder: IBuilder<Service>
 {
     private string _name = string.Empty;
     private bool _isDeleted = false;

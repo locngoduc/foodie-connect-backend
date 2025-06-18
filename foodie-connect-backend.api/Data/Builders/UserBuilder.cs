@@ -4,7 +4,7 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class UserBuilder
+public class UserBuilder: IBuilder<User>
 {
     private string _displayName = null!;
     private string? _avatarId = string.Empty;

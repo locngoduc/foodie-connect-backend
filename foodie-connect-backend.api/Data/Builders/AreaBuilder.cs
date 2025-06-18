@@ -4,7 +4,7 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class AreaBuilder
+public class AreaBuilder: IBuilder<Area>
 {
     private string _formattedAddress = null!;
     private string? _streetAddress;

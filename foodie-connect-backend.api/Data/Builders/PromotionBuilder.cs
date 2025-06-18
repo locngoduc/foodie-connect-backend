@@ -5,7 +5,7 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class PromotionBuilder
+public class PromotionBuilder: IBuilder<Promotion>
 {
     private Guid _restaurantId;
     private string _name = null!;

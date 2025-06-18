@@ -4,7 +4,7 @@ using foodie_connect_backend.Shared.Patterns.Builder;
 
 namespace foodie_connect_backend.Data.Builders;
 
-public class DishReviewBuilder
+public class DishReviewBuilder: IBuilder<DishReview>
 {
     private Guid _dishId;
     private User _user = null!;
