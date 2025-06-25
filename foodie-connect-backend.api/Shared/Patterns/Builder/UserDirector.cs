@@ -10,7 +10,7 @@ public class UserDirector(IUserBuilder userBuilder)
     {
         _userBuilder.Reset();
         _userBuilder.WithDisplayName(displayName);
-        _userBuilder.WithAvatarId(username);
+        _userBuilder.WithUserName(username);
         _userBuilder.WithPhoneNumber(phoneNumber);
         _userBuilder.WithEmail(email);
         _userBuilder.WithRole("User");
@@ -22,7 +22,7 @@ public class UserDirector(IUserBuilder userBuilder)
     {
         _userBuilder.Reset();
         _userBuilder.WithDisplayName(displayName);
-        _userBuilder.WithAvatarId(username);
+        _userBuilder.WithUserName(username);
         _userBuilder.WithPhoneNumber(phoneNumber);
         _userBuilder.WithEmail(email);
         _userBuilder.WithRole("Head");
