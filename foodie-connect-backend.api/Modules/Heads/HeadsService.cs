@@ -6,6 +6,7 @@ using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Dtos;
+using foodie_connect_backend.Shared.Patterns.Builder;
 using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Modules.Heads;
@@ -17,12 +18,14 @@ public class HeadsService(
 {
     public async Task<Result<User>> CreateHead(CreateHeadDto head)
     {
-        var newHead = new UserBuilder()
-            .WithDisplayName(head.DisplayName)
-            .WithPhoneNumber(head.PhoneNumber)
-            .WithUserName(head.UserName)
-            .WithEmail(head.Email)
-            .Build();
+        var userBuilder = new UserBuilder();
+        var userDirector = new UserDirector(userBuilder);
+
+        var newHead = userDirector.MakeHead(
+            head.DisplayName, 
+            head.UserName, 
+            head.Email, 
+            head.PhoneNumber);
 
         var result = await userManager.CreateAsync(newHead, head.Password);
         
@@ -41,7 +44,7 @@ public class HeadsService(
             };
         }
         
-        await userManager.AddToRoleAsync(newHead, "Head");
+        await userManager.AddToRoleAsync(newHead, newHead.Role);
 
         // Send verification email
         // This introduces tight-coupling between Heads and Verification service

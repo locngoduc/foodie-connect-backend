@@ -22,14 +22,15 @@ public class PromotionsService(ApplicationDbContext dbContext, IUploaderService 
         }
         
         // Add promotion to DB
-        var promotion = new PromotionBuilder()
-            .WithRestaurantId(restaurantId)
-            .WithName(dto.Name)
-            .WithDescription(dto.Description)
-            .WithTargets(dto.Targets)
-            .WithBeginsAt(dto.BeginsAt)
-            .WithEndsAt(dto.EndsAt)
-            .Build();
+        var promotion = new Promotion
+        {
+            RestaurantId = restaurantId,
+            Name = dto.Name,
+            Description = dto.Description,
+            Targets = dto.Targets,
+            BeginsAt = dto.BeginsAt,
+            EndsAt = dto.EndsAt,
+        };
 
         await dbContext.Promotions.AddAsync(promotion);
         await dbContext.SaveChangesAsync();

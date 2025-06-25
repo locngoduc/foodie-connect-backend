@@ -21,9 +21,10 @@ public class DishCategoriesService(ApplicationDbContext dbContext)
             return Result<DishCategory>.Failure(RestaurantError.DishCategoryAlreadyExist(categoryName));
 
         // Adds dish category to restaurant
-        var newDishCategory = new DishCategoryBuilder()
-            .WithCategoryName(categoryName)
-            .Build();
+        var newDishCategory = new DishCategory
+        {
+            CategoryName = categoryName,
+        };
         
         restaurant.DishCategories.Add(newDishCategory);
         await dbContext.SaveChangesAsync();

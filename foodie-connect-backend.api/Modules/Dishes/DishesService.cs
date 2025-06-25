@@ -20,12 +20,13 @@ public class DishesService(ApplicationDbContext dbContext, IUploaderService uplo
         if (isNameTaken != 0) 
             return Result<Dish>.Failure(DishError.NameAlreadyExists(dto.Name));
 
-        var dish = new DishBuilder()
-            .WithName(dto.Name)
-            .WithDescription(dto.Description)
-            .WithPrice(dto.Price)
-            .WithRestaurantId(dto.RestaurantId)
-            .Build();
+        var dish = new Dish
+        {
+            Name = dto.Name,
+            Description = dto.Description,
+            Price = dto.Price,
+            RestaurantId = dto.RestaurantId,
+        };
         
         var availableCategories = await dbContext.DishCategories
             .Where(x => x.RestaurantId == dto.RestaurantId)

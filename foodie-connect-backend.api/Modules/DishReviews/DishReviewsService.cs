@@ -21,12 +21,13 @@ public class DishReviewsService(ApplicationDbContext dbContext)
         if (timesReviewed != 0) return Result<DishReview>.Failure(DishError.AlreadyReviewed());
 
         // Add review to database
-        var review = new DishReviewBuilder()
-            .WithDishId(dish.Id)
-            .WithUserId(reviewerId)
-            .WithRating(dto.Rating)
-            .WithContent(dto.Content)
-            .Build();
+        var review = new DishReview
+        {
+            DishId = dish.Id,
+            UserId = reviewerId,
+            Rating = dto.Rating,
+            Content = dto.Content,
+        };
         
         dbContext.DishReviews.Add(review);
         await dbContext.SaveChangesAsync();

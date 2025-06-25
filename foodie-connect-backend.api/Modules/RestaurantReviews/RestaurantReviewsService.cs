@@ -20,12 +20,13 @@ public class RestaurantReviewsService(ApplicationDbContext dbContext)
             return Result<RestaurantReview>.Failure(RestaurantError.AlreadyReviewed());
         
         // Add review
-        var review = new RestaurantReviewBuilder()
-            .WithRestaurantId(restaurantId)
-            .WithUserId(reviewerId)
-            .WithRating(dto.Rating)
-            .WithContent(dto.Content)
-            .Build();
+        var review = new RestaurantReview
+        {
+            RestaurantId = restaurantId,
+            UserId = reviewerId,
+            Rating = dto.Rating,
+            Content = dto.Content,
+        };
         
         dbContext.RestaurantReviews.Add(review);
         await dbContext.SaveChangesAsync();

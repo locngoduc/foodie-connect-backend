@@ -50,11 +50,12 @@ public class SocialsService(ApplicationDbContext dbContext)
             if (restaurant.SocialLinks.Any(sl => sl.PlatformType == dto.PlatformType))
                 return Result<SocialLinkResponseDto>.Failure(SocialError.SocialAlreadyExists(dto.PlatformType.ToString()));
             
-            var socialLink = new SocialLinkBuilder()
-                .WithPlatformType(dto.PlatformType)
-                .WithUrl(dto.Url)
-                .WithRestaurantId(restaurantId)
-                .Build();
+            var socialLink = new SocialLink
+            {
+                PlatformType = dto.PlatformType,
+                Url = dto.Url,
+                RestaurantId = restaurant.Id
+            };
 
             dbContext.SocialLinks.Add(socialLink);
             await dbContext.SaveChangesAsync();

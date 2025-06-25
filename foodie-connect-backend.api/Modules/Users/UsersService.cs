@@ -1,10 +1,12 @@
 using foodie_connect_backend.Data;
+using foodie_connect_backend.Data.Builders;
 using foodie_connect_backend.Modules.Uploader;
 using foodie_connect_backend.Modules.Users.Dtos;
 using foodie_connect_backend.Modules.Verification;
 using foodie_connect_backend.Shared.Classes;
 using foodie_connect_backend.Shared.Classes.Errors;
 using foodie_connect_backend.Shared.Dtos;
+using foodie_connect_backend.Shared.Patterns.Builder;
 using Microsoft.AspNetCore.Identity;
 
 namespace foodie_connect_backend.Modules.Users;
@@ -17,13 +19,14 @@ public class UsersService(
 {
     public async Task<Result<User>> CreateUser(CreateUserDto user)
     {
-        var newUser = new User
-        {
-            DisplayName = user.DisplayName,
-            PhoneNumber = user.PhoneNumber,
-            UserName = user.UserName,
-            Email = user.Email,
-        };
+        var userBuilder = new UserBuilder();
+        var userDirector = new UserDirector(userBuilder);
+
+        var newUser = userDirector.MakeUser(
+            user.DisplayName, 
+            user.UserName, 
+            user.Email, 
+            user.PhoneNumber);
         
         var result = await userManager.CreateAsync(newUser, user.Password);
         
@@ -42,7 +45,7 @@ public class UsersService(
             };
         }
         
-        await userManager.AddToRoleAsync(newUser, "User");
+        await userManager.AddToRoleAsync(newUser, newUser.Role);
         
         // Send verification email
         // This introduces tight-coupling between Heads and Verification service

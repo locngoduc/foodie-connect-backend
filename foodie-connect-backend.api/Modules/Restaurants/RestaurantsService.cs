@@ -40,15 +40,16 @@ public class RestaurantsService(
 
             var locationPoint = new Point(longitude, latitude) { SRID = 4326 };
 
-            var newRestaurant = new RestaurantBuilder()
-                .WithName(restaurant.Name)
-                .WithPhone(restaurant.Phone)
-                .WithOpenTime(restaurant.OpenTime)
-                .WithCloseTime(restaurant.CloseTime)
-                .WithStatus(restaurant.Status)
-                .WithHeadId(head.Id)
-                .WithLocation(locationPoint)
-                .Build();
+            var newRestaurant = new Restaurant
+            {
+                Name = restaurant.Name,
+                Phone = restaurant.Phone,
+                OpenTime = restaurant.OpenTime,
+                CloseTime = restaurant.CloseTime,
+                Status = restaurant.Status,
+                Location = locationPoint,
+                HeadId = head.Id,
+            };
 
             var resultArea = await geoCoderService.GetAddressAsync(latitude, longitude);
             if (resultArea.IsFailure)
